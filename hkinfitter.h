@@ -66,7 +66,7 @@ private:
     TLorentzVector fInit;
     Double_t fMass;
 
-    bool fVtxConstraint, f3Constraint, f4Constraint, fMomConstraint;
+    bool fMassConstraint, fMMConstraint, fMassVtxConstraint, fVtxConstraint, fVtxConstraint, f3Constraint, f4Constraint, fMomConstraint;
     int fVerbose;
 
     double fLearningRate;
@@ -75,6 +75,8 @@ private:
 
 public:
     HKinFitter(const std::vector<HRefitCand> &cands);
+    HKinFitter(const std::vector<HRefitCand> &cands, Double_t mass);
+    HKinFitter(const std::vector<HRefitCand> &cands, Double_t mass, TLorentzVector &lv);
     HKinFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother);
     HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector &lv);
     HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector &lv, Double_t mass);
