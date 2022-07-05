@@ -71,7 +71,7 @@ private:
 
     double fLearningRate;
     int fNumIterations; 
-    double fConvergenceCriteria;
+    double fConvergenceCriterion;
 
 public:
     HKinFitter(const std::vector<HRefitCand> &cands);
@@ -93,7 +93,7 @@ public:
 
     void setLearningRate(double val) { fLearningRate = val; }
     void setNumberOfIterations(int val) { fNumIterations = val; }
-    void setConvergenceCriteria(double val) { fConvergenceCriteria = val; }
+    void setConvergenceCriteria(double val) { fConvergenceCriterion = val; }
 
     double getChi2() const { return fChi2; }
     double getProb() const { return fProb; }
