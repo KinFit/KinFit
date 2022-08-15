@@ -1,12 +1,16 @@
 // ROOT includes
 #include "hrefitcand.h"
 
-HRefitCand::HRefitCand()
-    : TLorentzVector(), fMomentum(-9.0), fTheta(), fPhi(-9.0), fR(-9.0), fZ(-9.0), fIsForward(false)
+HRefitCand::HRefitCand(TLorentVector* cand, Double_t R, Double_t Z)
+    : TLorentzVector(*cand), cand(cand), fMomentum(cand->P()), fTheta(cand->Theta()), fPhi(cand->Phi()), fR(R), fZ(Z)
 {
-    //HRefitCand cand = new HRefitCand();
-    //fR = cand->getR();
-    //fZ = cand->getZ();
+}
+
+HRefitCand::HRefitCand()
+{
+    cand = new TLorentzVector();
+    fR = 0;
+    fZ = 0;
 }
 
 void HRefitCand::setCovariance(const TMatrixD& cov)
@@ -20,10 +24,10 @@ void HRefitCand::setCovariance(const TMatrixD& cov)
     fCov = cov;
 }
 
-void HRefitCand::reset(HRefitCand* cand) {
+void HRefitCand::reset() {
     *(TLorentzVector*)this = *cand;
 }
 
-void HRefitCand::update(HRefitCand* cand) {
+void HRefitCand::update() {
     *((TLorentzVector*)cand) = *this;
 }

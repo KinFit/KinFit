@@ -15,7 +15,6 @@
 // framework includes
 #include "hrefitcand.h"
 #include "hvertexfinder.h"
-#include "hgeomvector.h"
 #include "hparticletool.h"
 
 using std::cout;
@@ -28,32 +27,32 @@ private:
 
     TVector3 fVertex;
     TVector3 fPrimaryVertex;
-    int fVerbose=0;
+    Int_t fVerbose = 0;
 
-    double fMomentumAfterDecay;
-    double fNeutralCandMass;
+    Double_t fMomentumAfterDecay;
+    Double_t fNeutralCandMass;
 
     HRefitCand fNeutralMotherCandidate;
 
-    double fDistParticle1Vertex;
-    double fDistParticle2Vertex;
-    double fDistParticle1Origin;
-    double fDistParticle2Origin;
+    Double_t fDistParticle1Vertex;
+    Double_t fDistParticle2Vertex;
+    Double_t fDistParticle1Origin;
+    Double_t fDistParticle2Origin;
 
     TMatrixD fCovarianceNeutralMother;
-    bool fPrimaryVertexFound;
+    Bool_t fPrimaryVertexFound;
 
 public:
     HNeutralCandFinder(const std::vector<HRefitCand> &cands);
     ~HNeutralCandFinder(){};
 
-    void setVerbosity(int val) { fVerbose = val; }
+    void setVerbosity(Int_t val) { fVerbose = val; }
 
     // The first function is for creating a neutral mother candidate if only information of the decay vertex is available
     // The second function is for creating the neutral candidate if information about the primary vertex is also available
-    void setNeutralMotherCand(double valMomentum, double valTheta, double valPhi, double valR, double ValZ, TVector3 decayVertex);
+    void setNeutralMotherCand(Double_t valMomentum, Double_t valTheta, Double_t valPhi, Double_t valR, Double_t ValZ, TVector3 decayVertex);
     void setNeutralMotherCand(TVector3 primVtx, TVector3 decayVtx);
-    void setMassNutralCand(double val) { fNeutralCandMass = val; }
+    void setMassNutralCand(Double_t val) { fNeutralCandMass = val; }
 
     HRefitCand getNeutralMotherCandidate() { return fNeutralMotherCandidate; }
 

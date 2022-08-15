@@ -13,15 +13,17 @@
 #include <vector>
 #include <cmath>
 
+// ROOT includes
+#include "TObject.h"
+
 // framework includes
 #include "hrefitcand.h"
-#include "hgeomvector.h"
 #include "hparticletool.h"
 
 using std::cout;
 using std::endl;
 
-const double pi2 = TMath::PiOver2();
+const Double_t pi2 = TMath::PiOver2();
 
 template <typename T>
 void Print(T const &matrix)
@@ -49,29 +51,29 @@ void Print(T const &matrix)
     cout << endl;
 }
 
-class HKinFitter
+class HKinFitter : public TObject
 {
 private:
     TMatrixD y, x, V, Vx, fPull;
-    double fChi2, fProb;
-    bool fConverged;
-    int fIteration, fN, fyDim;   
+    Double_t fChi2, fProb;
+    Bool_t fConverged;
+    Int_t fIteration, fN, fyDim;
     std::vector<HRefitCand> fCands;
     HRefitCand fMother;
     TLorentzVector fMissDaughter;
 
     // data members for constraints
-    int fNdf;
-    std::vector<double> fM;
+    Int_t fNdf;
+    std::vector<Double_t> fM;
     TLorentzVector fInit;
     Double_t fMass;
 
-    bool fVtxConstraint, f3Constraint, f4Constraint, fMomConstraint;
-    int fVerbose;
+    Bool_t fVtxConstraint, f3Constraint, f4Constraint, fMomConstraint;
+    Int_t fVerbose;
 
-    double fLearningRate;
-    int fNumIterations; 
-    double fConvergenceCriterion;
+    Double_t fLearningRate;
+    Int_t fNumIterations;
+    Double_t fConvergenceCriteria;
 
 public:
     HKinFitter(const std::vector<HRefitCand> &cands);
@@ -91,24 +93,24 @@ public:
     void addVertexConstraint();
     void addMomConstraint();
 
-    void setLearningRate(double val) { fLearningRate = val; }
-    void setNumberOfIterations(int val) { fNumIterations = val; }
-    void setConvergenceCriteria(double val) { fConvergenceCriterion = val; }
+    void setLearningRate(Double_t val) { fLearningRate = val; }
+    void setNumberOfIterations(Int_t val) { fNumIterations = val; }
+    void setConvergenceCriteria(Double_t val) { fConvergenceCriteria = val; }
 
-    double getChi2() const { return fChi2; }
-    double getProb() const { return fProb; }
-    double getPull(int val = 0) { return fPull(val, val); }
+    Double_t getChi2() const { return fChi2; }
+    Double_t getProb() const { return fProb; }
+    Double_t getPull(Int_t val = 0) { return fPull(val, val); }
 
-    bool isConverged() const { return fConverged; }
-    int getIteration() const { return fIteration; }
+    Bool_t isConverged() const { return fConverged; }
+    Int_t getIteration() const { return fIteration; }
     void setCovariance(TMatrixD &val) { V = val; }
     void setMeasurement(TMatrixD &val) { y = val; }
 
-    bool fit();
+    Bool_t fit();
 
-    void setVerbosity(int val) { fVerbose = val; }
+    void setVerbosity(Int_t val) { fVerbose = val; }
 
-    HRefitCand getDaughter(int val);
+    HRefitCand getDaughter(Int_t val);
     void getDaughters(std::vector<HRefitCand> &daughters) { daughters = fCands; }
     HRefitCand getMother();
     TLorentzVector getMissingDaughter();
@@ -118,6 +120,7 @@ public:
 protected:
     void updateDaughters();
     void updateMother();
+    ClassDef(HKinFitter, 0)
 };
 
 #endif /* HKINFITTER_H */

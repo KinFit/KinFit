@@ -15,7 +15,6 @@
 
 // framework includes
 #include "hrefitcand.h"
-#include "hgeomvector.h"
 #include "hparticletool.h"
 #include "hgeomvertexfit.h"
 
@@ -30,34 +29,34 @@ private:
 
     TVector3 fVertex;
     TVector3 fPrimaryVertex;
-    int fVerbose;
+    Int_t fVerbose;
 
-    double fDistanceParticleToParticle;
-    double fDistanceParticleToVertex;
+    Double_t fDistanceParticleToParticle;
+    Double_t fDistanceParticleToVertex;
 
-    double fDistParticle1Vertex;
-    double fDistParticle2Vertex;
-    double fDistParticle1Origin;
-    double fDistParticle2Origin;
+    Double_t fDistParticle1Vertex;
+    Double_t fDistParticle2Vertex;
+    Double_t fDistParticle1Origin;
+    Double_t fDistParticle2Origin;
 
-    bool fPrimaryVertexFound;
+    Bool_t fPrimaryVertexFound;
 
     // Properties related to difference between primary and decay vertex
     TVector3 fVecPrimToDecayVertex;
-    double fDistPrimToDecayVertex;
+    Double_t fDistPrimToDecayVertex;
 
     // Checks if the decay vertex is located further downstream in z-position
     // and at larger values of R compared to the primary vertex
-    bool fPrimaryVertexIsBetforeDecayVertex;
-    bool fPrimaryVertexIsInsideDecayVertex;
+    Bool_t fPrimaryVertexIsBetforeDecayVertex;
+    Bool_t fPrimaryVertexIsInsideDecayVertex;
 
-    bool fUsePrimaryVertexInNeutralCandidateCalculation;
+    Bool_t fUsePrimaryVertexInNeutralCandidateCalculation;
 
 public:
     HVertexTools();
     ~HVertexTools(){};
 
-    void setVerbosity(int val) { fVerbose = val; }
+    void setVerbosity(Int_t val) { fVerbose = val; }
 
     TVector3 findVertex(const std::vector<HRefitCand> &cands);
     TVector3 findPrimaryVertex(const std::vector<HRefitCand> &cands);
@@ -67,19 +66,18 @@ public:
     TVector3 getVertex() const { return fVertex; }               // Function that the user should use in the analysis macro
     TVector3 gePrimarytVertex() const { return fPrimaryVertex; } // Function that the user should use in the analysis macro
 
-    double getDistanceBetweenFittedParticles() const { return fDistanceParticleToParticle; }
-    double getDistanceFirstParticleVertex() const { return fDistParticle1Vertex; }
-    double getDistanceSecondParticleVertex() const { return fDistParticle2Vertex; }
-    double getDistanceFirstParticleOrigin() const { return fDistParticle1Origin; }
-    double getDistanceSecondParticleOrigin() const { return fDistParticle2Origin; }
+    Double_t getDistanceBetweenFittedParticles() const { return fDistanceParticleToParticle; }
+    Double_t getDistanceFirstParticleVertex() const { return fDistParticle1Vertex; }
+    Double_t getDistanceSecondParticleVertex() const { return fDistParticle2Vertex; }
+    Double_t getDistanceFirstParticleOrigin() const { return fDistParticle1Origin; }
+    Double_t getDistanceSecondParticleOrigin() const { return fDistParticle2Origin; }
 
-    double getDistBetweenVertices() { return fDistPrimToDecayVertex; }
+    Double_t getDistBetweenVertices() { return fDistPrimToDecayVertex; }
 
-    bool isPrimVertexBeforeDecayVertex() { return fPrimaryVertexIsBetforeDecayVertex; }
-    bool isPrimVertexInsideDecayVertex() { return fPrimaryVertexIsInsideDecayVertex; }
+    Bool_t isPrimVertexBeforeDecayVertex() { return fPrimaryVertexIsBetforeDecayVertex; }
+    Bool_t isPrimVertexInsideDecayVertex() { return fPrimaryVertexIsInsideDecayVertex; }
 
     TVector3 getPrimaryVertex() { return fPrimaryVertex; }
-    
 };
 
 #endif /* HVERTEXTOOLS_H */

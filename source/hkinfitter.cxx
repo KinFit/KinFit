@@ -2,16 +2,16 @@
 
 const size_t cov_dim = 5;
 
-//To be used for vertex fitter
+// To be used for vertex fitter
 HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
-                                                                     fVerbose(0),
-                                                                     fLearningRate(1),
-                                                                     fNumIterations(10),
-                                                                     fConvergenceCriterion(1)
+                                                               fVerbose(0),
+                                                               fLearningRate(1),
+                                                               fNumIterations(10),
+                                                               fConvergenceCriteria(1)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = cands.size();
-    fyDim = fN * cov_dim; //Dimension of full covariance matrix (number of measured variables x cov_dim)
+    fyDim = fN * cov_dim; // Dimension of full covariance matrix (number of measured variables x cov_dim)
 
     y.ResizeTo(fyDim, 1);
     x.ResizeTo(1, 1);
@@ -33,7 +33,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
 
     // set 'y=alpha' measurements
     // and the covariance
-    for (int ix = 0; ix < fN; ix++)
+    for (Int_t ix = 0; ix < fN; ix++)
     {
         HRefitCand cand = cands[ix];
         y(0 + ix * cov_dim, 0) = 1. / cand.P();
@@ -50,21 +50,20 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
         V(2 + ix * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
         V(3 + ix * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
         V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
-
     }
 }
 
-//To be used for 3C fitter
+// To be used for 3C fitter
 HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother) : fCands(cands),
-                                                                                         fMother(mother),
-                                                                                         fVerbose(0),
-                                                                                         fLearningRate(1),
-                                                                                         fNumIterations(10),
-                                                                                         fConvergenceCriterion(1)
+                                                                                   fMother(mother),
+                                                                                   fVerbose(0),
+                                                                                   fLearningRate(1),
+                                                                                   fNumIterations(10),
+                                                                                   fConvergenceCriteria(1)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = cands.size();
-    fyDim = (fN + 1) * cov_dim - 1; //Dimension of full covariance matrix (number of measured variables x cov_dim). Mother momentum is not measured
+    fyDim = (fN + 1) * cov_dim - 1; // Dimension of full covariance matrix (number of measured variables x cov_dim). Mother momentum is not measured
 
     y.ResizeTo(fyDim, 1);
     x.ResizeTo(1, 1);
@@ -85,7 +84,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother)
     fMomConstraint = false;
 
     // set y to measurements and the covariance, set mass
-    for (int ix = 0; ix < fN; ix++) //for daughters
+    for (Int_t ix = 0; ix < fN; ix++) // for daughters
     {
         HRefitCand cand = cands[ix];
 
@@ -105,7 +104,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother)
         V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
     }
 
-    //for mother
+    // for mother
     HRefitCand cand = fMother;
 
     y(fN * cov_dim, 0) = cand.Theta();
@@ -120,27 +119,25 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother)
     V(2 + fN * cov_dim, 2 + fN * cov_dim) = covariance(3, 3);
     V(3 + fN * cov_dim, 3 + fN * cov_dim) = covariance(4, 4);
 
-    V(0 + fN * cov_dim, 1 + fN * cov_dim)=covariance(1, 2);
-    V(1 + fN * cov_dim, 0 + fN * cov_dim)=covariance(2, 1);
+    V(0 + fN * cov_dim, 1 + fN * cov_dim) = covariance(1, 2);
+    V(1 + fN * cov_dim, 0 + fN * cov_dim) = covariance(2, 1);
     // Jenny: Comments below are for testing so that the covariance matrix is read in correctly
-    //std::cout << "Fitter" << std::endl;
-    //std::cout << "Diag elements: " << V(0 + fN * cov_dim, 0 + fN * cov_dim) << " " << V(1 + fN * cov_dim, 1 + fN * cov_dim) << std::endl;
-    //std::cout << "Off diag elements: " << V(0 + fN * cov_dim, 1 + fN * cov_dim) << " " << V(1 + fN * cov_dim, 0 + fN * cov_dim) << std::endl;
-
-
+    // std::cout << "Fitter" << std::endl;
+    // std::cout << "Diag elements: " << V(0 + fN * cov_dim, 0 + fN * cov_dim) << " " << V(1 + fN * cov_dim, 1 + fN * cov_dim) << std::endl;
+    // std::cout << "Off diag elements: " << V(0 + fN * cov_dim, 1 + fN * cov_dim) << " " << V(1 + fN * cov_dim, 0 + fN * cov_dim) << std::endl;
 }
 
-//To be used for 4C fitter
-HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector& lv) : fCands(cands),
-                                                                                         fInit(lv),
-                                                                                         fVerbose(0),
-                                                                                         fLearningRate(1),
-                                                                                         fNumIterations(10),
-                                                                                         fConvergenceCriterion(1)
+// To be used for 4C fitter
+HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector &lv) : fCands(cands),
+                                                                                   fInit(lv),
+                                                                                   fVerbose(0),
+                                                                                   fLearningRate(1),
+                                                                                   fNumIterations(10),
+                                                                                   fConvergenceCriteria(1)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = cands.size();
-    fyDim = fN * cov_dim; //Dimension of full covariance matrix (number of measured variables x cov_dim).
+    fyDim = fN * cov_dim; // Dimension of full covariance matrix (number of measured variables x cov_dim).
 
     y.ResizeTo(fyDim, 1);
     x.ResizeTo(1, 1);
@@ -161,7 +158,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector& lv)
     fMomConstraint = false;
 
     // set y to measurements and the covariance, set mass
-    for (int ix = 0; ix < fN; ix++) //for daughters
+    for (Int_t ix = 0; ix < fN; ix++) // for daughters
     {
         HRefitCand cand = cands[ix];
 
@@ -182,18 +179,18 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector& lv)
     }
 }
 
-//To be used for missing particle fitter
-HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector& lv, Double_t mass) : fCands(cands),
-                                                                                         fInit(lv),
-                                                                                         fMass(mass),
-                                                                                         fVerbose(0),
-                                                                                         fLearningRate(1),
-                                                                                         fNumIterations(10),
-                                                                                         fConvergenceCriterion(1)
+// To be used for missing particle fitter
+HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector &lv, Double_t mass) : fCands(cands),
+                                                                                                  fInit(lv),
+                                                                                                  fMass(mass),
+                                                                                                  fVerbose(0),
+                                                                                                  fLearningRate(1),
+                                                                                                  fNumIterations(10),
+                                                                                                  fConvergenceCriteria(1)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = cands.size();
-    fyDim = fN * cov_dim; //Dimension of full covariance matrix (number of measured variables x cov_dim).
+    fyDim = fN * cov_dim; // Dimension of full covariance matrix (number of measured variables x cov_dim).
 
     y.ResizeTo(fyDim, 1);
     x.ResizeTo(3, 1);
@@ -214,7 +211,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector& lv,
     fMomConstraint = false;
 
     // set y to measurements and the covariance, set mass
-    for (int ix = 0; ix < fN; ix++) //for daughters
+    for (Int_t ix = 0; ix < fN; ix++) // for daughters
     {
         HRefitCand cand = cands[ix];
 
@@ -258,31 +255,33 @@ void HKinFitter::addVertexConstraint()
 
 void HKinFitter::addMomConstraint()
 {
-    if (!fMomConstraint){
+    if (!fMomConstraint)
+    {
         fM.push_back(fMass);
         fNdf += 1;
     }
     fMomConstraint = true;
 }
 
-TMatrixD HKinFitter::calcMissingMom(const TMatrixD& m_iter)
+TMatrixD HKinFitter::calcMissingMom(const TMatrixD &m_iter)
 {
-    TMatrix xi(3,1);
+    TMatrix xi(3, 1);
 
     xi(0, 0) = fInit.Px();
     xi(1, 0) = fInit.Py();
     xi(2, 0) = fInit.Pz();
 
-    for(int q=0; q<fN; q++){
-        xi(0, 0) -= 1. / m_iter(0 + q * cov_dim, 0)*sin(m_iter(1 + q * cov_dim, 0))*cos(m_iter(2 + q * cov_dim, 0));
-        xi(1, 0) -= 1. / m_iter(0 + q * cov_dim, 0)*sin(m_iter(1 + q * cov_dim, 0))*sin(m_iter(2 + q * cov_dim, 0));
-        xi(2, 0) -= 1. / m_iter(0 + q * cov_dim, 0)*cos(m_iter(1 + q * cov_dim, 0));
+    for (Int_t q = 0; q < fN; q++)
+    {
+        xi(0, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
+        xi(1, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
+        xi(2, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0));
     }
 
     return xi;
 }
 
-//Constraint equations
+// Constraint equations
 TMatrixD HKinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 {
     TMatrixD d;
@@ -321,20 +320,20 @@ TMatrixD HKinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 
     if (f3Constraint)
     {
-        //mother
+        // mother
         d.ResizeTo(4, 1);
-        d(0, 0) = -1. / xi_iter(0, 0) * sin(m_iter(0 + fN * cov_dim, 0)) * cos(m_iter(1 + fN * cov_dim, 0));
-        d(1, 0) = -1. / xi_iter(0, 0) * sin(m_iter(0 + fN * cov_dim, 0)) * sin(m_iter(1 + fN * cov_dim, 0));
-        d(2, 0) = -1. / xi_iter(0, 0) * cos(m_iter(0 + fN * cov_dim, 0));
-        d(3, 0) = -sqrt(pow((1. / xi_iter(0, 0)), 2) + pow(fM[fN], 2));
+        d(0, 0) = -1. / xi_iter(0, 0) * std::sin(m_iter(0 + fN * cov_dim, 0)) * std::cos(m_iter(1 + fN * cov_dim, 0));
+        d(1, 0) = -1. / xi_iter(0, 0) * std::sin(m_iter(0 + fN * cov_dim, 0)) * std::sin(m_iter(1 + fN * cov_dim, 0));
+        d(2, 0) = -1. / xi_iter(0, 0) * std::cos(m_iter(0 + fN * cov_dim, 0));
+        d(3, 0) = -sqrt(pow((1. / xi_iter(0, 0)), 2) + std::pow(fM[fN], 2));
 
-        //daughters
-        for (int q = 0; q < fN; q++)
+        // daughters
+        for (Int_t q = 0; q < fN; q++)
         {
-            d(0, 0) += 1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
-            d(1, 0) += 1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
-            d(2, 0) += 1. / m_iter(0 + q * cov_dim, 0) * cos(m_iter(1 + q * cov_dim, 0));
-            d(3, 0) += sqrt(pow((1. / m_iter(0 + q * cov_dim, 0)), 2) + pow(fM[q], 2));
+            d(0, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
+            d(1, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
+            d(2, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0));
+            d(3, 0) += sqrt(pow((1. / m_iter(0 + q * cov_dim, 0)), 2) + std::pow(fM[q], 2));
         }
     }
 
@@ -342,43 +341,44 @@ TMatrixD HKinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
     {
         d.ResizeTo(4, 1);
 
-        //initial system
+        // initial system
         d(0, 0) = -fInit.Px();
         d(1, 0) = -fInit.Py();
         d(2, 0) = -fInit.Pz();
         d(3, 0) = -fInit.E();
 
-        //daughters
-        for (int q = 0; q < fN; q++)
+        // daughters
+        for (Int_t q = 0; q < fN; q++)
         {
-            d(0, 0) += 1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
-            d(1, 0) += 1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
-            d(2, 0) += 1. / m_iter(0 + q * cov_dim, 0) * cos(m_iter(1 + q * cov_dim, 0));
-            d(3, 0) += sqrt(pow((1. / m_iter(0 + q * cov_dim, 0)), 2) + pow(fM[q], 2));
+            d(0, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
+            d(1, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
+            d(2, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0));
+            d(3, 0) += sqrt(pow((1. / m_iter(0 + q * cov_dim, 0)), 2) + std::pow(fM[q], 2));
         }
     }
 
     if (fMomConstraint)
     {
-	
-	d.ResizeTo(4, 1);
-        d(0, 0) = -fInit.Px() + xi_iter(0,0);
-        d(1, 0) = -fInit.Py() + xi_iter(1,0);
-        d(2, 0) = -fInit.Pz() + xi_iter(2,0);
-        d(3, 0) = -fInit.E() + sqrt(pow(xi_iter(0,0),2)+pow(xi_iter(1,0),2)+pow(xi_iter(2,0),2)+pow(fM[fN],2));
-	
-        for(int q=0; q<fN; q++){
-            d(0,0) += 1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
-            d(1,0) += 1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
-            d(2,0) += 1. / m_iter(0 + q * cov_dim, 0) * cos(m_iter(1 + q * cov_dim, 0));
-            d(3,0) += sqrt(pow((1. / m_iter(0 + q * cov_dim, 0)), 2) + pow(fM[q], 2));
+
+        d.ResizeTo(4, 1);
+        d(0, 0) = -fInit.Px() + xi_iter(0, 0);
+        d(1, 0) = -fInit.Py() + xi_iter(1, 0);
+        d(2, 0) = -fInit.Pz() + xi_iter(2, 0);
+        d(3, 0) = -fInit.E() + sqrt(pow(xi_iter(0, 0), 2) + std::pow(xi_iter(1, 0), 2) + std::pow(xi_iter(2, 0), 2) + std::pow(fM[fN], 2));
+
+        for (Int_t q = 0; q < fN; q++)
+        {
+            d(0, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
+            d(1, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
+            d(2, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0));
+            d(3, 0) += sqrt(pow((1. / m_iter(0 + q * cov_dim, 0)), 2) + std::pow(fM[q], 2));
         }
     }
 
     return d;
 }
 
-//Jacobian (derivative of constraint equations with respect to measured variables)
+// Jacobian (derivative of constraint equations with respect to measured variables)
 TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 {
     TMatrixD H;
@@ -549,64 +549,65 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         H.ResizeTo(4, fyDim);
         H.Zero();
 
-        //Daughter variables
-        for (int q = 0; q < fN; q++)
+        // Daughter variables
+        for (Int_t q = 0; q < fN; q++)
         {
-            //d(1/p)
-            H(0, q * cov_dim) = -1. / pow(m_iter(0 + q * cov_dim, 0), 2) * sin(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
-            H(1, q * cov_dim) = -1. / pow(m_iter(0 + q * cov_dim, 0), 2) * sin(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
-            H(2, q * cov_dim) = -1. / pow(m_iter(0 + q * cov_dim, 0), 2) * cos(m_iter(1 + q * cov_dim, 0));
-            H(3, q * cov_dim) = -1. / pow(m_iter(0 + q * cov_dim, 0), 3) * 1. / sqrt(pow(1. / (m_iter(0 + q * cov_dim, 0)), 2) + pow(fM[q], 2));
+            // d(1/p)
+            H(0, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 2) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
+            H(1, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 2) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
+            H(2, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 2) * std::cos(m_iter(1 + q * cov_dim, 0));
+            H(3, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 3) * 1. / sqrt(pow(1. / (m_iter(0 + q * cov_dim, 0)), 2) + std::pow(fM[q], 2));
 
-            //dtht
-            H(0, 1 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * cos(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
-            H(1, 1 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * cos(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
-            H(2, 1 + q * cov_dim) = -1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0));
+            // dtht
+            H(0, 1 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
+            H(1, 1 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
+            H(2, 1 + q * cov_dim) = -1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0));
 
-            //dphi
-            H(0, 2 + q * cov_dim) = -1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
-            H(1, 2 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
+            // dphi
+            H(0, 2 + q * cov_dim) = -1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
+            H(1, 2 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
         }
 
-        //Mother variables
-        //dtht
-        H(0, fN * cov_dim) = -1. / xi_iter(0, 0) * cos(m_iter(0 + fN * cov_dim, 0)) * cos(m_iter(1 + fN * cov_dim, 0));
-        H(1, fN * cov_dim) = -1. / xi_iter(0, 0) * cos(m_iter(0 + fN * cov_dim, 0)) * sin(m_iter(1 + fN * cov_dim, 0));
-        H(2, fN * cov_dim) = 1. / xi_iter(0, 0) * sin(m_iter(0 + fN * cov_dim, 0));
-        //dphi
-        H(0, 1 + fN * cov_dim) = 1. / xi_iter(0, 0) * sin(m_iter(0 + fN * cov_dim, 0)) * sin(m_iter(1 + fN * cov_dim, 0));
-        H(1, 1 + fN * cov_dim) = -1. / xi_iter(0, 0) * sin(m_iter(0 + fN * cov_dim, 0)) * cos(m_iter(1 + fN * cov_dim, 0));
+        // Mother variables
+        // dtht
+        H(0, fN * cov_dim) = -1. / xi_iter(0, 0) * std::cos(m_iter(0 + fN * cov_dim, 0)) * std::cos(m_iter(1 + fN * cov_dim, 0));
+        H(1, fN * cov_dim) = -1. / xi_iter(0, 0) * std::cos(m_iter(0 + fN * cov_dim, 0)) * std::sin(m_iter(1 + fN * cov_dim, 0));
+        H(2, fN * cov_dim) = 1. / xi_iter(0, 0) * std::sin(m_iter(0 + fN * cov_dim, 0));
+        // dphi
+        H(0, 1 + fN * cov_dim) = 1. / xi_iter(0, 0) * std::sin(m_iter(0 + fN * cov_dim, 0)) * std::sin(m_iter(1 + fN * cov_dim, 0));
+        H(1, 1 + fN * cov_dim) = -1. / xi_iter(0, 0) * std::sin(m_iter(0 + fN * cov_dim, 0)) * std::cos(m_iter(1 + fN * cov_dim, 0));
     }
 
     if (f4Constraint || fMomConstraint)
     {
-        //H.ResizeTo(4, fN * cov_dim);
+        // H.ResizeTo(4, fN * cov_dim);
         H.ResizeTo(4, fyDim);
         H.Zero();
 
-        for(int q=0; q<fN; q++){
+        for (Int_t q = 0; q < fN; q++)
+        {
 
-            //d(1/p)
-            H(0, q * cov_dim) = -1. / pow(m_iter(0 + q * cov_dim, 0),2) * sin(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
-            H(1, q * cov_dim) = -1. / pow(m_iter(0 + q * cov_dim, 0),2) * sin(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
-            H(2, q * cov_dim) = -1. / pow(m_iter(0 + q * cov_dim, 0),2) * cos(m_iter(1 + q * cov_dim, 0));
-            H(3, q * cov_dim) = -1. / pow(m_iter(0 + q * cov_dim, 0),3) * 1. / sqrt(pow(1. / (m_iter(0 + q * cov_dim, 0)),2) + pow(fM[q], 2));
-            
-            //dtht
-            H(0, 1 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * cos(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
-            H(1, 1 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * cos(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
-            H(2, 1 + q * cov_dim) = -1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0));
+            // d(1/p)
+            H(0, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 2) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
+            H(1, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 2) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
+            H(2, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 2) * std::cos(m_iter(1 + q * cov_dim, 0));
+            H(3, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 3) * 1. / sqrt(pow(1. / (m_iter(0 + q * cov_dim, 0)), 2) + std::pow(fM[q], 2));
 
-            //dphi
-            H(0, 2 + q * cov_dim) = -1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
-            H(1, 2 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
+            // dtht
+            H(0, 1 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
+            H(1, 1 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
+            H(2, 1 + q * cov_dim) = -1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0));
+
+            // dphi
+            H(0, 2 + q * cov_dim) = -1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
+            H(1, 2 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
         }
     }
 
     return H;
 }
 
-//Jacobian (derivative of constraint equations with respect to unmeasured variables)
+// Jacobian (derivative of constraint equations with respect to unmeasured variables)
 TMatrixD HKinFitter::Fxi_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 {
     TMatrixD H;
@@ -616,11 +617,11 @@ TMatrixD HKinFitter::Fxi_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         H.ResizeTo(4, 1);
         H.Zero();
 
-        //d(1/p)
-        H(0, 0) = 1. / pow(xi_iter(0, 0), 2) * sin(m_iter(0 + fN * cov_dim, 0)) * cos(m_iter(1 + fN * cov_dim, 0));
-        H(1, 0) = 1. / pow(xi_iter(0, 0), 2) * sin(m_iter(0 + fN * cov_dim, 0)) * sin(m_iter(1 + fN * cov_dim, 0));
-        H(2, 0) = 1. / pow(xi_iter(0, 0), 2) * cos(m_iter(0 + fN * cov_dim, 0));
-        H(3, 0) = 1. / pow(xi_iter(0, 0), 3) * 1. / sqrt(pow(1. / xi_iter(0, 0), 2) + pow(fM[fN], 2));
+        // d(1/p)
+        H(0, 0) = 1. / std::pow(xi_iter(0, 0), 2) * std::sin(m_iter(0 + fN * cov_dim, 0)) * std::cos(m_iter(1 + fN * cov_dim, 0));
+        H(1, 0) = 1. / std::pow(xi_iter(0, 0), 2) * std::sin(m_iter(0 + fN * cov_dim, 0)) * std::sin(m_iter(1 + fN * cov_dim, 0));
+        H(2, 0) = 1. / std::pow(xi_iter(0, 0), 2) * std::cos(m_iter(0 + fN * cov_dim, 0));
+        H(3, 0) = 1. / std::pow(xi_iter(0, 0), 3) * 1. / sqrt(pow(1. / xi_iter(0, 0), 2) + std::pow(fM[fN], 2));
     }
 
     if (fMomConstraint)
@@ -632,15 +633,15 @@ TMatrixD HKinFitter::Fxi_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         H(1, 1) = 1;
         H(2, 2) = 1;
 
-        H(3, 0) = xi_iter(0,0) / sqrt( pow(xi_iter(0,0),2) + pow(xi_iter(1,0),2) + pow(xi_iter(2,0),2) + pow(fM[fN],2) );
-        H(3, 1) = xi_iter(1,0) / sqrt( pow(xi_iter(0,0),2) + pow(xi_iter(1,0),2) + pow(xi_iter(2,0),2) + pow(fM[fN],2) );
-        H(3, 2) = xi_iter(2,0) / sqrt( pow(xi_iter(0,0),2) + pow(xi_iter(1,0),2) + pow(xi_iter(2,0),2) + pow(fM[fN],2) );
+        H(3, 0) = xi_iter(0, 0) / sqrt(pow(xi_iter(0, 0), 2) + std::pow(xi_iter(1, 0), 2) + std::pow(xi_iter(2, 0), 2) + std::pow(fM[fN], 2));
+        H(3, 1) = xi_iter(1, 0) / sqrt(pow(xi_iter(0, 0), 2) + std::pow(xi_iter(1, 0), 2) + std::pow(xi_iter(2, 0), 2) + std::pow(fM[fN], 2));
+        H(3, 2) = xi_iter(2, 0) / sqrt(pow(xi_iter(0, 0), 2) + std::pow(xi_iter(1, 0), 2) + std::pow(xi_iter(2, 0), 2) + std::pow(fM[fN], 2));
     }
 
     return H;
 }
 
-bool HKinFitter::fit()
+Bool_t HKinFitter::fit()
 {
     if (fVerbose > 0)
     {
@@ -652,7 +653,7 @@ bool HKinFitter::fit()
         std::cout << "" << std::endl;
     }
 
-    double lr = fLearningRate;
+    Double_t lr = fLearningRate;
     TMatrixD alpha0(fyDim, 1), alpha(fyDim, 1);
     TMatrixD xi0(x), xi(x), neu_xi(x);
     TMatrixD A0(y), V0(V);
@@ -662,14 +663,14 @@ bool HKinFitter::fit()
     // Calculating the inverse of the original covariance matrix that is not changed in the iterations
     TMatrixD V0_inv(V);
     V0_inv.Invert();
-/*
-    xi0.Zero();
-    xi.Zero();
-    neu_xi.Zero();
-*/
+    /*
+        xi0.Zero();
+        xi.Zero();
+        neu_xi.Zero();
+    */
     if (f4Constraint == false && f3Constraint == false && fVtxConstraint == false && fMomConstraint == false)
     {
-        Error("fit()", Form("No constraint is chosen, please add constraint"));
+        std::cout << "FATAL: No constraint is chosen, please add constraint!" << std::endl;
         abort();
     }
 
@@ -685,7 +686,7 @@ bool HKinFitter::fit()
         xi = xi0;
     }
 
-    double chi2 = 1e6;
+    Double_t chi2 = 1e6;
     if (fVerbose > 1)
     {
         cout << " calc Feta" << endl;
@@ -698,10 +699,13 @@ bool HKinFitter::fit()
     }
     TMatrixD d = f_eval(alpha, xi);
     TMatrixD D_xi(d.GetNrows(), 1), DT_xi(1, d.GetNrows());
-    if (d.GetNrows()-fNdf>0) D_xi.ResizeTo(d.GetNrows(), d.GetNrows()-fNdf); DT_xi.ResizeTo(d.GetNrows()-fNdf, d.GetNrows()); //check dimension if other fitters are added
+    if (d.GetNrows() - fNdf > 0)
+        D_xi.ResizeTo(d.GetNrows(), d.GetNrows() - fNdf);
+    DT_xi.ResizeTo(d.GetNrows() - fNdf, d.GetNrows()); // check dimension if other fitters are added
     D_xi.Zero();
     DT_xi.Zero();
-    if (f3Constraint || fMomConstraint){
+    if (f3Constraint || fMomConstraint)
+    {
         if (fVerbose > 1)
         {
             cout << " calc Fxi" << endl;
@@ -713,17 +717,17 @@ bool HKinFitter::fit()
     TMatrixD VDD(D_xi.GetNcols(), D_xi.GetNcols());
     VDD.Zero();
 
-    for (int q = 0; q < fNumIterations; q++)
+    for (Int_t q = 0; q < fNumIterations; q++)
     {
         TMatrixD delta_alpha = alpha0 - alpha;
-        //calc r
+        // calc r
         if (fVerbose > 1)
         {
             cout << " calc r" << endl;
         }
         TMatrixD r = d + D * delta_alpha;
         DT.Transpose(D);
-        //calc S
+        // calc S
         if (fVerbose > 1)
         {
             cout << " calc S" << endl;
@@ -741,8 +745,8 @@ bool HKinFitter::fit()
             VDD.Invert();
         }
 
-        //calculate values for next iteration
-        TMatrixD lambda(d); //Lagrange multiplier
+        // calculate values for next iteration
+        TMatrixD lambda(d); // Lagrange multiplier
         lambda.Zero();
         if (f3Constraint || fMomConstraint)
         {
@@ -767,7 +771,7 @@ bool HKinFitter::fit()
         }
         neu_alpha = alpha0 - lr * V0 * DT * lambda;
 
-        //Calculate new chi2
+        // Calculate new chi2
         TMatrixD chisqrd(1, 1);
         TMatrixD delta_alphaT(delta_alpha.GetNcols(), delta_alpha.GetNrows());
         delta_alphaT.Transpose(delta_alpha);
@@ -778,11 +782,11 @@ bool HKinFitter::fit()
             cout << " calc chi2" << endl;
         }
         chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * d;
-        //chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * f_eval(neu_alpha, neu_xi);
-        
-        //for checking convergence
+        // chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * f_eval(neu_alpha, neu_xi);
+
+        // for checking convergence
         fIteration = q;
-        if (fabs(chi2 - chisqrd(0, 0)) < fConvergenceCriterion)
+        if (fabs(chi2 - chisqrd(0, 0)) < fConvergenceCriteria)
         {
             fConverged = true;
             chi2 = chisqrd(0, 0);
@@ -807,7 +811,6 @@ bool HKinFitter::fit()
         if (f3Constraint || fMomConstraint)
             D_xi = Fxi_eval(alpha, xi);
         d = f_eval(alpha, xi);
-
     }
 
     if (fVerbose > 0)
@@ -817,11 +820,11 @@ bool HKinFitter::fit()
     y = alpha;
     x = xi;
     if (fMomConstraint)
-        fMissDaughter.SetXYZM(x(0,0), x(1,0), x(2,0), fM[fN]);
+        fMissDaughter.SetXYZM(x(0, 0), x(1, 0), x(2, 0), fM[fN]);
     fChi2 = chi2;
     fProb = TMath::Prob(chi2, fNdf);
 
-    //Update covariance
+    // Update covariance
     if (fVerbose > 1)
     {
         cout << " calc Vneu" << endl;
@@ -843,15 +846,15 @@ bool HKinFitter::fit()
     // Pull
     // -----------------------------------------
     fPull.ResizeTo(fyDim, fyDim);
-    for (int b = 0; b < (fyDim); b++)
+    for (Int_t b = 0; b < (fyDim); b++)
         fPull(b, b) = -10000;
 
     if (true)
     {
-        for (int b = 0; b < (fyDim); b++)
+        for (Int_t b = 0; b < (fyDim); b++)
         {
-            double num = A0(b, 0) - alpha(b, 0);
-            double dem = V0(b, b) - V(b, b);
+            Double_t num = A0(b, 0) - alpha(b, 0);
+            Double_t dem = V0(b, b) - V(b, b);
             if (dem > 0)
             {
                 fPull(b, b) = num / std::sqrt(dem);
@@ -864,10 +867,10 @@ bool HKinFitter::fit()
         updateMother();
 
     return fConverged; // for number of iterations greater than 1
-    //return true; // for number of iterations equal to 1
+    // return true; // for number of iterations equal to 1
 }
 
-HRefitCand HKinFitter::getDaughter(int val)
+HRefitCand HKinFitter::getDaughter(Int_t val)
 {
     return fCands[val];
 }
@@ -884,18 +887,18 @@ TLorentzVector HKinFitter::getMissingDaughter()
 
 void HKinFitter::updateDaughters()
 {
-    for (int val = 0; val < fN; ++val)
+    for (Int_t val = 0; val < fN; ++val)
     {
         HRefitCand &cand = fCands[val];
-        double Px = (1. / y(0 + val * cov_dim, 0)) *
-                    std::sin(y(1 + val * cov_dim, 0)) *
-                    std::cos(y(2 + val * cov_dim, 0));
-        double Py = (1. / y(0 + val * cov_dim, 0)) *
-                    std::sin(y(1 + val * cov_dim, 0)) *
-                    std::sin(y(2 + val * cov_dim, 0));
-        double Pz =
+        Double_t Px = (1. / y(0 + val * cov_dim, 0)) *
+                      std::sin(y(1 + val * cov_dim, 0)) *
+                      std::cos(y(2 + val * cov_dim, 0));
+        Double_t Py = (1. / y(0 + val * cov_dim, 0)) *
+                      std::sin(y(1 + val * cov_dim, 0)) *
+                      std::sin(y(2 + val * cov_dim, 0));
+        Double_t Pz =
             (1. / y(0 + val * cov_dim, 0)) * std::cos(y(1 + val * cov_dim, 0));
-        double M = fM[val];
+        Double_t M = fM[val];
         cand.SetXYZM(Px, Py, Pz, M);
         cand.setR(y(3 + val * cov_dim, 0));
         cand.setZ(y(4 + val * cov_dim, 0));
@@ -917,15 +920,15 @@ void HKinFitter::updateDaughters()
 void HKinFitter::updateMother()
 {
     HRefitCand &mother = fMother;
-    double Px = (1. / x(0, 0)) *
-                std::sin(y(0 + fN * cov_dim, 0)) *
-                std::cos(y(1 + fN * cov_dim, 0));
-    double Py = (1. / x(0, 0)) *
-                std::sin(y(0 + fN * cov_dim, 0)) *
-                std::sin(y(1 + fN * cov_dim, 0));
-    double Pz =
+    Double_t Px = (1. / x(0, 0)) *
+                  std::sin(y(0 + fN * cov_dim, 0)) *
+                  std::cos(y(1 + fN * cov_dim, 0));
+    Double_t Py = (1. / x(0, 0)) *
+                  std::sin(y(0 + fN * cov_dim, 0)) *
+                  std::sin(y(1 + fN * cov_dim, 0));
+    Double_t Pz =
         (1. / x(0, 0)) * std::cos(y(0 + fN * cov_dim, 0));
-    double M = fM[fN];
+    Double_t M = fM[fN];
     mother.SetXYZM(Px, Py, Pz, M);
     mother.setR(y(2 + fN * cov_dim, 0));
     mother.setZ(y(3 + fN * cov_dim, 0));
@@ -945,9 +948,11 @@ void HKinFitter::updateMother()
 
 void HKinFitter::update()
 {
-    for (int val = 0; val < fN; ++val)
+    for (Int_t val = 0; val < fN; ++val)
     {
-        HRefitCand *cand = &fCands[val];
-        cand->update(cand);
+        HRefitCand &cand = fCands[val];
+        cand.update();
     }
 }
+
+ClassImp(HKinFitter)
