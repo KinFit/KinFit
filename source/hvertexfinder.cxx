@@ -15,8 +15,7 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
     double param_theta, param_phi, param_R, param_Z;
     // Calculate the base and direction vectors of the two candidates
     TVector3 vtx_base, vtx_dir;
-    HGeomVector vtx_geom_dir, vtx_geom_base;
-    
+    TVector3 vtx_geom_dir, vtx_geom_base;
 
     if (cands.size() < 2)
     {
@@ -26,7 +25,7 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
         return fVertex;
     }
 
-    HGeomVector vertex;
+    TVector3 vertex;
     HGeomVertexFit *vtxFit = new HGeomVertexFit();
 
     for (int i_cands = 0; i_cands < (int)cands.size(); i_cands++)
@@ -41,23 +40,23 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
 
         // Base vectors
         vtx_base.SetXYZ(param_R * std::cos(param_phi + TMath::PiOver2()),
-                          param_R * std::sin(param_phi + TMath::PiOver2()),
-                          param_Z);
+                        param_R * std::sin(param_phi + TMath::PiOver2()),
+                        param_Z);
 
         // Direction vectors
         vtx_dir.SetXYZ(std::sin(param_theta) * std::cos(param_phi),
-                         std::sin(param_theta) * std::sin(param_phi),
-                         std::cos(param_theta));
+                       std::sin(param_theta) * std::sin(param_phi),
+                       std::cos(param_theta));
 
         // Direction vectors
-        vtx_geom_dir.setX(std::sin(param_theta) * std::cos(param_phi));
-        vtx_geom_dir.setY(std::sin(param_theta) * std::sin(param_phi));
-        vtx_geom_dir.setZ(std::cos(param_theta));
+        vtx_geom_dir.SetX(std::sin(param_theta) * std::cos(param_phi));
+        vtx_geom_dir.SetY(std::sin(param_theta) * std::sin(param_phi));
+        vtx_geom_dir.SetZ(std::cos(param_theta));
 
         // Base vectors
-        vtx_geom_base.setX(param_R * std::cos(param_phi + TMath::PiOver2()));
-        vtx_geom_base.setY(param_R * std::sin(param_phi + TMath::PiOver2()));
-        vtx_geom_base.setZ(param_Z);
+        vtx_geom_base.SetX(param_R * std::cos(param_phi + TMath::PiOver2()));
+        vtx_geom_base.SetY(param_R * std::sin(param_phi + TMath::PiOver2()));
+        vtx_geom_base.SetZ(param_Z);
 
         vtxFit->addLine(vtx_geom_base, vtx_geom_dir, 1);
     }
@@ -243,25 +242,25 @@ TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
 //                      std::sin(param_theta2) * std::sin(param_phi2),
 //                      std::cos(param_theta2));
 
-//     HGeomVector vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_base_1, vtx_geom_base_2;
+//     TVector3 vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_base_1, vtx_geom_base_2;
 
 //     // Direction vectors
-//     vtx_geom_dir_1.setX(std::sin(param_theta1) * std::cos(param_theta1));
-//     vtx_geom_dir_1.setY(std::sin(param_theta1) * std::sin(param_phi1));
-//     vtx_geom_dir_1.setZ(std::cos(param_theta1));
-//     vtx_geom_dir_2.setX(std::sin(param_theta2) * std::cos(param_theta2));
-//     vtx_geom_dir_2.setY(std::sin(param_theta2) * std::sin(param_phi2));
-//     vtx_geom_dir_2.setZ(std::cos(param_theta2));
+//     vtx_geom_dir_1.SetX(std::sin(param_theta1) * std::cos(param_theta1));
+//     vtx_geom_dir_1.SetY(std::sin(param_theta1) * std::sin(param_phi1));
+//     vtx_geom_dir_1.SetZ(std::cos(param_theta1));
+//     vtx_geom_dir_2.SetX(std::sin(param_theta2) * std::cos(param_theta2));
+//     vtx_geom_dir_2.SetY(std::sin(param_theta2) * std::sin(param_phi2));
+//     vtx_geom_dir_2.SetZ(std::cos(param_theta2));
 
 //     // Base vectors
-//     vtx_geom_base_1.setX(param_R1 * std::cos(param_phi1 + TMath::PiOver2()));
-//     vtx_geom_base_1.setY(param_R1 * std::sin(param_phi1 + TMath::PiOver2()));
-//     vtx_geom_base_1.setZ(param_Z1);
-//     vtx_geom_base_2.setX(param_R2 * std::cos(param_phi2 + TMath::PiOver2()));
-//     vtx_geom_base_2.setY(param_R2 * std::sin(param_phi2 + TMath::PiOver2()));
-//     vtx_geom_base_2.setZ(param_Z2);
+//     vtx_geom_base_1.SetX(param_R1 * std::cos(param_phi1 + TMath::PiOver2()));
+//     vtx_geom_base_1.SetY(param_R1 * std::sin(param_phi1 + TMath::PiOver2()));
+//     vtx_geom_base_1.SetZ(param_Z1);
+//     vtx_geom_base_2.SetX(param_R2 * std::cos(param_phi2 + TMath::PiOver2()));
+//     vtx_geom_base_2.SetY(param_R2 * std::sin(param_phi2 + TMath::PiOver2()));
+//     vtx_geom_base_2.SetZ(param_Z2);
 
-//     HGeomVector primaryVertex = HParticleTool::calculatePointOfClosestApproach(vtx_geom_base_1, vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_dir_2);
+//     TVector3 primaryVertex = HParticleTool::calculatePointOfClosestApproach(vtx_geom_base_1, vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_dir_2);
 
 //     fPrimaryVertex.SetXYZ(primaryVertex.X(), primaryVertex.Y(), primaryVertex.Z());
 

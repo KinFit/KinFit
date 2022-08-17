@@ -1,4 +1,4 @@
-#include "HVertexTools.h"
+#include "hvertextools.h"
 
 HVertexTools::HVertexTools() : fVerbose(0), fPrimaryVertexFound(false), fUsePrimaryVertexInNeutralCandidateCalculation(false)
 {
@@ -12,8 +12,8 @@ TVector3 HVertexTools::findVertex(const std::vector<HRefitCand> &cands)
         std::cout << "" << std::endl;
     }
 
-    double param_theta1, param_phi1, param_R1, param_Z1;
-    double param_theta2, param_phi2, param_R2, param_Z2;
+    Double_t param_theta1, param_phi1, param_R1, param_Z1;
+    Double_t param_theta2, param_phi2, param_R2, param_Z2;
 
     if (cands.size() < 2)
     {
@@ -59,25 +59,25 @@ TVector3 HVertexTools::findVertex(const std::vector<HRefitCand> &cands)
                      std::cos(param_theta2));
 
     // Calculate the distance between the two tracks
-    //double distance = std::fabs((vtx_dir_1.Cross(vtx_dir_2)).Dot((vtx_base_1 - vtx_base_2)))/(vtx_dir_1.Cross(vtx_dir_2).Mag());
+    // Double_t distance = std::fabs((vtx_dir_1.Cross(vtx_dir_2)).Dot((vtx_base_1 - vtx_base_2)))/(vtx_dir_1.Cross(vtx_dir_2).Mag());
 
-    HGeomVector vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_base_1, vtx_geom_base_2;
+    TVector3 vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_base_1, vtx_geom_base_2;
 
     // Direction vectors
-    vtx_geom_dir_1.setX(std::sin(param_theta1) * std::cos(param_phi1));
-    vtx_geom_dir_1.setY(std::sin(param_theta1) * std::sin(param_phi1));
-    vtx_geom_dir_1.setZ(std::cos(param_theta1));
-    vtx_geom_dir_2.setX(std::sin(param_theta2) * std::cos(param_phi2));
-    vtx_geom_dir_2.setY(std::sin(param_theta2) * std::sin(param_phi2));
-    vtx_geom_dir_2.setZ(std::cos(param_theta2));
+    vtx_geom_dir_1.SetX(std::sin(param_theta1) * std::cos(param_phi1));
+    vtx_geom_dir_1.SetY(std::sin(param_theta1) * std::sin(param_phi1));
+    vtx_geom_dir_1.SetZ(std::cos(param_theta1));
+    vtx_geom_dir_2.SetX(std::sin(param_theta2) * std::cos(param_phi2));
+    vtx_geom_dir_2.SetY(std::sin(param_theta2) * std::sin(param_phi2));
+    vtx_geom_dir_2.SetZ(std::cos(param_theta2));
 
     // Base vectors
-    vtx_geom_base_1.setX(param_R1 * std::cos(param_phi1 + TMath::PiOver2()));
-    vtx_geom_base_1.setY(param_R1 * std::sin(param_phi1 + TMath::PiOver2()));
-    vtx_geom_base_1.setZ(param_Z1);
-    vtx_geom_base_2.setX(param_R2 * std::cos(param_phi2 + TMath::PiOver2()));
-    vtx_geom_base_2.setY(param_R2 * std::sin(param_phi2 + TMath::PiOver2()));
-    vtx_geom_base_2.setZ(param_Z2);
+    vtx_geom_base_1.SetX(param_R1 * std::cos(param_phi1 + TMath::PiOver2()));
+    vtx_geom_base_1.SetY(param_R1 * std::sin(param_phi1 + TMath::PiOver2()));
+    vtx_geom_base_1.SetZ(param_Z1);
+    vtx_geom_base_2.SetX(param_R2 * std::cos(param_phi2 + TMath::PiOver2()));
+    vtx_geom_base_2.SetY(param_R2 * std::sin(param_phi2 + TMath::PiOver2()));
+    vtx_geom_base_2.SetZ(param_Z2);
 
     if (fVerbose > 0)
     {
@@ -104,23 +104,23 @@ TVector3 HVertexTools::findVertex(const std::vector<HRefitCand> &cands)
         std::cout << " " << std::endl;
     }
 
-    double_t dist = HParticleTool::calculateMinimumDistance(vtx_geom_base_1,vtx_geom_dir_1,vtx_geom_base_2,vtx_geom_dir_2);
-    
+    Double_t dist = HParticleTool::calculateMinimumDistance(vtx_geom_base_1, vtx_geom_dir_1, vtx_geom_base_2, vtx_geom_dir_2);
+
     fDistanceParticleToParticle = dist;
 
-    //HGeomVector vertex = HParticleTool::calculatePointOfClosestApproach(vtx_geom_base_1, vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_dir_2);
-    
-    HGeomVector vertex;
+    // TVector3 vertex = HParticleTool::calculatePointOfClosestApproach(vtx_geom_base_1, vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_dir_2);
+
+    TVector3 vertex;
     HGeomVertexFit *vtxFit = new HGeomVertexFit();
-    vtxFit->addLine(vtx_geom_base_1,vtx_geom_dir_1,1);
-    vtxFit->addLine(vtx_geom_base_2,vtx_geom_dir_2,1);
+    vtxFit->addLine(vtx_geom_base_1, vtx_geom_dir_1, 1);
+    vtxFit->addLine(vtx_geom_base_2, vtx_geom_dir_2, 1);
     vtxFit->getVertex(vertex);
 
-    /* HGeomVector cross = vtx_geom_dir_1.vectorProduct(vtx_geom_dir_2); // cross product: dir1 x dir2
+    /* TVector3 cross = vtx_geom_dir_1.vectorProduct(vtx_geom_dir_2); // cross product: dir1 x dir2
 
     // straight lines are either skew or have a cross point
 
-    HGeomVector diff = vtx_geom_base_1;
+    TVector3 diff = vtx_geom_base_1;
     diff-=vtx_geom_base_2; // Difference of two base vectors base1 - base2
 
     Double_t D;
@@ -129,9 +129,9 @@ TVector3 HVertexTools::findVertex(const std::vector<HRefitCand> &cands)
     Double_t Dm =  HParticleTool::calcDeterminant(diff , vtx_geom_dir_1, cross);
     Double_t Dl = -HParticleTool::calcDeterminant(diff , vtx_geom_dir_2, cross);
 
-    HGeomVector vertex;
-    HGeomVector dm;
-    HGeomVector dl;
+    TVector3 vertex;
+    TVector3 dm;
+    TVector3 dl;
 
     dm = vtx_geom_dir_2;
     dm *= Dm;
@@ -149,16 +149,16 @@ TVector3 HVertexTools::findVertex(const std::vector<HRefitCand> &cands)
 
     fVertex.SetXYZ(vertex.X(), vertex.Y(), vertex.Z());
 
-    double distanceFromParticleToVertex_1 = HParticleTool::calculateMinimumDistanceStraightToPoint(vtx_geom_base_1, vtx_geom_dir_1, vertex);
-    double distanceFromParticleToVertex_2 = HParticleTool::calculateMinimumDistanceStraightToPoint(vtx_geom_base_2, vtx_geom_dir_2, vertex);
+    Double_t distanceFromParticleToVertex_1 = HParticleTool::calculateMinimumDistanceStraightToPoint(vtx_geom_base_1, vtx_geom_dir_1, vertex);
+    Double_t distanceFromParticleToVertex_2 = HParticleTool::calculateMinimumDistanceStraightToPoint(vtx_geom_base_2, vtx_geom_dir_2, vertex);
 
-    HGeomVector originVertex;
-    originVertex.setX(0.0);
-    originVertex.setY(0.0);
-    originVertex.setZ(0.0);
+    TVector3 originVertex;
+    originVertex.SetX(0.0);
+    originVertex.SetY(0.0);
+    originVertex.SetZ(0.0);
 
-    double distanceFromParticleToOrigin_1 = HParticleTool::calculateMinimumDistanceStraightToPoint(vtx_geom_base_1, vtx_geom_dir_1, originVertex);
-    double distanceFromParticleToOrigin_2 = HParticleTool::calculateMinimumDistanceStraightToPoint(vtx_geom_base_2, vtx_geom_dir_2, originVertex);
+    Double_t distanceFromParticleToOrigin_1 = HParticleTool::calculateMinimumDistanceStraightToPoint(vtx_geom_base_1, vtx_geom_dir_1, originVertex);
+    Double_t distanceFromParticleToOrigin_2 = HParticleTool::calculateMinimumDistanceStraightToPoint(vtx_geom_base_2, vtx_geom_dir_2, originVertex);
 
     fDistParticle1Vertex = distanceFromParticleToVertex_1;
     fDistParticle2Vertex = distanceFromParticleToVertex_2;
@@ -194,14 +194,13 @@ std::vector<HRefitCand> HVertexTools::UpdateTrackParameters(std::vector<HRefitCa
         std::cout << " ----------- HVertexTools::UpdateTrackParameters() -----------" << std::endl;
         std::cout << "" << std::endl;
     }
-    
 
-    double param_theta1, param_phi1, param_R1, param_Z1;
-    double param_theta2, param_phi2, param_R2, param_Z2;
+    Double_t param_theta1, param_phi1, param_R1, param_Z1;
+    Double_t param_theta2, param_phi2, param_R2, param_Z2;
 
     HRefitCand cand1 = cands[0];
 
-    //param_p_inv1 = 1. / cand1.P();
+    // param_p_inv1 = 1. / cand1.P();
     param_theta1 = cand1.Theta();
     param_phi1 = cand1.Phi();
     param_R1 = cand1.getR();
@@ -209,7 +208,7 @@ std::vector<HRefitCand> HVertexTools::UpdateTrackParameters(std::vector<HRefitCa
 
     HRefitCand cand2 = cands[1];
 
-    //param_p_inv2 = 1. / cand2.P();
+    // param_p_inv2 = 1. / cand2.P();
     param_theta2 = cand2.Theta();
     param_phi2 = cand2.Phi();
     param_R2 = cand2.getR();
@@ -236,7 +235,7 @@ std::vector<HRefitCand> HVertexTools::UpdateTrackParameters(std::vector<HRefitCa
                      std::sin(param_theta2) * std::sin(param_phi2),
                      std::cos(param_theta2));
 
-    //Vectors pointing from vertex to POCA to Beam axis
+    // Vectors pointing from vertex to POCA to Beam axis
     TVector3 vtx_base_1_updated, vtx_base_2_updated;
     vtx_base_1_updated = vtx_base_1 - vertexPos;
     vtx_base_2_updated = vtx_base_2 - vertexPos;
@@ -258,11 +257,11 @@ std::vector<HRefitCand> HVertexTools::UpdateTrackParameters(std::vector<HRefitCa
         std::cout << " " << std::endl;
     }
 
-    double theta_secondary1 = vtx_base_1_updated.Theta();
-    double theta_secondary2 = vtx_base_2_updated.Theta();
+    Double_t theta_secondary1 = vtx_base_1_updated.Theta();
+    Double_t theta_secondary2 = vtx_base_2_updated.Theta();
 
-    double phi_secondary1 = vtx_base_1_updated.Phi();
-    double phi_secondary2 = vtx_base_2_updated.Phi();
+    Double_t phi_secondary1 = vtx_base_1_updated.Phi();
+    Double_t phi_secondary2 = vtx_base_2_updated.Phi();
 
     TVector3 vtx_dir_1_updated, vtx_dir_2_updated;
 
@@ -274,7 +273,7 @@ std::vector<HRefitCand> HVertexTools::UpdateTrackParameters(std::vector<HRefitCa
                              std::cos(theta_secondary2));
 
     // Calculate the distance between the two tracks
-    double dist_new = std::fabs((vtx_dir_1_updated.Cross(vtx_dir_2_updated)).Dot((vtx_base_1_updated - vtx_base_2_updated)));
+    Double_t dist_new = std::fabs((vtx_dir_1_updated.Cross(vtx_dir_2_updated)).Dot((vtx_base_1_updated - vtx_base_2_updated)));
 
     if (fVerbose > 0)
     {
@@ -324,8 +323,8 @@ TVector3 HVertexTools::findPrimaryVertex(const std::vector<HRefitCand> &cands)
         std::cout << "" << std::endl;
     }
 
-    double param_theta1, param_phi1, param_R1, param_Z1;
-    double param_theta2, param_phi2, param_R2, param_Z2;
+    Double_t param_theta1, param_phi1, param_R1, param_Z1;
+    Double_t param_theta2, param_phi2, param_R2, param_Z2;
 
     // All found protons in the event
     HRefitCand primaryCand1 = cands[0];
@@ -362,25 +361,25 @@ TVector3 HVertexTools::findPrimaryVertex(const std::vector<HRefitCand> &cands)
                      std::sin(param_theta2) * std::sin(param_phi2),
                      std::cos(param_theta2));
 
-    HGeomVector vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_base_1, vtx_geom_base_2;
+    TVector3 vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_base_1, vtx_geom_base_2;
 
     // Direction vectors
-    vtx_geom_dir_1.setX(std::sin(param_theta1) * std::cos(param_theta1));
-    vtx_geom_dir_1.setY(std::sin(param_theta1) * std::sin(param_phi1));
-    vtx_geom_dir_1.setZ(std::cos(param_theta1));
-    vtx_geom_dir_2.setX(std::sin(param_theta2) * std::cos(param_theta2));
-    vtx_geom_dir_2.setY(std::sin(param_theta2) * std::sin(param_phi2));
-    vtx_geom_dir_2.setZ(std::cos(param_theta2));
+    vtx_geom_dir_1.SetX(std::sin(param_theta1) * std::cos(param_theta1));
+    vtx_geom_dir_1.SetY(std::sin(param_theta1) * std::sin(param_phi1));
+    vtx_geom_dir_1.SetZ(std::cos(param_theta1));
+    vtx_geom_dir_2.SetX(std::sin(param_theta2) * std::cos(param_theta2));
+    vtx_geom_dir_2.SetY(std::sin(param_theta2) * std::sin(param_phi2));
+    vtx_geom_dir_2.SetZ(std::cos(param_theta2));
 
     // Base vectors
-    vtx_geom_base_1.setX(param_R1 * std::cos(param_phi1 + TMath::PiOver2()));
-    vtx_geom_base_1.setY(param_R1 * std::sin(param_phi1 + TMath::PiOver2()));
-    vtx_geom_base_1.setZ(param_Z1);
-    vtx_geom_base_2.setX(param_R2 * std::cos(param_phi2 + TMath::PiOver2()));
-    vtx_geom_base_2.setY(param_R2 * std::sin(param_phi2 + TMath::PiOver2()));
-    vtx_geom_base_2.setZ(param_Z2);
+    vtx_geom_base_1.SetX(param_R1 * std::cos(param_phi1 + TMath::PiOver2()));
+    vtx_geom_base_1.SetY(param_R1 * std::sin(param_phi1 + TMath::PiOver2()));
+    vtx_geom_base_1.SetZ(param_Z1);
+    vtx_geom_base_2.SetX(param_R2 * std::cos(param_phi2 + TMath::PiOver2()));
+    vtx_geom_base_2.SetY(param_R2 * std::sin(param_phi2 + TMath::PiOver2()));
+    vtx_geom_base_2.SetZ(param_Z2);
 
-    HGeomVector primaryVertex = HParticleTool::calculatePointOfClosestApproach(vtx_geom_base_1, vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_dir_2);
+    TVector3 primaryVertex = HParticleTool::calculatePointOfClosestApproach(vtx_geom_base_1, vtx_geom_dir_1, vtx_geom_dir_2, vtx_geom_dir_2);
 
     fPrimaryVertex.SetXYZ(primaryVertex.X(), primaryVertex.Y(), primaryVertex.Z());
 
@@ -401,16 +400,15 @@ void HVertexTools::calculateVertexProperties(TVector3 primaryVertex, TVector3 de
     fDistPrimToDecayVertex = sqrt((decayVertex.X() - primaryVertex.X()) * (decayVertex.X() - primaryVertex.X()) + (decayVertex.Y() - primaryVertex.Y()) * (decayVertex.Y() - primaryVertex.Y()) + (decayVertex.Z() - primaryVertex.Z()) * (decayVertex.Z() - primaryVertex.Z()));
 
     if (decayVertex.Z() > primaryVertex.Z())
-    {   
+    {
         fPrimaryVertexIsBetforeDecayVertex = true;
-
     }
     else
     {
         fPrimaryVertexIsBetforeDecayVertex = false;
     }
 
-    double R_primaryVertex, R_decayVertex;
+    Double_t R_primaryVertex, R_decayVertex;
 
     R_primaryVertex = sqrt(primaryVertex.X() * primaryVertex.X() + primaryVertex.Y() * primaryVertex.Y());
     R_decayVertex = sqrt(decayVertex.X() * decayVertex.X() + decayVertex.Y() * decayVertex.Y());
