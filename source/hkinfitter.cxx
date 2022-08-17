@@ -2,118 +2,7 @@
 
 const size_t cov_dim = 5;
 
-// for missing mass fit
-HKinFitter::HKinFitter(const std::vector<HRefitCand>& cands, Double_t mass, TLorentzVector& lv) : fCands(cands),
-                                                                                         fInit(lv),
-                                                                                         fMass(mass),
-                                                                                         fVerbose(0),
-                                                                                         fLearningRate(1),
-                                                                                         fNumIterations(10),
-                                                                                         fConvergenceCriteria(1)
-{
-    // fN is the number of daughters e.g. (L->ppi-) n=2
-    fN = cands.size();
-    fyDim = fN * cov_dim; //Dimension of full covariance matrix (number of measured variables x cov_dim).
-
-    y.ResizeTo(fyDim, 1);
-    x.ResizeTo(1, 1);
-    V.ResizeTo(fyDim, fyDim);
-    Vx.ResizeTo(1, 1);
-
-    y.Zero();
-    V.Zero();
-    x.Zero();
-    Vx.Zero();
-
-    fConverged = false;
-    fIteration = 0;
-    fNdf = 0;
-    f3Constraint = false;
-    f4Constraint = false;
-    fVtxConstraint = false;
-    fMomConstraint = false;
-    fMassConstraint = false;
-    fMMConstraint = false;
-    fMassVtxConstraint = false;
-
-   // set y to measurements and the covariance, set mass
-    for (int ix = 0; ix < fN; ix++) //for daughters
-    {
-        HRefitCand cand = cands[ix];
-
-        y(0 + ix * cov_dim, 0) = 1. / cand.P();
-        y(1 + ix * cov_dim, 0) = cand.Theta();
-        y(2 + ix * cov_dim, 0) = cand.Phi();
-        y(3 + ix * cov_dim, 0) = cand.getR();
-        y(4 + ix * cov_dim, 0) = cand.getZ();
-        fM.push_back(cand.M());
-
-        // FIX ME: only for diagonal elements
-        TMatrixD covariance = cand.getCovariance();
-        V(0 + ix * cov_dim, 0 + ix * cov_dim) = covariance(0, 0);
-        V(1 + ix * cov_dim, 1 + ix * cov_dim) = covariance(1, 1);
-        V(2 + ix * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
-        V(3 + ix * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
-        V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
-    }
-}
-
-// for mass fit and simultaneous mass and vertex fit
-HKinFitter::HKinFitter(const std::vector<HRefitCand>& cands, Double_t mass) : fCands(cands),
-                                                                                         fMass(mass),
-                                                                                         fVerbose(0),
-                                                                                         fLearningRate(1),
-                                                                                         fNumIterations(10),
-                                                                                         fConvergenceCriteria(1)
-{
-    // fN is the number of daughters e.g. (L->ppi-) n=2
-    fN = cands.size();
-    fyDim = fN * cov_dim; //Dimension of full covariance matrix (number of measured variables x cov_dim).
-
-    y.ResizeTo(fyDim, 1);
-    x.ResizeTo(1, 1);
-    V.ResizeTo(fyDim, fyDim);
-    Vx.ResizeTo(1, 1);
-
-    y.Zero();
-    V.Zero();
-    x.Zero();
-    Vx.Zero();
-
-    fConverged = false;
-    fIteration = 0;
-    fNdf = 0;
-    f3Constraint = false;
-    f4Constraint = false;
-    fVtxConstraint = false;
-    fMomConstraint = false;
-    fMassConstraint = false;
-    fMMConstraint = false;
-    fMassVtxConstraint = false;
-
-   // set y to measurements and the covariance, set mass
-    for (int ix = 0; ix < fN; ix++) //for daughters
-    {
-        HRefitCand cand = cands[ix];
-
-        y(0 + ix * cov_dim, 0) = 1. / cand.P();
-        y(1 + ix * cov_dim, 0) = cand.Theta();
-        y(2 + ix * cov_dim, 0) = cand.Phi();
-        y(3 + ix * cov_dim, 0) = cand.getR();
-        y(4 + ix * cov_dim, 0) = cand.getZ();
-        fM.push_back(cand.M());
-
-        // FIX ME: only for diagonal elements
-        TMatrixD covariance = cand.getCovariance();
-        V(0 + ix * cov_dim, 0 + ix * cov_dim) = covariance(0, 0);
-        V(1 + ix * cov_dim, 1 + ix * cov_dim) = covariance(1, 1);
-        V(2 + ix * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
-        V(3 + ix * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
-        V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
-    }
-}
-
-//To be used for vertex fitter
+// general HKinFitter constructor
 HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
                                                                fVerbose(0),
                                                                fLearningRate(1),
@@ -121,7 +10,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
                                                                fConvergenceCriteria(1)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
-    fN = cands.size();
+    fN = fCands.size();
     fyDim = fN * cov_dim; // Dimension of full covariance matrix (number of measured variables x cov_dim)
 
     y.ResizeTo(fyDim, 1);
@@ -141,191 +30,15 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
     f4Constraint = false;
     fVtxConstraint = false;
     fMomConstraint = false;
+    fMassConstraint = false;
+    fMMConstraint = false;
+    fMassVtxConstraint = false;
 
     // set 'y=alpha' measurements
     // and the covariance
     for (Int_t ix = 0; ix < fN; ix++)
     {
-        HRefitCand cand = cands[ix];
-        y(0 + ix * cov_dim, 0) = 1. / cand.P();
-        y(1 + ix * cov_dim, 0) = cand.Theta();
-        y(2 + ix * cov_dim, 0) = cand.Phi();
-        y(3 + ix * cov_dim, 0) = cand.getR();
-        y(4 + ix * cov_dim, 0) = cand.getZ();
-        fM.push_back(cand.M());
-
-        // FIX ME: only for diagonal elements
-        TMatrixD covariance = cand.getCovariance();
-        V(0 + ix * cov_dim, 0 + ix * cov_dim) = covariance(0, 0);
-        V(1 + ix * cov_dim, 1 + ix * cov_dim) = covariance(1, 1);
-        V(2 + ix * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
-        V(3 + ix * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
-        V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
-    }
-}
-
-// To be used for 3C fitter
-HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother) : fCands(cands),
-                                                                                   fMother(mother),
-                                                                                   fVerbose(0),
-                                                                                   fLearningRate(1),
-                                                                                   fNumIterations(10),
-                                                                                   fConvergenceCriteria(1)
-{
-    // fN is the number of daughters e.g. (L->ppi-) n=2
-    fN = cands.size();
-    fyDim = (fN + 1) * cov_dim - 1; // Dimension of full covariance matrix (number of measured variables x cov_dim). Mother momentum is not measured
-
-    y.ResizeTo(fyDim, 1);
-    x.ResizeTo(1, 1);
-    V.ResizeTo(fyDim, fyDim);
-    Vx.ResizeTo(1, 1);
-
-    y.Zero();
-    V.Zero();
-    x.Zero();
-    Vx.Zero();
-
-    fConverged = false;
-    fIteration = 0;
-    fNdf = 0;
-    f3Constraint = false;
-    f4Constraint = false;
-    fVtxConstraint = false;
-    fMomConstraint = false;
-
-    // set y to measurements and the covariance, set mass
-    for (Int_t ix = 0; ix < fN; ix++) // for daughters
-    {
-        HRefitCand cand = cands[ix];
-
-        y(0 + ix * cov_dim, 0) = 1. / cand.P();
-        y(1 + ix * cov_dim, 0) = cand.Theta();
-        y(2 + ix * cov_dim, 0) = cand.Phi();
-        y(3 + ix * cov_dim, 0) = cand.getR();
-        y(4 + ix * cov_dim, 0) = cand.getZ();
-        fM.push_back(cand.M());
-
-        // FIX ME: only for diagonal elements
-        TMatrixD covariance = cand.getCovariance();
-        V(0 + ix * cov_dim, 0 + ix * cov_dim) = covariance(0, 0);
-        V(1 + ix * cov_dim, 1 + ix * cov_dim) = covariance(1, 1);
-        V(2 + ix * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
-        V(3 + ix * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
-        V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
-    }
-
-    // for mother
-    HRefitCand cand = fMother;
-
-    y(fN * cov_dim, 0) = cand.Theta();
-    y(1 + fN * cov_dim, 0) = cand.Phi();
-    y(2 + fN * cov_dim, 0) = cand.getR();
-    y(3 + fN * cov_dim, 0) = cand.getZ();
-    fM.push_back(cand.M());
-
-    TMatrixD covariance = cand.getCovariance();
-    V(0 + fN * cov_dim, 0 + fN * cov_dim) = covariance(1, 1);
-    V(1 + fN * cov_dim, 1 + fN * cov_dim) = covariance(2, 2);
-    V(2 + fN * cov_dim, 2 + fN * cov_dim) = covariance(3, 3);
-    V(3 + fN * cov_dim, 3 + fN * cov_dim) = covariance(4, 4);
-
-    V(0 + fN * cov_dim, 1 + fN * cov_dim) = covariance(1, 2);
-    V(1 + fN * cov_dim, 0 + fN * cov_dim) = covariance(2, 1);
-    // Jenny: Comments below are for testing so that the covariance matrix is read in correctly
-    // std::cout << "Fitter" << std::endl;
-    // std::cout << "Diag elements: " << V(0 + fN * cov_dim, 0 + fN * cov_dim) << " " << V(1 + fN * cov_dim, 1 + fN * cov_dim) << std::endl;
-    // std::cout << "Off diag elements: " << V(0 + fN * cov_dim, 1 + fN * cov_dim) << " " << V(1 + fN * cov_dim, 0 + fN * cov_dim) << std::endl;
-}
-
-// To be used for 4C fitter
-HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector &lv) : fCands(cands),
-                                                                                   fInit(lv),
-                                                                                   fVerbose(0),
-                                                                                   fLearningRate(1),
-                                                                                   fNumIterations(10),
-                                                                                   fConvergenceCriteria(1)
-{
-    // fN is the number of daughters e.g. (L->ppi-) n=2
-    fN = cands.size();
-    fyDim = fN * cov_dim; // Dimension of full covariance matrix (number of measured variables x cov_dim).
-
-    y.ResizeTo(fyDim, 1);
-    x.ResizeTo(1, 1);
-    V.ResizeTo(fyDim, fyDim);
-    Vx.ResizeTo(1, 1);
-
-    y.Zero();
-    V.Zero();
-    x.Zero();
-    Vx.Zero();
-
-    fConverged = false;
-    fIteration = 0;
-    fNdf = 0;
-    f3Constraint = false;
-    f4Constraint = false;
-    fVtxConstraint = false;
-    fMomConstraint = false;
-
-    // set y to measurements and the covariance, set mass
-    for (Int_t ix = 0; ix < fN; ix++) // for daughters
-    {
-        HRefitCand cand = cands[ix];
-
-        y(0 + ix * cov_dim, 0) = 1. / cand.P();
-        y(1 + ix * cov_dim, 0) = cand.Theta();
-        y(2 + ix * cov_dim, 0) = cand.Phi();
-        y(3 + ix * cov_dim, 0) = cand.getR();
-        y(4 + ix * cov_dim, 0) = cand.getZ();
-        fM.push_back(cand.M());
-
-        // FIX ME: only for diagonal elements
-        TMatrixD covariance = cand.getCovariance();
-        V(0 + ix * cov_dim, 0 + ix * cov_dim) = covariance(0, 0);
-        V(1 + ix * cov_dim, 1 + ix * cov_dim) = covariance(1, 1);
-        V(2 + ix * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
-        V(3 + ix * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
-        V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
-    }
-}
-
-// To be used for missing particle fitter
-HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector &lv, Double_t mass) : fCands(cands),
-                                                                                                  fInit(lv),
-                                                                                                  fMass(mass),
-                                                                                                  fVerbose(0),
-                                                                                                  fLearningRate(1),
-                                                                                                  fNumIterations(10),
-                                                                                                  fConvergenceCriteria(1)
-{
-    // fN is the number of daughters e.g. (L->ppi-) n=2
-    fN = cands.size();
-    fyDim = fN * cov_dim; // Dimension of full covariance matrix (number of measured variables x cov_dim).
-
-    y.ResizeTo(fyDim, 1);
-    x.ResizeTo(3, 1);
-    V.ResizeTo(fyDim, fyDim);
-    Vx.ResizeTo(3, 3);
-
-    y.Zero();
-    V.Zero();
-    x.Zero();
-    Vx.Zero();
-
-    fConverged = false;
-    fIteration = 0;
-    fNdf = 0;
-    f3Constraint = false;
-    f4Constraint = false;
-    fVtxConstraint = false;
-    fMomConstraint = false;
-
-    // set y to measurements and the covariance, set mass
-    for (Int_t ix = 0; ix < fN; ix++) // for daughters
-    {
-        HRefitCand cand = cands[ix];
-
+        HRefitCand cand = fCands[ix];
         y(0 + ix * cov_dim, 0) = 1. / cand.P();
         y(1 + ix * cov_dim, 0) = cand.Theta();
         y(2 + ix * cov_dim, 0) = cand.Phi();
@@ -351,11 +64,11 @@ void HKinFitter::addMassConstraint(Double_t mass)
     fMassConstraint = true;
 }
 
-void HKinFitter::addMissingMassConstraint(Double_t mass, TLorentzVector init)
+void HKinFitter::addMMConstraint(Double_t mm, TLorentzVector init)
 {
-    fMass = mass;
+    fMass = mm;
     fInit = init;
-    if (!fMissingMassConstraint)
+    if (!fMMConstraint)
         fNdf += 1;
     fMMConstraint = true;
 }
@@ -368,16 +81,68 @@ void HKinFitter::addMassVtxConstraint(Double_t mass)
     fMassVtxConstraint = true;
 }
 
-void HKinFitter::add4Constraint()
+void HKinFitter::add4Constraint(TLorentzVector lv)
 {
+    fInit =  lv;
+
     if (!f4Constraint)
         fNdf += 4;
     f4Constraint = true;
-
 }
 
-void HKinFitter::add3Constraint()
+void HKinFitter::add3Constraint(HRefitCand mother)
 {
+    fyDim = (fN + 1) * cov_dim - 1; // Dimension of full covariance matrix (number of measured variables x cov_dim). Mother momentum is not measured
+
+    y.ResizeTo(fyDim, 1);
+    V.ResizeTo(fyDim, fyDim);
+
+    y.Zero();
+    V.Zero();
+
+    // set y to measurements and the covariance, set mass
+    for (Int_t ix = 0; ix < fN; ix++) // for daughters
+    {
+        HRefitCand cand = fCands[ix];
+
+        y(0 + ix * cov_dim, 0) = 1. / cand.P();
+        y(1 + ix * cov_dim, 0) = cand.Theta();
+        y(2 + ix * cov_dim, 0) = cand.Phi();
+        y(3 + ix * cov_dim, 0) = cand.getR();
+        y(4 + ix * cov_dim, 0) = cand.getZ();
+        fM.push_back(cand.M());
+
+        // FIX ME: only for diagonal elements
+        TMatrixD covariance = cand.getCovariance();
+        V(0 + ix * cov_dim, 0 + ix * cov_dim) = covariance(0, 0);
+        V(1 + ix * cov_dim, 1 + ix * cov_dim) = covariance(1, 1);
+        V(2 + ix * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
+        V(3 + ix * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
+        V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
+    }
+
+    // for mother
+    fMother = mother;
+
+    y(fN * cov_dim, 0) = fMother.Theta();
+    y(1 + fN * cov_dim, 0) = fMother.Phi();
+    y(2 + fN * cov_dim, 0) = fMother.getR();
+    y(3 + fN * cov_dim, 0) = fMother.getZ();
+    fM.push_back(fMother.M());
+
+    TMatrixD covariance = fMother.getCovariance();
+    V(0 + fN * cov_dim, 0 + fN * cov_dim) = covariance(1, 1);
+    V(1 + fN * cov_dim, 1 + fN * cov_dim) = covariance(2, 2);
+    V(2 + fN * cov_dim, 2 + fN * cov_dim) = covariance(3, 3);
+    V(3 + fN * cov_dim, 3 + fN * cov_dim) = covariance(4, 4);
+
+    V(0 + fN * cov_dim, 1 + fN * cov_dim) = covariance(1, 2);
+    V(1 + fN * cov_dim, 0 + fN * cov_dim) = covariance(2, 1);
+    // Jenny: Comments below are for testing so that the covariance matrix is read in correctly
+    // std::cout << "Fitter" << std::endl;
+    // std::cout << "Diag elements: " << V(0 + fN * cov_dim, 0 + fN * cov_dim) << " " << V(1 + fN * cov_dim, 1 + fN * cov_dim) << std::endl;
+    // std::cout << "Off diag elements: " << V(0 + fN * cov_dim, 1 + fN * cov_dim) << " " << V(1 + fN * cov_dim, 0 + fN * cov_dim) << std::endl;
+
     if (!f3Constraint)
         fNdf += 3;
     f3Constraint = true;
@@ -390,8 +155,17 @@ void HKinFitter::addVertexConstraint()
     fVtxConstraint = true;
 }
 
-void HKinFitter::addMomConstraint()
+//For fit with missing particle
+void HKinFitter::addMomConstraint(TLorentzVector lv, Double_t mass)
 {
+    fInit = lv;
+    fMass = mass;
+
+    x.ResizeTo(3, 1);
+    Vx.ResizeTo(3, 3);
+    x.Zero();
+    Vx.Zero();
+    
     if (!fMomConstraint)
     {
         fM.push_back(fMass);

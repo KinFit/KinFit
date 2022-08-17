@@ -67,7 +67,7 @@ private:
     TLorentzVector fInit;
     Double_t fMass;
 
-    bool fMassConstraint, fMMConstraint, fMassVtxConstraint, fVtxConstraint, f3Constraint, f4Constraint, fMomConstraint, fMissingMassConstraint;
+    bool fMassConstraint, fMMConstraint, fMassVtxConstraint, fVtxConstraint, f3Constraint, f4Constraint, fMomConstraint;
     int fVerbose;
 
     Double_t fLearningRate;
@@ -89,12 +89,12 @@ public:
     TMatrixD Feta_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
     TMatrixD Fxi_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
 
-    void add3Constraint();
-    void add4Constraint();
+    void add3Constraint(HRefitCand mother);
+    void add4Constraint(TLorentzVector lv);
     void addVertexConstraint();
-    void addMomConstraint();
+    void addMomConstraint(TLorentzVector lv, Double_t mass);
     void addMassConstraint(Double_t mass);
-    void addMissingMassConstraint(Double_t mass, TLorentzVector init);
+    void addMMConstraint(Double_t mm, TLorentzVector init);
     void addMassVtxConstraint(Double_t mass);
 
     void setLearningRate(Double_t val) { fLearningRate = val; }
