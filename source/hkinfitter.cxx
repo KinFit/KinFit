@@ -3,7 +3,7 @@
 const size_t cov_dim = 5;
 
 // for missing mass fit
-HFitter::HFitter(const std::vector<HRefitCand>& cands, Double_t mass, TLorentzVector& lv) : fCands(cands),
+HKinFitter::HKinFitter(const std::vector<HRefitCand>& cands, Double_t mass, TLorentzVector& lv) : fCands(cands),
                                                                                          fInit(lv),
                                                                                          fMass(mass),
                                                                                          fVerbose(0),
@@ -59,7 +59,7 @@ HFitter::HFitter(const std::vector<HRefitCand>& cands, Double_t mass, TLorentzVe
 }
 
 // for mass fit and simultaneous mass and vertex fit
-HFitter::HFitter(const std::vector<HRefitCand>& cands, Double_t mass) : fCands(cands),
+HKinFitter::HKinFitter(const std::vector<HRefitCand>& cands, Double_t mass) : fCands(cands),
                                                                                          fMass(mass),
                                                                                          fVerbose(0),
                                                                                          fLearningRate(1),
@@ -343,7 +343,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector &lv,
     }
 }
 
-void HFitter::addMassConstraint(double mass)
+void HKinFitter::addMassConstraint(Double_t mass)
 {
     fMass = mass;
     if (!fMassConstraint)
@@ -351,7 +351,7 @@ void HFitter::addMassConstraint(double mass)
     fMassConstraint = true;
 }
 
-void HFitter::addMissingMassConstraint(double mass, TLorentzVector init)
+void HKinFitter::addMissingMassConstraint(Double_t mass, TLorentzVector init)
 {
     fMass = mass;
     fInit = init;
@@ -360,7 +360,7 @@ void HFitter::addMissingMassConstraint(double mass, TLorentzVector init)
     fMMConstraint = true;
 }
 
-void HFitter::addMassVtxConstraint(double mass)
+void HKinFitter::addMassVtxConstraint(Double_t mass)
 {
     if (!fMassVtxConstraint)
         fNdf += 2;
@@ -624,7 +624,7 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         H.ResizeTo(2, fyDim);
         H.Zero();
 
-        double Px = 0., Py = 0., Pz = 0., E = 0.;
+        Double_t Px = 0., Py = 0., Pz = 0., E = 0.;
         for (int q = 0; q < fN; q++)
         {
             E += std::sqrt((1. / m_iter(0 + q * cov_dim, 0)) *
@@ -641,8 +641,8 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         }
         for (int q = 0; q < fN; q++)
         {
-            double Pi = 1. / m_iter(0 + q * cov_dim, 0);
-            double Ei = std::sqrt(Pi * Pi + fM[q] * fM[q]);
+            Double_t Pi = 1. / m_iter(0 + q * cov_dim, 0);
+            Double_t Ei = std::sqrt(Pi * Pi + fM[q] * fM[q]);
             H(0, 0 + q * cov_dim) =
                 -2 * E * (std::pow(Pi, 3) / Ei) +
                 2 * std::pow(Pi, 2) * std::sin(m_iter(1 + q * cov_dim, 0)) *
@@ -827,7 +827,7 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         H.ResizeTo(1, fyDim);
         H.Zero();
 
-        double Px = 0., Py = 0., Pz = 0., E = 0.;
+        Double_t Px = 0., Py = 0., Pz = 0., E = 0.;
         Px += fInit.Px();
         Py += fInit.Py();
         Pz += fInit.Pz();
@@ -849,8 +849,8 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 
         for (int q = 0; q < fN; q++)
         {
-            double Pi = 1. / m_iter(0 + q * cov_dim, 0);
-            double Ei = std::sqrt(Pi * Pi + fM[q] * fM[q]);
+            Double_t Pi = 1. / m_iter(0 + q * cov_dim, 0);
+            Double_t Ei = std::sqrt(Pi * Pi + fM[q] * fM[q]);
             H(0, 0 + q * cov_dim) =
                 2 * E * (std::pow(Pi, 3) / Ei) -
                 2 * std::pow(Pi, 2) * std::sin(m_iter(1 + q * cov_dim, 0)) *

@@ -18,7 +18,6 @@
 
 // framework includes
 #include "hrefitcand.h"
-//#include "hparticletool.h"
 
 using std::cout;
 using std::endl;
@@ -68,7 +67,7 @@ private:
     TLorentzVector fInit;
     Double_t fMass;
 
-    bool fMassConstraint, fMMConstraint, fMassVtxConstraint, fVtxConstraint, fVtxConstraint, f3Constraint, f4Constraint, fMomConstraint;
+    bool fMassConstraint, fMMConstraint, fMassVtxConstraint, fVtxConstraint, f3Constraint, f4Constraint, fMomConstraint, fMissingMassConstraint;
     int fVerbose;
 
     Double_t fLearningRate;
@@ -94,6 +93,9 @@ public:
     void add4Constraint();
     void addVertexConstraint();
     void addMomConstraint();
+    void addMassConstraint(Double_t mass);
+    void addMissingMassConstraint(Double_t mass, TLorentzVector init);
+    void addMassVtxConstraint(Double_t mass);
 
     void setLearningRate(Double_t val) { fLearningRate = val; }
     void setNumberOfIterations(Int_t val) { fNumIterations = val; }
