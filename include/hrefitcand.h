@@ -14,7 +14,7 @@ private:
     TMatrixD fCov;
 
 public:
-    HRefitCand(TLorentzVector *cand, Double_t R, Double_t Z);
+    HRefitCand(TLorentzVector* cand, Double_t R, Double_t Z);
     HRefitCand(); //Does that work like this? See https://os.mbed.com/users/fpucher/code/HIM0Board/wiki/Vererbung-in-C%2B%2B
     ~HRefitCand(){};
     void setMomentum(Double_t val){ fMomentum = val; }

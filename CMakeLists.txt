@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
-project(KinFittter)
+project(KinFit)
 
 if(NOT WIN32)
   string(ASCII 27 Esc)
@@ -28,6 +28,10 @@ list(APPEND CMAKE_MODULE_PATH $ENV{ROOTSYS} ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Locate the ROOT package and define a number of useful targets and variables.
 find_package(ROOT REQUIRED)
+if ( NOT ROOT_FOUND )
+message(FATAL_ERROR "ROOT is required but missing !")
+endif ( NOT ROOT_FOUND )
+
 
 Set(INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -35,16 +39,30 @@ Set(INCLUDE_DIRECTORIES
   ${PROJECT_SOURCE_DIR}/include
 )
 
+# added jana
+#SET (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+#SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+#SET (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+#---
 Include_Directories(${INCLUDE_DIRECTORIES})
-set(SRCS
-${CMAKE_CURRENT_SOURCE_DIR}/source/hkinfitter.cxx)
+
+#jana changed:
+#set(SRCS
+#${CMAKE_CURRENT_SOURCE_DIR}/source/hkinfitter.cxx
+#${CMAKE_CURRENT_SOURCE_DIR}/source/hrefitcand.cxx
+#)
+
+FILE(GLOB SRCFILES source/hkinfitter.cxx source/hrefitcand.cxx)
+FILE(GLOB HFILES include/hkinfitter.h include/hrefitcand.h)
+#---
 
 message (STATUS "${BoldGreen}ROOT${ColourReset} at " ${CMAKE_CURRENT_SOURCE_DIR})
 
 #---Define useful ROOT functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
 include(${ROOT_USE_FILE})
 
-ROOT_GENERATE_DICTIONARY(G__HKinFitter include/hkinfitter.h LINKDEF include/FitterLinkDef.h)
-add_library(HKinFitter SHARED source/hkinfitter.cxx G__HKinFitter.cxx)
-target_link_libraries(HKinFitter ${ROOT_LIBRARIES})
-set_target_properties(HKinFitter PROPERTIES CXX_STANDARD 17)
+#ROOT_GENERATE_DICTIONARY(G__HKinFitter include/hkinfitter.h LINKDEF include/FitterLinkDef.h)
+ROOT_GENERATE_DICTIONARY(KinFitDict ${HFILES} LINKDEF include/FitterLinkDef.h)
+add_library(KinFit SHARED ${SRCFILES} KinFitDict.cxx)
+target_link_libraries(KinFit ${ROOT_LIBRARIES})
+set_target_properties(KinFit PROPERTIES CXX_STANDARD 17)

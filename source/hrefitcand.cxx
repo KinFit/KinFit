@@ -1,12 +1,13 @@
 // ROOT includes
 #include "hrefitcand.h"
 
-HRefitCand::HRefitCand(TLorentVector* cand, Double_t R, Double_t Z)
+HRefitCand::HRefitCand(TLorentzVector* cand, Double_t R, Double_t Z)
     : TLorentzVector(*cand), cand(cand), fMomentum(cand->P()), fTheta(cand->Theta()), fPhi(cand->Phi()), fR(R), fZ(Z)
 {
 }
 
 HRefitCand::HRefitCand()
+    : TLorentzVector()
 {
     cand = new TLorentzVector();
     fR = 0;
