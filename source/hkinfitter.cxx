@@ -869,6 +869,56 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         }
     }
 
+    if (fMassConstraint)
+    {
+        H.ResizeTo(1, fyDim);
+        H.Zero();
+
+        Double_t  Px = 0., Py = 0., Pz = 0., E = 0.;
+        for (int q = 0; q < fN; q++)
+        {
+            E += std::sqrt((1. / m_iter(0 + q * cov_dim, 0)) *
+                               (1. / m_iter(0 + q * cov_dim, 0)) +
+                           fM[q] * fM[q]);
+            Px += (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::sin(m_iter(1 + q * cov_dim, 0)) *
+                  std::cos(m_iter(2 + q * cov_dim, 0));
+            Py += (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::sin(m_iter(1 + q * cov_dim, 0)) *
+                  std::sin(m_iter(2 + q * cov_dim, 0));
+            Pz += (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::cos(m_iter(1 + q * cov_dim, 0));
+        }
+        for (int q = 0; q < fN; q++)
+        {
+            double Pi = 1. / m_iter(0 + q * cov_dim, 0);
+            double Ei = std::sqrt(Pi * Pi + fM[q] * fM[q]);
+            H(0, 0 + q * cov_dim) =
+                -2 * E * (std::pow(Pi, 3) / Ei) +
+                2 * std::pow(Pi, 2) * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::cos(m_iter(2 + q * cov_dim, 0)) * Px +
+                2 * std::pow(Pi, 2) * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::sin(m_iter(2 + q * cov_dim, 0)) * Py +
+                2 * std::pow(Pi, 2) * std::cos(m_iter(1 + q * cov_dim, 0)) * Pz;
+
+            H(0, 1 + q * cov_dim) =
+                -2 * Pi * std::cos(m_iter(1 + q * cov_dim, 0)) *
+                    std::cos(m_iter(2 + q * cov_dim, 0)) * Px -
+                2 * Pi * std::cos(m_iter(1 + q * cov_dim, 0)) *
+                    std::sin(m_iter(2 + q * cov_dim, 0)) * Py +
+                2 * Pi * std::sin(m_iter(1 + q * cov_dim, 0)) * Pz;
+
+            H(0, 2 + q * cov_dim) =
+                2 * Pi * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::sin(m_iter(2 + q * cov_dim, 0)) * Px -
+                2 * Pi * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::cos(m_iter(2 + q * cov_dim, 0)) * Py;
+
+            H(0, 3 + q * cov_dim) = 0.;
+            H(0, 4 + q * 4) = 0.;
+        }
+    }
+
     return H;
 }
 
@@ -915,6 +965,9 @@ Bool_t HKinFitter::fit()
         std::cout << "3C set: " << f3Constraint << std::endl;
         std::cout << "4C set: " << f4Constraint << std::endl;
         std::cout << "Momentum constraint set: " << fMomConstraint << std::endl;
+        std::cout << "Mass constraint set: " << fMassConstraint << std::endl;
+        std::cout << "Missing Mass constraint set: " << fMMConstraint << std::endl;
+        std::cout << "Mass + Vertex constraint set: " << fMassVtxConstraint << std::endl;
         std::cout << "" << std::endl;
     }
 
@@ -933,7 +986,8 @@ Bool_t HKinFitter::fit()
         xi.Zero();
         neu_xi.Zero();
     */
-    if (f4Constraint == false && f3Constraint == false && fVtxConstraint == false && fMomConstraint == false)
+    if (f4Constraint == false && f3Constraint == false && fVtxConstraint == false && fMomConstraint == false &&
+            fMassConstraint == false && fMMConstraint == false && fMassVtxConstraint == false)
     {
         std::cout << "FATAL: No constraint is chosen, please add constraint!" << std::endl;
         abort();
@@ -1104,7 +1158,7 @@ Bool_t HKinFitter::fit()
         V = V0 - lr * V0 * (DT * VD * D - (matrix * invertedMatrix * matrixT)) * V0;
         Vx = invertedMatrix;
     }
-    if (fVtxConstraint || f4Constraint)
+    if (fVtxConstraint || f4Constraint || fMassConstraint || fMMConstraint || fMassVtxConstraint)
         V = V0 - lr * V0 * DT * VD * D * V0;
 
     // -----------------------------------------
