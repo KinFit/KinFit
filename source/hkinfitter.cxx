@@ -7,7 +7,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
                                                                fVerbose(0),
                                                                fLearningRate(1),
                                                                fNumIterations(10),
-                                                               fConvergenceCriteria(1)
+                                                               fConvergenceCriterion(1)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = cands.size();
@@ -59,7 +59,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother)
                                                                                    fVerbose(0),
                                                                                    fLearningRate(1),
                                                                                    fNumIterations(10),
-                                                                                   fConvergenceCriteria(1)
+                                                                                   fConvergenceCriterion(1)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = cands.size();
@@ -133,7 +133,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector &lv)
                                                                                    fVerbose(0),
                                                                                    fLearningRate(1),
                                                                                    fNumIterations(10),
-                                                                                   fConvergenceCriteria(1)
+                                                                                   fConvergenceCriterion(1)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = cands.size();
@@ -186,7 +186,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector &lv,
                                                                                                   fVerbose(0),
                                                                                                   fLearningRate(1),
                                                                                                   fNumIterations(10),
-                                                                                                  fConvergenceCriteria(1)
+                                                                                                  fConvergenceCriterion(1)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = cands.size();
@@ -786,7 +786,7 @@ Bool_t HKinFitter::fit()
 
         // for checking convergence
         fIteration = q;
-        if (fabs(chi2 - chisqrd(0, 0)) < fConvergenceCriteria)
+        if (fabs(chi2 - chisqrd(0, 0)) < fConvergenceCriterion)
         {
             fConverged = true;
             chi2 = chisqrd(0, 0);
