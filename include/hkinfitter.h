@@ -95,15 +95,15 @@ public:
     void setLearningRate(Double_t val) { fLearningRate = val; }
     void setNumberOfIterations(Int_t val) { fNumIterations = val; }
     void setConvergenceCriteria(Double_t val) { fConvergenceCriteria = val; }
+    void setCovariance(TMatrixD &val) { V = val; }
+    void setMeasurement(TMatrixD &val) { y = val; }
 
     Double_t getChi2() const { return fChi2; }
     Double_t getProb() const { return fProb; }
     Double_t getPull(Int_t val = 0) { return fPull(val, val); }
+    Int_t getIteration() const { return fIteration; }
 
     Bool_t isConverged() const { return fConverged; }
-    Int_t getIteration() const { return fIteration; }
-    void setCovariance(TMatrixD &val) { V = val; }
-    void setMeasurement(TMatrixD &val) { y = val; }
 
     Bool_t fit();
 

@@ -39,29 +39,16 @@ Set(INCLUDE_DIRECTORIES
   ${PROJECT_SOURCE_DIR}/include
 )
 
-# added jana
-#SET (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-#SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
-#SET (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
-#---
 Include_Directories(${INCLUDE_DIRECTORIES})
-
-#jana changed:
-#set(SRCS
-#${CMAKE_CURRENT_SOURCE_DIR}/source/hkinfitter.cxx
-#${CMAKE_CURRENT_SOURCE_DIR}/source/hrefitcand.cxx
-#)
 
 FILE(GLOB SRCFILES source/hkinfitter.cxx source/hrefitcand.cxx)
 FILE(GLOB HFILES include/hkinfitter.h include/hrefitcand.h)
-#---
 
 message (STATUS "${BoldGreen}ROOT${ColourReset} at " ${CMAKE_CURRENT_SOURCE_DIR})
 
 #---Define useful ROOT functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
 include(${ROOT_USE_FILE})
 
-#ROOT_GENERATE_DICTIONARY(G__HKinFitter include/hkinfitter.h LINKDEF include/FitterLinkDef.h)
 ROOT_GENERATE_DICTIONARY(KinFitDict ${HFILES} LINKDEF include/FitterLinkDef.h)
 add_library(KinFit SHARED ${SRCFILES} KinFitDict.cxx)
 target_link_libraries(KinFit ${ROOT_LIBRARIES})

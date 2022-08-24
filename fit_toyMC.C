@@ -25,7 +25,6 @@ void FillData(HRefitCand& outcand, double arr[])
     cov(0, 0) = std::pow(arr[0], 2);
     cov(1, 1) = std::pow(arr[1], 2);
     cov(2, 2) = std::pow(arr[2], 2);
-    cov(2, 2) = std::pow(arr[2], 2);
     cov(3, 3) = std::pow(arr[3], 2);
     cov(4, 4) = std::pow(arr[4], 2);
 
@@ -38,7 +37,7 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
     // define output file and some histograms
     // -----------------------------------------------------------------------
     // set ouput file
-    TFile* outfile = new TFile("testFit_toyMC.root", "recreate");
+    TFile* outfile = new TFile("testFit_toyMC_M.root", "recreate");
     TH1F* h01 = new TH1F("hLambdaMassPreFit", "", 100, 1.070, 1.250);
     h01->SetXTitle(" M_{p#pi^{-}} [GeV/c^{2}]");
     h01->SetYTitle(" events ");
@@ -74,13 +73,18 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
     TH1F *h092 = (TH1F*)h09->Clone("hLambdaMomPostFit_probCut");
     h092 -> SetLineColor(kGreen);
 
-    TH1F* h05 = new TH1F("hPull", "", 100, -1, 1);
+    TH1F* h05 = new TH1F("hPull", "", 100, -5, 5);
     h05->SetXTitle("Pull(1/P_{p})");
     h05->SetYTitle(" counts ");
     TH1F *h052 = (TH1F*)h05->Clone("hPull_probCut");
     h052 -> SetLineColor(kGreen);
     TH1F *h053 = (TH1F*)h05->Clone("hPull_converged");
     h053 -> SetLineColor(kBlue);
+    TH1F *h054 = (TH1F*)h05->Clone("hPull_tht");
+    TH1F *h055 = (TH1F*)h05->Clone("hPull_phi");
+    TH1F *h056 = (TH1F*)h05->Clone("hPull_p_pi");
+    TH1F *h057 = (TH1F*)h05->Clone("hPull_tht_pi");
+    TH1F *h058 = (TH1F*)h05->Clone("hPull_phi_pi");
     /*
     TH1F* h06 = new TH1F("hTotMomPreFit", "", 100, 3800, 4800);
     h06->SetXTitle(" p [MeV/c]");
@@ -121,6 +125,9 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
     t->SetBranchAddress("piCandTruePhi", &piCandTruePhi);
     t->SetBranchAddress("piCandRecoPhi", &piCandRecoPhi);
 
+    TLorentzVector ini;
+    ini.SetXYZM(0.1, .1, 3., 1.11568);
+
     Long64_t nevts = t->GetEntries();
     if (nEvents <= 0 || nEvents > nevts)
         nEvents = nevts;
@@ -133,13 +140,13 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
         proton->SetXYZM(pCandRecoP * std::sin(pCandRecoTheta) * std::cos(pCandRecoPhi),
                     pCandRecoP * std::sin(pCandRecoTheta) * std::sin(pCandRecoPhi),
                     pCandRecoP * std::cos(pCandRecoTheta), 0.938272);
-        double proton_errors[] = {0.025*1/pCandRecoTheta, 0.0009*pCandRecoTheta, 0.0009*pCandRecoPhi, 0.0001, 0.0001};
+        double proton_errors[] = {0.025*(1/pCandRecoP), 0.0009*pCandRecoTheta, 0.0009*pCandRecoPhi, 0.0001, 0.0001};
 
         TLorentzVector *pion = new TLorentzVector();
         pion->SetXYZM(piCandRecoP * std::sin(piCandRecoTheta) * std::cos(piCandRecoPhi),
                     piCandRecoP * std::sin(piCandRecoTheta) * std::sin(piCandRecoPhi),
                     piCandRecoP * std::cos(piCandRecoTheta), 0.13957);
-        double pion_errors[] = {0.025*1/piCandRecoTheta, 0.0009*piCandRecoTheta, 0.0009*piCandRecoPhi, 0.0001, 0.0001};
+        double pion_errors[] = {0.025*(1/piCandRecoP), 0.0009*piCandRecoTheta, 0.0009*piCandRecoPhi, 0.0001, 0.0001};
 
         TLorentzVector lambda = *proton + *pion;
         h01->Fill(lambda.M());
@@ -158,9 +165,12 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
         cands.push_back(pion_fit);
 
         HKinFitter fitter(cands);
-        fitter.setVerbosity(2);
-        fitter.setConvergenceCriteria(0.0001);
+        fitter.setVerbosity(0);
+        fitter.setNumberOfIterations(10);
+        //fitter.setLearningRate(0.5);
+        fitter.setConvergenceCriteria(0.01);
         fitter.addMassConstraint(1.11568);
+        //fitter.add4Constraint(ini);
         if(fitter.fit()){
 
             HRefitCand fcand1 = fitter.getDaughter(0); // proton
@@ -172,6 +182,11 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
             h04->Fill(lambda_fit.M());
             // get Pull example (1/P for the fitted proton)
             h05->Fill(fitter.getPull(0));
+            h054->Fill(fitter.getPull(1));
+            h055->Fill(fitter.getPull(2));
+            h056->Fill(fitter.getPull(5));
+            h057->Fill(fitter.getPull(6));
+            h058->Fill(fitter.getPull(7));
             h09->Fill(lambda_fit.P());
             
             if(fitter.getProb()>0.01){
@@ -183,6 +198,8 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
                 h052->Fill(fitter.getPull(0));
                 h092->Fill(lambda_fit.P());
             }
+
+            h08->Fill(fitter.getIteration());
 
         }
     }
@@ -201,6 +218,11 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
     h05->Write();
     h052->Write();
     h053->Write();
+    h054->Write();
+    h055->Write();
+    h056->Write();
+    h057->Write();
+    h058->Write();
     /*
     h06->Write();
     h07->Write();

@@ -977,6 +977,7 @@ Bool_t HKinFitter::fit()
     TMatrixD A0(y), V0(V);
     alpha0 = y;
     alpha = alpha0;
+    Double_t chi2 = 1e6;
 
     // Calculating the inverse of the original covariance matrix that is not changed in the iterations
     TMatrixD V0_inv(V);
@@ -1005,7 +1006,6 @@ Bool_t HKinFitter::fit()
         xi = xi0;
     }
 
-    Double_t chi2 = 1e6;
     if (fVerbose > 1)
     {
         cout << " calc Feta" << endl;
@@ -1100,8 +1100,9 @@ Bool_t HKinFitter::fit()
         {
             cout << " calc chi2" << endl;
         }
+        //Which one???
         chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * d;
-        // chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * f_eval(neu_alpha, neu_xi);
+        //chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * f_eval(neu_alpha, neu_xi);
 
         // for checking convergence
         fIteration = q;
@@ -1185,8 +1186,8 @@ Bool_t HKinFitter::fit()
     if (f3Constraint)
         updateMother();
 
-    return fConverged; // for number of iterations greater than 1
-    // return true; // for number of iterations equal to 1
+    if (fNumIterations == 1) return kTRUE; // for number of iterations greater than 1
+    else return fConverged; // for number of iterations equal to 1
 }
 
 HRefitCand HKinFitter::getDaughter(Int_t val)
