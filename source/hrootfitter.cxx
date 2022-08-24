@@ -1,10 +1,9 @@
 #include "hrootfitter.h"
-#include "hphysicsconstants.h"  //knows conversion from id to mass -- replace with conversion table??
 
 HRootFitter::HRootFitter(TString infileList, TString outprefix, Int_t nEvents) : fInfileList(infileList),
-																								fOutprefix(outprefix),
-																								fEvents(nEvents),
-																								fVerbose(0)
+                                                                                 fOutprefix(outprefix),
+                                                                                 fEvents(nEvents),
+                                                                                 fVerbose(0)
 {
 }
 
@@ -17,7 +16,7 @@ void HRootFitter::selectCandidates()
 
     for (size_t it = 0; it < fPids.size(); it++)
     {
-        std::vector<HRefitCand*> tempVec;
+        std::vector<HRefitCand *> tempVec;
 
         for (Int_t j = 0; j < ntracks; j++)
         {
@@ -32,20 +31,19 @@ void HRootFitter::selectCandidates()
 
     } // end of PIDs loop
 }
-    
 
-void HRootFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector()){
+void HRootFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector())
+{
 
-    //fCandsFit.Clear();
+    // fCandsFit.Clear();
     selectCandidates();
 
-    //initialize DecayBuilder
+    // initialize DecayBuilder
 
-    //Write output category
+    // Write output category
 
-     //end of the event loop
+    // end of the event loop
 }
-
 
 void HRootFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, HRefitCand mother, Double_t mm)
 {
@@ -64,7 +62,7 @@ void HRootFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzV
     TH1F *hmLam_post4C = (TH1F *)hmLam_prefit->Clone("hmLam_post4C");
     hmLam_post4C->SetLineColor(kBlue);
 
-    //Create branch for output of fitted particles
+    // Create branch for output of fitted particles
     TString out_branchname;
     TClonesArray *fit_array = new TClonesArray("HParticleCand");
     TClonesArray &fit_arrayRef = *fit_array;
@@ -77,12 +75,13 @@ void HRootFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzV
     timer.Start();
 
     TFile tree_file(fInfileList, "read");
-    fTree = (TTree*)tree_file.Get("data");
+    fTree = (TTree *)tree_file.Get("data");
 
     fTree->SetBranchAddress("Cands_in", &fCands_in);
 
     Int_t entries = fTree->GetEntries();
-    if(nEvents<entries && fEvents>0) entries = fEvents;
+    if (nEvents < entries && fEvents > 0)
+        entries = fEvents;
 
     // start of the event loop
     for (Int_t i = 0; i < fEvents; i++)
@@ -91,19 +90,21 @@ void HRootFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzV
 
         selectCandidates();
 
-        //if not all particles are found, skip event
+        // if not all particles are found, skip event
         bool isIncomplete = false;
         for (size_t it = 0; it < fPids.size(); it++)
         {
             cout << "fCandsFit size " << fCandsFit[it].size() << endl;
-            if(fCandsFit[it].size()==0){ 
-				isIncomplete = true;
-				break;
-			}
+            if (fCandsFit[it].size() == 0)
+            {
+                isIncomplete = true;
+                break;
+            }
         }
-        if (isIncomplete) continue;
-        
-        //initialize DecayBuilder
+        if (isIncomplete)
+            continue;
+
+        // initialize DecayBuilder
         cout << "ini Decay Builder" << endl;
         HDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
         cout << "build decay" << endl;
@@ -113,11 +114,13 @@ void HRootFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzV
         cout << result.size() << endl;
         builder.getFitCands(result);
 
-        //Fill output TClonesArray with fit result
-        for (Int_t k=0; k<result.size(); k++){
+        // Fill output TClonesArray with fit result
+        for (Int_t k = 0; k < result.size(); k++)
+        {
             fit_array[k] = result[k];
         }
-        if(fit successfull) fTree_out->Fill();
+        if (fit successfull)
+            fTree_out->Fill();
 
         cout << "fill histos" << endl;
         if (result.size() > 2)
@@ -134,11 +137,11 @@ void HRootFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzV
     hmLam_post4C->Write();
     outfile->Close();
 
-    //Write tree to outfile and close
+    // Write tree to outfile and close
 }
 
-//Function to fill HRefitCand -- not needed here if input is already HRefitCand
-void HRootFitter::FillData(HParticleCandSim* cand, HRefitCand &outcand, double arr[5], double mass)
+// Function to fill HRefitCand -- not needed here if input is already HRefitCand
+void HRootFitter::FillData(HParticleCandSim *cand, HRefitCand &outcand, double arr[5], double mass)
 {
 
     if (fVerbose > 0)
@@ -164,5 +167,5 @@ void HRootFitter::FillData(HParticleCandSim* cand, HRefitCand &outcand, double a
                     mass);
     outcand.setR(cand->getR());
     outcand.setZ(cand->getZ());
-    outcand.setCovariance(cov);   
+    outcand.setCovariance(cov);
 }
