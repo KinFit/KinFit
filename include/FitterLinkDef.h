@@ -7,5 +7,6 @@
 #pragma link off all typedef;
 
 #pragma link C++ class HKinFitter;
+#pragma link C++ class HRefitCand;
 
 #endif

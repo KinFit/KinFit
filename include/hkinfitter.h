@@ -18,7 +18,6 @@
 
 // framework includes
 #include "hrefitcand.h"
-//#include "hparticletool.h"
 
 using std::cout;
 using std::endl;
@@ -68,8 +67,8 @@ private:
     TLorentzVector fInit;
     Double_t fMass;
 
-    Bool_t fVtxConstraint, f3Constraint, f4Constraint, fMomConstraint;
-    Int_t fVerbose;
+    bool fMassConstraint, fMMConstraint, fMassVtxConstraint, fVtxConstraint, f3Constraint, f4Constraint, fMomConstraint;
+    int fVerbose;
 
     Double_t fLearningRate;
     Int_t fNumIterations;
@@ -77,9 +76,6 @@ private:
 
 public:
     HKinFitter(const std::vector<HRefitCand> &cands);
-    HKinFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother);
-    HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector &lv);
-    HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector &lv, Double_t mass);
     ~HKinFitter(){};
 
     TMatrixD calcMissingMom(const TMatrixD &m_iter);
@@ -88,23 +84,26 @@ public:
     TMatrixD Feta_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
     TMatrixD Fxi_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
 
-    void add3Constraint();
-    void add4Constraint();
+    void add3Constraint(HRefitCand mother);
+    void add4Constraint(TLorentzVector lv);
     void addVertexConstraint();
-    void addMomConstraint();
+    void addMomConstraint(TLorentzVector lv, Double_t mass);
+    void addMassConstraint(Double_t mass);
+    void addMMConstraint(Double_t mm, TLorentzVector init);
+    void addMassVtxConstraint(Double_t mass);
 
     void setLearningRate(Double_t val) { fLearningRate = val; }
     void setNumberOfIterations(Int_t val) { fNumIterations = val; }
     void setConvergenceCriterion(Double_t val) { fConvergenceCriterion = val; }
+    void setCovariance(TMatrixD &val) { V = val; }
+    void setMeasurement(TMatrixD &val) { y = val; }
 
     Double_t getChi2() const { return fChi2; }
     Double_t getProb() const { return fProb; }
     Double_t getPull(Int_t val = 0) { return fPull(val, val); }
+    Int_t getIteration() const { return fIteration; }
 
     Bool_t isConverged() const { return fConverged; }
-    Int_t getIteration() const { return fIteration; }
-    void setCovariance(TMatrixD &val) { V = val; }
-    void setMeasurement(TMatrixD &val) { y = val; }
 
     Bool_t fit();
 

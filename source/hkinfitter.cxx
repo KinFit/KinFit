@@ -2,7 +2,7 @@
 
 const size_t cov_dim = 5;
 
-// To be used for vertex fitter
+// general HKinFitter constructor
 HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
                                                                fVerbose(0),
                                                                fLearningRate(1),
@@ -10,7 +10,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
                                                                fConvergenceCriterion(1)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
-    fN = cands.size();
+    fN = fCands.size();
     fyDim = fN * cov_dim; // Dimension of full covariance matrix (number of measured variables x cov_dim)
 
     y.ResizeTo(fyDim, 1);
@@ -30,12 +30,15 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
     f4Constraint = false;
     fVtxConstraint = false;
     fMomConstraint = false;
+    fMassConstraint = false;
+    fMMConstraint = false;
+    fMassVtxConstraint = false;
 
     // set 'y=alpha' measurements
     // and the covariance
     for (Int_t ix = 0; ix < fN; ix++)
     {
-        HRefitCand cand = cands[ix];
+        HRefitCand cand = fCands[ix];
         y(0 + ix * cov_dim, 0) = 1. / cand.P();
         y(1 + ix * cov_dim, 0) = cand.Theta();
         y(2 + ix * cov_dim, 0) = cand.Phi();
@@ -53,40 +56,54 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
     }
 }
 
-// To be used for 3C fitter
-HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother) : fCands(cands),
-                                                                                   fMother(mother),
-                                                                                   fVerbose(0),
-                                                                                   fLearningRate(1),
-                                                                                   fNumIterations(10),
-                                                                                   fConvergenceCriterion(1)
+void HKinFitter::addMassConstraint(Double_t mass)
 {
-    // fN is the number of daughters e.g. (L->ppi-) n=2
-    fN = cands.size();
+    fMass = mass;
+    if (!fMassConstraint)
+        fNdf += 1;
+    fMassConstraint = true;
+}
+
+void HKinFitter::addMMConstraint(Double_t mm, TLorentzVector init)
+{
+    fMass = mm;
+    fInit = init;
+    if (!fMMConstraint)
+        fNdf += 1;
+    fMMConstraint = true;
+}
+
+void HKinFitter::addMassVtxConstraint(Double_t mass)
+{
+    if (!fMassVtxConstraint)
+        fNdf += 2;
+    fMass = mass;
+    fMassVtxConstraint = true;
+}
+
+void HKinFitter::add4Constraint(TLorentzVector lv)
+{
+    fInit =  lv;
+
+    if (!f4Constraint)
+        fNdf += 4;
+    f4Constraint = true;
+}
+
+void HKinFitter::add3Constraint(HRefitCand mother)
+{
     fyDim = (fN + 1) * cov_dim - 1; // Dimension of full covariance matrix (number of measured variables x cov_dim). Mother momentum is not measured
 
     y.ResizeTo(fyDim, 1);
-    x.ResizeTo(1, 1);
     V.ResizeTo(fyDim, fyDim);
-    Vx.ResizeTo(1, 1);
 
     y.Zero();
     V.Zero();
-    x.Zero();
-    Vx.Zero();
-
-    fConverged = false;
-    fIteration = 0;
-    fNdf = 0;
-    f3Constraint = false;
-    f4Constraint = false;
-    fVtxConstraint = false;
-    fMomConstraint = false;
 
     // set y to measurements and the covariance, set mass
     for (Int_t ix = 0; ix < fN; ix++) // for daughters
     {
-        HRefitCand cand = cands[ix];
+        HRefitCand cand = fCands[ix];
 
         y(0 + ix * cov_dim, 0) = 1. / cand.P();
         y(1 + ix * cov_dim, 0) = cand.Theta();
@@ -105,15 +122,15 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother)
     }
 
     // for mother
-    HRefitCand cand = fMother;
+    fMother = mother;
 
-    y(fN * cov_dim, 0) = cand.Theta();
-    y(1 + fN * cov_dim, 0) = cand.Phi();
-    y(2 + fN * cov_dim, 0) = cand.getR();
-    y(3 + fN * cov_dim, 0) = cand.getZ();
-    fM.push_back(cand.M());
+    y(fN * cov_dim, 0) = fMother.Theta();
+    y(1 + fN * cov_dim, 0) = fMother.Phi();
+    y(2 + fN * cov_dim, 0) = fMother.getR();
+    y(3 + fN * cov_dim, 0) = fMother.getZ();
+    fM.push_back(fMother.M());
 
-    TMatrixD covariance = cand.getCovariance();
+    TMatrixD covariance = fMother.getCovariance();
     V(0 + fN * cov_dim, 0 + fN * cov_dim) = covariance(1, 1);
     V(1 + fN * cov_dim, 1 + fN * cov_dim) = covariance(2, 2);
     V(2 + fN * cov_dim, 2 + fN * cov_dim) = covariance(3, 3);
@@ -125,125 +142,10 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, HRefitCand &mother)
     // std::cout << "Fitter" << std::endl;
     // std::cout << "Diag elements: " << V(0 + fN * cov_dim, 0 + fN * cov_dim) << " " << V(1 + fN * cov_dim, 1 + fN * cov_dim) << std::endl;
     // std::cout << "Off diag elements: " << V(0 + fN * cov_dim, 1 + fN * cov_dim) << " " << V(1 + fN * cov_dim, 0 + fN * cov_dim) << std::endl;
-}
 
-// To be used for 4C fitter
-HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector &lv) : fCands(cands),
-                                                                                   fInit(lv),
-                                                                                   fVerbose(0),
-                                                                                   fLearningRate(1),
-                                                                                   fNumIterations(10),
-                                                                                   fConvergenceCriterion(1)
-{
-    // fN is the number of daughters e.g. (L->ppi-) n=2
-    fN = cands.size();
-    fyDim = fN * cov_dim; // Dimension of full covariance matrix (number of measured variables x cov_dim).
-
-    y.ResizeTo(fyDim, 1);
-    x.ResizeTo(1, 1);
-    V.ResizeTo(fyDim, fyDim);
-    Vx.ResizeTo(1, 1);
-
-    y.Zero();
-    V.Zero();
-    x.Zero();
-    Vx.Zero();
-
-    fConverged = false;
-    fIteration = 0;
-    fNdf = 0;
-    f3Constraint = false;
-    f4Constraint = false;
-    fVtxConstraint = false;
-    fMomConstraint = false;
-
-    // set y to measurements and the covariance, set mass
-    for (Int_t ix = 0; ix < fN; ix++) // for daughters
-    {
-        HRefitCand cand = cands[ix];
-
-        y(0 + ix * cov_dim, 0) = 1. / cand.P();
-        y(1 + ix * cov_dim, 0) = cand.Theta();
-        y(2 + ix * cov_dim, 0) = cand.Phi();
-        y(3 + ix * cov_dim, 0) = cand.getR();
-        y(4 + ix * cov_dim, 0) = cand.getZ();
-        fM.push_back(cand.M());
-
-        // FIX ME: only for diagonal elements
-        TMatrixD covariance = cand.getCovariance();
-        V(0 + ix * cov_dim, 0 + ix * cov_dim) = covariance(0, 0);
-        V(1 + ix * cov_dim, 1 + ix * cov_dim) = covariance(1, 1);
-        V(2 + ix * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
-        V(3 + ix * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
-        V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
-    }
-}
-
-// To be used for missing particle fitter
-HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands, TLorentzVector &lv, Double_t mass) : fCands(cands),
-                                                                                                  fInit(lv),
-                                                                                                  fMass(mass),
-                                                                                                  fVerbose(0),
-                                                                                                  fLearningRate(1),
-                                                                                                  fNumIterations(10),
-                                                                                                  fConvergenceCriterion(1)
-{
-    // fN is the number of daughters e.g. (L->ppi-) n=2
-    fN = cands.size();
-    fyDim = fN * cov_dim; // Dimension of full covariance matrix (number of measured variables x cov_dim).
-
-    y.ResizeTo(fyDim, 1);
-    x.ResizeTo(3, 1);
-    V.ResizeTo(fyDim, fyDim);
-    Vx.ResizeTo(3, 3);
-
-    y.Zero();
-    V.Zero();
-    x.Zero();
-    Vx.Zero();
-
-    fConverged = false;
-    fIteration = 0;
-    fNdf = 0;
-    f3Constraint = false;
-    f4Constraint = false;
-    fVtxConstraint = false;
-    fMomConstraint = false;
-
-    // set y to measurements and the covariance, set mass
-    for (Int_t ix = 0; ix < fN; ix++) // for daughters
-    {
-        HRefitCand cand = cands[ix];
-
-        y(0 + ix * cov_dim, 0) = 1. / cand.P();
-        y(1 + ix * cov_dim, 0) = cand.Theta();
-        y(2 + ix * cov_dim, 0) = cand.Phi();
-        y(3 + ix * cov_dim, 0) = cand.getR();
-        y(4 + ix * cov_dim, 0) = cand.getZ();
-        fM.push_back(cand.M());
-
-        // FIX ME: only for diagonal elements
-        TMatrixD covariance = cand.getCovariance();
-        V(0 + ix * cov_dim, 0 + ix * cov_dim) = covariance(0, 0);
-        V(1 + ix * cov_dim, 1 + ix * cov_dim) = covariance(1, 1);
-        V(2 + ix * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
-        V(3 + ix * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
-        V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
-    }
-}
-
-void HKinFitter::add3Constraint()
-{
     if (!f3Constraint)
         fNdf += 3;
     f3Constraint = true;
-}
-
-void HKinFitter::add4Constraint()
-{
-    if (!f4Constraint)
-        fNdf += 4;
-    f4Constraint = true;
 }
 
 void HKinFitter::addVertexConstraint()
@@ -253,8 +155,17 @@ void HKinFitter::addVertexConstraint()
     fVtxConstraint = true;
 }
 
-void HKinFitter::addMomConstraint()
+//For fit with missing particle
+void HKinFitter::addMomConstraint(TLorentzVector lv, Double_t mass)
 {
+    fInit = lv;
+    fMass = mass;
+
+    x.ResizeTo(3, 1);
+    Vx.ResizeTo(3, 3);
+    x.Zero();
+    Vx.Zero();
+    
     if (!fMomConstraint)
     {
         fM.push_back(fMass);
@@ -286,6 +197,103 @@ TMatrixD HKinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 {
     TMatrixD d;
 
+     if (fMassConstraint)
+    {
+        d.ResizeTo(1, 1);
+        Double_t Px = 0., Py = 0., Pz = 0., E = 0.;
+
+        for (int q = 0; q < fN; q++)
+        {
+            E += std::sqrt((1. / m_iter(0 + q * cov_dim, 0)) *
+                               (1. / m_iter(0 + q * cov_dim, 0)) +
+                           fM[q] * fM[q]);
+            Px += (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::sin(m_iter(1 + q * cov_dim, 0)) *
+                  std::cos(m_iter(2 + q * cov_dim, 0));
+            Py += (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::sin(m_iter(1 + q * cov_dim, 0)) *
+                  std::sin(m_iter(2 + q * cov_dim, 0));
+            Pz += (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::cos(m_iter(1 + q * cov_dim, 0));
+        }
+
+        d(0, 0) = std::pow(E, 2) - std::pow(Px, 2) - std::pow(Py, 2) -
+                  std::pow(Pz, 2) - fMass * fMass;
+    }
+
+    // invariant mass + vertex constraint
+    if (fMassVtxConstraint)
+    {
+        d.ResizeTo(2, 1);
+        Double_t Px = 0., Py = 0., Pz = 0., E = 0.;
+
+        for (int q = 0; q < fN; q++)
+        {
+            E += std::sqrt((1. / m_iter(0 + q * cov_dim, 0)) *
+                               (1. / m_iter(0 + q * cov_dim, 0)) +
+                           fM[q] * fM[q]);
+            Px += (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::sin(m_iter(1 + q * cov_dim, 0)) *
+                  std::cos(m_iter(2 + q * cov_dim, 0));
+            Py += (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::sin(m_iter(1 + q * cov_dim, 0)) *
+                  std::sin(m_iter(2 + q * cov_dim, 0));
+            Pz += (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::cos(m_iter(1 + q * cov_dim, 0));
+        }
+
+        TVector3 base_1, base_2, dir_1, dir_2;
+        base_1.SetXYZ(
+            m_iter(3 + 0 * cov_dim, 0) *
+                std::cos(m_iter(2 + 0 * cov_dim, 0) + TMath::PiOver2()),
+            m_iter(3 + 0 * cov_dim, 0) *
+                std::sin(m_iter(2 + 0 * cov_dim, 0) + TMath::PiOver2()),
+            m_iter(4 + 0 * cov_dim, 0));
+        base_2.SetXYZ(
+            m_iter(3 + 1 * cov_dim, 0) *
+                std::cos(m_iter(2 + 1 * cov_dim, 0) + TMath::PiOver2()),
+            m_iter(3 + 1 * cov_dim, 0) *
+                std::sin(m_iter(2 + 1 * cov_dim, 0) + TMath::PiOver2()),
+            m_iter(4 + 1 * cov_dim, 0));
+
+        dir_1.SetXYZ(std::sin(m_iter(1 + 0 * cov_dim, 0)) *
+                         std::cos(m_iter(2 + 0 * cov_dim, 0)),
+                     std::sin(m_iter(1 + 0 * cov_dim, 0)) *
+                         std::sin(m_iter(2 + 0 * cov_dim, 0)),
+                     std::cos(m_iter(1 + 0 * cov_dim, 0)));
+        dir_2.SetXYZ(std::sin(m_iter(1 + 1 * cov_dim, 0)) *
+                         std::cos(m_iter(2 + 1 * cov_dim, 0)),
+                     std::sin(m_iter(1 + 1 * cov_dim, 0)) *
+                         std::sin(m_iter(2 + 1 * cov_dim, 0)),
+                     std::cos(m_iter(1 + 1 * cov_dim, 0)));
+
+        d(0, 0) = std::pow(E, 2) - std::pow(Px, 2) - std::pow(Py, 2) -
+                  std::pow(Pz, 2) - fMass * fMass;
+        d(1, 0) = std::fabs((dir_1.Cross(dir_2)).Dot((base_2 - base_1)));
+    }
+
+    // missing mass constraint
+    if (fMMConstraint)
+    {
+        d.ResizeTo(1, 1);
+
+        //initial system
+        Double_t Px = fInit.Px();
+        Double_t Py = fInit.Py();
+        Double_t Pz = fInit.Pz();
+        Double_t E = fInit.E();
+
+        for (int q = 0; q < fN; q++)
+        {
+            Px += 1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
+            Py += 1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
+            Pz += 1. / m_iter(0 + q * cov_dim, 0) * cos(m_iter(1 + q * cov_dim, 0));
+            E += sqrt(pow((1. / m_iter(0 + q * cov_dim, 0)), 2) + pow(fM[q], 2));
+        }
+        d(0, 0) = std::pow(E, 2) - std::pow(Px, 2) - std::pow(Py, 2) - std::pow(Pz, 2) - fMass * fMass;
+    }
+
+    // vertex constraint
     if (fVtxConstraint)
     {
         d.ResizeTo(1, 1);
@@ -318,6 +326,7 @@ TMatrixD HKinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         d(0, 0) = std::fabs((dir_1.Cross(dir_2)).Dot((base_1 - base_2)));
     }
 
+    // for 4momentum fit in vertex with fixed mass, momentum unmeasured
     if (f3Constraint)
     {
         // mother
@@ -337,6 +346,7 @@ TMatrixD HKinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         }
     }
 
+    // 4C fit
     if (f4Constraint)
     {
         d.ResizeTo(4, 1);
@@ -357,21 +367,21 @@ TMatrixD HKinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         }
     }
 
+    // for missing particle fit, all 4momenta constraint to that of initial system
     if (fMomConstraint)
     {
+	    d.ResizeTo(4, 1);
 
-        d.ResizeTo(4, 1);
-        d(0, 0) = -fInit.Px() + xi_iter(0, 0);
-        d(1, 0) = -fInit.Py() + xi_iter(1, 0);
-        d(2, 0) = -fInit.Pz() + xi_iter(2, 0);
-        d(3, 0) = -fInit.E() + sqrt(pow(xi_iter(0, 0), 2) + std::pow(xi_iter(1, 0), 2) + std::pow(xi_iter(2, 0), 2) + std::pow(fM[fN], 2));
-
-        for (Int_t q = 0; q < fN; q++)
-        {
-            d(0, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
-            d(1, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
-            d(2, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0));
-            d(3, 0) += sqrt(pow((1. / m_iter(0 + q * cov_dim, 0)), 2) + std::pow(fM[q], 2));
+        d(0, 0) = -fInit.Px() + xi_iter(0,0);
+        d(1, 0) = -fInit.Py() + xi_iter(1,0);
+        d(2, 0) = -fInit.Pz() + xi_iter(2,0);
+        d(3, 0) = -fInit.E() + sqrt(pow(xi_iter(0,0),2)+pow(xi_iter(1,0),2)+pow(xi_iter(2,0),2)+pow(fM[fN],2));
+	
+        for(int q=0; q<fN; q++){
+            d(0,0) += 1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * cos(m_iter(2 + q * cov_dim, 0));
+            d(1,0) += 1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
+            d(2,0) += 1. / m_iter(0 + q * cov_dim, 0) * cos(m_iter(1 + q * cov_dim, 0));
+            d(3,0) += sqrt(pow((1. / m_iter(0 + q * cov_dim, 0)), 2) + pow(fM[q], 2));
         }
     }
 
@@ -382,6 +392,261 @@ TMatrixD HKinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 {
     TMatrixD H;
+
+    if (fMassVtxConstraint)
+    {
+        H.ResizeTo(2, fyDim);
+        H.Zero();
+
+        Double_t Px = 0., Py = 0., Pz = 0., E = 0.;
+        for (int q = 0; q < fN; q++)
+        {
+            E += std::sqrt((1. / m_iter(0 + q * cov_dim, 0)) *
+                               (1. / m_iter(0 + q * cov_dim, 0)) +
+                           fM[q] * fM[q]);
+            Px += (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::sin(m_iter(1 + q * cov_dim, 0)) *
+                  std::cos(m_iter(2 + q * cov_dim, 0));
+            Py += (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::sin(m_iter(1 + q * cov_dim, 0)) *
+                  std::sin(m_iter(2 + q * cov_dim, 0));
+            Pz += (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::cos(m_iter(1 + q * cov_dim, 0));
+        }
+        for (int q = 0; q < fN; q++)
+        {
+            Double_t Pi = 1. / m_iter(0 + q * cov_dim, 0);
+            Double_t Ei = std::sqrt(Pi * Pi + fM[q] * fM[q]);
+            H(0, 0 + q * cov_dim) =
+                -2 * E * (std::pow(Pi, 3) / Ei) +
+                2 * std::pow(Pi, 2) * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::cos(m_iter(2 + q * cov_dim, 0)) * Px +
+                2 * std::pow(Pi, 2) * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::sin(m_iter(2 + q * cov_dim, 0)) * Py +
+                2 * std::pow(Pi, 2) * std::cos(m_iter(1 + q * cov_dim, 0)) * Pz;
+
+            H(0, 1 + q * cov_dim) =
+                -2 * Pi * std::cos(m_iter(1 + q * cov_dim, 0)) *
+                    std::cos(m_iter(2 + q * cov_dim, 0)) * Px -
+                2 * Pi * std::cos(m_iter(1 + q * cov_dim, 0)) *
+                    std::sin(m_iter(2 + q * cov_dim, 0)) * Py +
+                2 * Pi * std::sin(m_iter(1 + q * cov_dim, 0)) * Pz;
+
+            H(0, 2 + q * cov_dim) =
+                2 * Pi * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::sin(m_iter(2 + q * cov_dim, 0)) * Px -
+                2 * Pi * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::cos(m_iter(2 + q * cov_dim, 0)) * Py;
+            H(0, 3 + q * cov_dim) = 0.;
+            H(0, 4 + q * cov_dim) = 0.;
+            H(1, 0 + q * cov_dim) = 0.;
+        }
+
+        H(1, 1) = m_iter(3, 0) * std::cos(m_iter(2, 0) + pi2) *
+                      std::cos(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                      std::cos(m_iter(6, 0)) +
+                  m_iter(3, 0) * std::cos(m_iter(2, 0) + pi2) *
+                      std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) *
+                      std::sin(m_iter(2, 0)) -
+                  m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
+                      std::cos(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                      std::cos(m_iter(6, 0)) -
+                  m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
+                      std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) *
+                      std::sin(m_iter(1, 0)) -
+                  m_iter(3, 0) * std::sin(m_iter(2, 0) + pi2) *
+                      std::cos(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                      std::cos(m_iter(6, 0)) -
+                  m_iter(3, 0) * std::sin(m_iter(2, 0) + pi2) *
+                      std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
+                      std::sin(m_iter(1, 0)) +
+                  m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
+                      std::cos(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                      std::cos(m_iter(6, 0)) +
+                  m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
+                      std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
+                      std::sin(m_iter(1, 0)) +
+                  (m_iter(4, 0) - m_iter(9, 0)) *
+                      (std::cos(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                           std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) -
+                       std::cos(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                           std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)));
+
+        H(1, 6) = -1 * m_iter(3, 0) * std::cos(m_iter(2, 0) + pi2) *
+                      std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                      std::sin(m_iter(6, 0)) -
+                  m_iter(3, 0) * std::cos(m_iter(2, 0) + pi2) *
+                      std::cos(m_iter(6, 0)) * std::sin(m_iter(7, 0)) *
+                      std::cos(m_iter(1, 0)) + //
+                  m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
+                      std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                      std::sin(m_iter(6, 0)) +
+                  m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
+                      std::cos(m_iter(6, 0)) * std::sin(m_iter(7, 0)) *
+                      std::cos(m_iter(1, 0)) +
+                  m_iter(3, 0) * std::sin(m_iter(2, 0) + pi2) *
+                      std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                      std::sin(m_iter(6, 0)) +
+                  m_iter(3, 0) * std::sin(m_iter(2, 0) + pi2) *
+                      std::cos(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
+                      std::cos(m_iter(1, 0)) -
+                  m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
+                      std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                      std::sin(m_iter(6, 0)) -
+                  m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
+                      std::cos(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
+                      std::cos(m_iter(1, 0)) +
+                  (m_iter(4, 0) - m_iter(9, 0)) *
+                      (std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                           std::cos(m_iter(6, 0)) * std::sin(m_iter(7, 0)) -
+                       std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                           std::cos(m_iter(6, 0)) * std::cos(m_iter(7, 0)));
+
+        H(1, 2) = m_iter(3, 0) * std::cos(m_iter(2, 0) + pi2) *
+                      std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                      std::cos(m_iter(6, 0)) -
+                  m_iter(3, 0) * std::sin(m_iter(2, 0) + pi2) *
+                      std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                      std::cos(m_iter(6, 0)) +
+                  m_iter(3, 0) * std::sin(m_iter(2, 0) + pi2) *
+                      std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) *
+                      std::cos(m_iter(1, 0)) -
+                  m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
+                      std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                      std::cos(m_iter(6, 0)) +
+                  m_iter(3, 0) * std::sin(m_iter(2, 0) + pi2) *
+                      std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                      std::cos(m_iter(6, 0)) -
+                  m_iter(3, 0) * std::cos(m_iter(2, 0) + pi2) *
+                      std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                      std::cos(m_iter(6, 0)) +
+                  m_iter(3, 0) * std::cos(m_iter(2, 0) + pi2) *
+                      std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
+                      std::cos(m_iter(1, 0)) - //
+                  m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
+                      std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                      std::cos(m_iter(6, 0)) +
+                  (m_iter(9, 0) - m_iter(4, 0)) *
+                      (std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                           std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) -
+                       std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                           std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)));
+
+        H(1, 7) = -1 * m_iter(3, 0) * std::cos(m_iter(2, 0) + pi2) *
+                      std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
+                      std::cos(m_iter(1, 0)) +
+                  m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
+                      std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                      std::cos(m_iter(6, 0)) +
+                  m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
+                      std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
+                      std::cos(m_iter(1, 0)) -
+                  m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
+                      std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) *
+                      std::cos(m_iter(1, 0)) -
+                  m_iter(3, 0) * std::sin(m_iter(2, 0) + pi2) *
+                      std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) *
+                      std::cos(m_iter(1, 0)) +
+                  m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
+                      std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                      std::cos(m_iter(6, 0)) +
+                  m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
+                      std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
+                      std::cos(m_iter(1, 0)) -
+                  m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
+                      std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
+                      std::cos(m_iter(1, 0)) +
+                  (m_iter(4, 0) - m_iter(9, 0)) *
+                      (std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                           std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) -
+                       std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                           std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)));
+
+        H(1, 3) = std::cos(m_iter(2, 0) + pi2) *
+                      (std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                           std::cos(m_iter(6, 0)) -
+                       std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) *
+                           std::cos(m_iter(1, 0))) -
+                  std::sin(m_iter(2, 0) + pi2) *
+                      (std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                           std::cos(m_iter(6, 0)) -
+                       std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
+                           std::cos(m_iter(1, 0)));
+
+        H(1, 8) = -1 * std::cos(m_iter(7, 0) + pi2) *
+                      (std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                           std::cos(m_iter(6, 0)) -
+                       std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) *
+                           std::cos(m_iter(1, 0))) +
+                  std::sin(m_iter(7, 0) + pi2) *
+                      (std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                           std::cos(m_iter(6, 0)) -
+                       std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
+                           std::cos(m_iter(1, 0)));
+
+        H(1, 4) = std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                      std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) -
+                  std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                      std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0));
+
+        H(1, 9) = -1 * std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
+                      std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) +
+                  std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                      std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0));
+    }
+
+    // missing mass constraint
+    if (fMMConstraint)
+    {
+        H.ResizeTo(1, fyDim);
+        H.Zero();
+
+        Double_t Px = 0., Py = 0., Pz = 0., E = 0.;
+        Px += fInit.Px();
+        Py += fInit.Py();
+        Pz += fInit.Pz();
+        E += fInit.E();
+        for (int q = 0; q < fN; q++)
+        {
+            E -= std::sqrt((1. / m_iter(0 + q * cov_dim, 0)) *
+                               (1. / m_iter(0 + q * cov_dim, 0)) +
+                           fM[q] * fM[q]);
+            Px -= (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::sin(m_iter(1 + q * cov_dim, 0)) *
+                  std::cos(m_iter(2 + q * cov_dim, 0));
+            Py -= (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::sin(m_iter(1 + q * cov_dim, 0)) *
+                  std::sin(m_iter(2 + q * cov_dim, 0));
+            Pz -= (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::cos(m_iter(1 + q * cov_dim, 0));
+        }
+
+        for (int q = 0; q < fN; q++)
+        {
+            Double_t Pi = 1. / m_iter(0 + q * cov_dim, 0);
+            Double_t Ei = std::sqrt(Pi * Pi + fM[q] * fM[q]);
+            H(0, 0 + q * cov_dim) =
+                2 * E * (std::pow(Pi, 3) / Ei) -
+                2 * std::pow(Pi, 2) * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::cos(m_iter(2 + q * cov_dim, 0)) * Px -
+                2 * std::pow(Pi, 2) * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::sin(m_iter(2 + q * cov_dim, 0)) * Py -
+                2 * std::pow(Pi, 2) * std::cos(m_iter(1 + q * cov_dim, 0)) * Pz;
+
+            H(0, 1 + q * cov_dim) =
+                2 * Pi * std::cos(m_iter(1 + q * cov_dim, 0)) *
+                    std::cos(m_iter(2 + q * cov_dim, 0)) * Px +
+                2 * Pi * std::cos(m_iter(1 + q * cov_dim, 0)) *
+                    std::sin(m_iter(2 + q * cov_dim, 0)) * Py -
+                2 * Pi * std::sin(m_iter(1 + q * cov_dim, 0)) * Pz;
+
+            H(0, 2 + q * cov_dim) =
+                -2 * Pi * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::sin(m_iter(2 + q * cov_dim, 0)) * Px +
+                2 * Pi * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::cos(m_iter(2 + q * cov_dim, 0)) * Py;
+        }
+    }
 
     if (fVtxConstraint)
     {
@@ -604,6 +869,56 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         }
     }
 
+    if (fMassConstraint)
+    {
+        H.ResizeTo(1, fyDim);
+        H.Zero();
+
+        Double_t  Px = 0., Py = 0., Pz = 0., E = 0.;
+        for (int q = 0; q < fN; q++)
+        {
+            E += std::sqrt((1. / m_iter(0 + q * cov_dim, 0)) *
+                               (1. / m_iter(0 + q * cov_dim, 0)) +
+                           fM[q] * fM[q]);
+            Px += (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::sin(m_iter(1 + q * cov_dim, 0)) *
+                  std::cos(m_iter(2 + q * cov_dim, 0));
+            Py += (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::sin(m_iter(1 + q * cov_dim, 0)) *
+                  std::sin(m_iter(2 + q * cov_dim, 0));
+            Pz += (1. / m_iter(0 + q * cov_dim, 0)) *
+                  std::cos(m_iter(1 + q * cov_dim, 0));
+        }
+        for (int q = 0; q < fN; q++)
+        {
+            double Pi = 1. / m_iter(0 + q * cov_dim, 0);
+            double Ei = std::sqrt(Pi * Pi + fM[q] * fM[q]);
+            H(0, 0 + q * cov_dim) =
+                -2 * E * (std::pow(Pi, 3) / Ei) +
+                2 * std::pow(Pi, 2) * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::cos(m_iter(2 + q * cov_dim, 0)) * Px +
+                2 * std::pow(Pi, 2) * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::sin(m_iter(2 + q * cov_dim, 0)) * Py +
+                2 * std::pow(Pi, 2) * std::cos(m_iter(1 + q * cov_dim, 0)) * Pz;
+
+            H(0, 1 + q * cov_dim) =
+                -2 * Pi * std::cos(m_iter(1 + q * cov_dim, 0)) *
+                    std::cos(m_iter(2 + q * cov_dim, 0)) * Px -
+                2 * Pi * std::cos(m_iter(1 + q * cov_dim, 0)) *
+                    std::sin(m_iter(2 + q * cov_dim, 0)) * Py +
+                2 * Pi * std::sin(m_iter(1 + q * cov_dim, 0)) * Pz;
+
+            H(0, 2 + q * cov_dim) =
+                2 * Pi * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::sin(m_iter(2 + q * cov_dim, 0)) * Px -
+                2 * Pi * std::sin(m_iter(1 + q * cov_dim, 0)) *
+                    std::cos(m_iter(2 + q * cov_dim, 0)) * Py;
+
+            H(0, 3 + q * cov_dim) = 0.;
+            H(0, 4 + q * 4) = 0.;
+        }
+    }
+
     return H;
 }
 
@@ -650,6 +965,9 @@ Bool_t HKinFitter::fit()
         std::cout << "3C set: " << f3Constraint << std::endl;
         std::cout << "4C set: " << f4Constraint << std::endl;
         std::cout << "Momentum constraint set: " << fMomConstraint << std::endl;
+        std::cout << "Mass constraint set: " << fMassConstraint << std::endl;
+        std::cout << "Missing Mass constraint set: " << fMMConstraint << std::endl;
+        std::cout << "Mass + Vertex constraint set: " << fMassVtxConstraint << std::endl;
         std::cout << "" << std::endl;
     }
 
@@ -659,6 +977,7 @@ Bool_t HKinFitter::fit()
     TMatrixD A0(y), V0(V);
     alpha0 = y;
     alpha = alpha0;
+    Double_t chi2 = 1e6;
 
     // Calculating the inverse of the original covariance matrix that is not changed in the iterations
     TMatrixD V0_inv(V);
@@ -668,7 +987,8 @@ Bool_t HKinFitter::fit()
         xi.Zero();
         neu_xi.Zero();
     */
-    if (f4Constraint == false && f3Constraint == false && fVtxConstraint == false && fMomConstraint == false)
+    if (f4Constraint == false && f3Constraint == false && fVtxConstraint == false && fMomConstraint == false &&
+            fMassConstraint == false && fMMConstraint == false && fMassVtxConstraint == false)
     {
         std::cout << "FATAL: No constraint is chosen, please add constraint!" << std::endl;
         abort();
@@ -686,7 +1006,6 @@ Bool_t HKinFitter::fit()
         xi = xi0;
     }
 
-    Double_t chi2 = 1e6;
     if (fVerbose > 1)
     {
         cout << " calc Feta" << endl;
@@ -781,8 +1100,7 @@ Bool_t HKinFitter::fit()
         {
             cout << " calc chi2" << endl;
         }
-        chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * d;
-        // chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * f_eval(neu_alpha, neu_xi);
+        chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * f_eval(neu_alpha, neu_xi);
 
         // for checking convergence
         fIteration = q;
@@ -839,7 +1157,7 @@ Bool_t HKinFitter::fit()
         V = V0 - lr * V0 * (DT * VD * D - (matrix * invertedMatrix * matrixT)) * V0;
         Vx = invertedMatrix;
     }
-    if (fVtxConstraint || f4Constraint)
+    if (fVtxConstraint || f4Constraint || fMassConstraint || fMMConstraint || fMassVtxConstraint)
         V = V0 - lr * V0 * DT * VD * D * V0;
 
     // -----------------------------------------
@@ -866,8 +1184,8 @@ Bool_t HKinFitter::fit()
     if (f3Constraint)
         updateMother();
 
-    return fConverged; // for number of iterations greater than 1
-    // return true; // for number of iterations equal to 1
+    if (fNumIterations == 1) return kTRUE; // for number of iterations greater than 1
+    else return fConverged; // for number of iterations equal to 1
 }
 
 HRefitCand HKinFitter::getDaughter(Int_t val)
