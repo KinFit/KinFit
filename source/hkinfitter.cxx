@@ -7,7 +7,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
                                                                fVerbose(0),
                                                                fLearningRate(1),
                                                                fNumIterations(10),
-                                                               fConvergenceCriteria(1)
+                                                               fConvergenceCriterion(1)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = fCands.size();
@@ -1100,13 +1100,11 @@ Bool_t HKinFitter::fit()
         {
             cout << " calc chi2" << endl;
         }
-        //Which one???
-        chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * d;
-        //chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * f_eval(neu_alpha, neu_xi);
+        chisqrd = delta_alphaT * V0_inv * delta_alpha + two * lambdaT * f_eval(neu_alpha, neu_xi);
 
         // for checking convergence
         fIteration = q;
-        if (fabs(chi2 - chisqrd(0, 0)) < fConvergenceCriteria)
+        if (fabs(chi2 - chisqrd(0, 0)) < fConvergenceCriterion)
         {
             fConverged = true;
             chi2 = chisqrd(0, 0);

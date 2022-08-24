@@ -72,7 +72,7 @@ private:
 
     Double_t fLearningRate;
     Int_t fNumIterations;
-    Double_t fConvergenceCriteria;
+    Double_t fConvergenceCriterion;
 
 public:
     HKinFitter(const std::vector<HRefitCand> &cands);
@@ -94,7 +94,7 @@ public:
 
     void setLearningRate(Double_t val) { fLearningRate = val; }
     void setNumberOfIterations(Int_t val) { fNumIterations = val; }
-    void setConvergenceCriteria(Double_t val) { fConvergenceCriteria = val; }
+    void setConvergenceCriterion(Double_t val) { fConvergenceCriterion = val; }
     void setCovariance(TMatrixD &val) { V = val; }
     void setMeasurement(TMatrixD &val) { y = val; }
 
