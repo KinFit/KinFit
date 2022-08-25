@@ -35,8 +35,10 @@ void ToyMC(Int_t nEvents = 500000)
       TLorentzVector *pCand = event.GetDecay(0);
       TLorentzVector *piCand = event.GetDecay(1);
 
-      auto pCand_p = (1. * (pCand->P())) + (noise->Gaus(0, (1/pCand->P()) * smear[0]));
-      auto piCand_p = (1. * (piCand->P())) + (noise->Gaus(0, (1/piCand->P()) * smear[0]));
+      auto pCand_p = (1. * (pCand->P())) / (1 + (pCand->P() * noise->Gaus(0, (1/pCand->P()) * smear[0])));
+      auto piCand_p = (1. * (piCand->P())) / (1 + (piCand->P() * noise->Gaus(0, (1/piCand->P()) * smear[0])));
+      //auto pCand_p = (1. * (pCand->P())) / (1 + (pCand->P() * noise->Gaus(0, smear[0])));
+      //auto piCand_p = (1. * (piCand->P())) / (1 + (piCand->P() * noise->Gaus(0, smear[0])));
 
       auto pCand_theta = (1. * (pCand->Theta())) + noise->Gaus(0, smear[1]);
       auto piCand_theta = (1. * (piCand->Theta())) + noise->Gaus(0, smear[1]);

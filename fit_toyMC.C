@@ -37,7 +37,7 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
     // define output file and some histograms
     // -----------------------------------------------------------------------
     // set ouput file
-    TFile* outfile = new TFile("testFit_toyMC_M.root", "recreate");
+    TFile* outfile = new TFile("testFit_toyMC_4C.root", "recreate");
     TH1F* h01 = new TH1F("hLambdaMassPreFit", "", 100, 1.070, 1.250);
     h01->SetXTitle(" M_{p#pi^{-}} [GeV/c^{2}]");
     h01->SetYTitle(" events ");
@@ -140,13 +140,13 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
         proton->SetXYZM(pCandRecoP * std::sin(pCandRecoTheta) * std::cos(pCandRecoPhi),
                     pCandRecoP * std::sin(pCandRecoTheta) * std::sin(pCandRecoPhi),
                     pCandRecoP * std::cos(pCandRecoTheta), 0.938272);
-        double proton_errors[] = {0.025*(1/pCandRecoP), 0.0009*pCandRecoTheta, 0.0009*pCandRecoPhi, 0.0001, 0.0001};
+        double proton_errors[] = {0.025*(1/pCandRecoP), 0.0009, 0.0009, 0.0001, 0.0001};
 
         TLorentzVector *pion = new TLorentzVector();
         pion->SetXYZM(piCandRecoP * std::sin(piCandRecoTheta) * std::cos(piCandRecoPhi),
                     piCandRecoP * std::sin(piCandRecoTheta) * std::sin(piCandRecoPhi),
                     piCandRecoP * std::cos(piCandRecoTheta), 0.13957);
-        double pion_errors[] = {0.025*(1/piCandRecoP), 0.0009*piCandRecoTheta, 0.0009*piCandRecoPhi, 0.0001, 0.0001};
+        double pion_errors[] = {0.025*(1/piCandRecoP), 0.0009, 0.0009, 0.0001, 0.0001};
 
         TLorentzVector lambda = *proton + *pion;
         h01->Fill(lambda.M());
@@ -161,6 +161,7 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
         // begin kinfit here
         // ---------------------------------------------------------------------------------
         std::vector<HRefitCand> cands;
+        cands.clear();
         cands.push_back(proton_fit);
         cands.push_back(pion_fit);
 
@@ -168,9 +169,9 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
         fitter.setVerbosity(0);
         fitter.setNumberOfIterations(10);
         //fitter.setLearningRate(0.5);
-        fitter.setConvergenceCriteria(0.01);
-        fitter.addMassConstraint(1.11568);
-        //fitter.add4Constraint(ini);
+        //fitter.setConvergenceCriterion(0.01);
+        //fitter.addMassConstraint(1.11568);
+        fitter.add4Constraint(ini);
         if(fitter.fit()){
 
             HRefitCand fcand1 = fitter.getDaughter(0); // proton
