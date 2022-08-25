@@ -1089,6 +1089,7 @@ Bool_t HKinFitter::fit()
             cout << " calc neueta" << endl;
         }
         neu_alpha = alpha0 - lr * V0 * DT * lambda;
+	delta_alpha = alpha0 - neu_alpha;
 
         // Calculate new chi2
         TMatrixD chisqrd(1, 1);
