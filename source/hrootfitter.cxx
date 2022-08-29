@@ -1,9 +1,8 @@
 #include "hrootfitter.h"
 
-HRootFitter::HRootFitter(TString infileList, TString outprefix, Int_t nEvents) : fInfileList(infileList),
-                                                                                 fOutprefix(outprefix),
-                                                                                 fEvents(nEvents),
-                                                                                 fVerbose(0)
+HRootFitter::HRootFitter(TTree* inTree, Int_t nEvents) : fTree(inTree),
+                                                         fEvents(nEvents),
+                                                         fVerbose(0)
 {
 }
 
@@ -13,16 +12,17 @@ void HRootFitter::selectCandidates()
     Int_t ntracks = fCands_in->GetEntries();
 
     fCandsFit.clear();
+    std::vector<HRefitCand *> tempVec;
+    HRefitCand *cand = new HRefitCand();
 
     for (size_t it = 0; it < fPids.size(); it++)
     {
-        std::vector<HRefitCand *> tempVec;
-
+        tempVec.clear();
         for (Int_t j = 0; j < ntracks; j++)
         {
-            HRefitCand *cand = fCands_in[j];
+            cand = fCands_in[j];
 
-            if (cand->getPID() == fPids[it])
+            if (cand->getPid() == fPids[it])
             {
                 tempVec.push_back(cand);
             }
@@ -32,6 +32,7 @@ void HRootFitter::selectCandidates()
     } // end of PIDs loop
 }
 
+/*
 void HRootFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector())
 {
 
@@ -44,11 +45,12 @@ void HRootFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzV
 
     // end of the event loop
 }
+*/
 
 void HRootFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, HRefitCand mother, Double_t mm)
 {
-
     cout << "Task added: " << task << endl;
+    /*
     TFile *outfile = new TFile("test_userfit.root", "recreate");
 
     TH1F *hmLam_prefit = new TH1F("hLambdaMassPreFit", "", 100, 1070, 1170);
@@ -61,26 +63,33 @@ void HRootFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzV
     hmLam_prefit->SetLineColor(kBlack);
     TH1F *hmLam_post4C = (TH1F *)hmLam_prefit->Clone("hmLam_post4C");
     hmLam_post4C->SetLineColor(kBlue);
+*/
+    // Read input tree
+    TClonesArray *input_cands = new TClonesArray("HRefitCand");
+    Int_t Event;
+    fTree->SetBranchAddress("cands", &input_cands);
+    
+    // Create output tree
+    fTree_out = fTree->CopyTree();
+    fTree_out->SetName("data_fitted");
+    fTree_out->BuildIndex("Event");
+    TString out_branchname = "cands_fitted";
+    TClonesArray *fitted_cands = new TClonesArray("HRefitCand");
+    Double_t Chi2, Prob;
+    //TClonesArray &fit_arrayRef = *fit_array;
 
-    // Create branch for output of fitted particles
-    TString out_branchname;
-    TClonesArray *fit_array = new TClonesArray("HParticleCand");
-    TClonesArray &fit_arrayRef = *fit_array;
-
-    fTree_out->Branch(out_branchname, "TClonesArray", &fit_array);
+    fTree_out->Branch(out_branchname, "TClonesArray", &fitted_cands);
+    fTree_out->Branch("Chi2", &Chi2, "Chi2/I");
+    fTree_out->Branch("Prob", &Prob, "Prob/I");
 
     setPids(pids);
-
-    TStopwatch timer;
-    timer.Start();
-
+/*
     TFile tree_file(fInfileList, "read");
     fTree = (TTree *)tree_file.Get("data");
-
-    fTree->SetBranchAddress("Cands_in", &fCands_in);
+*/
 
     Int_t entries = fTree->GetEntries();
-    if (nEvents < entries && fEvents > 0)
+    if (fEvents < entries && fEvents > 0)
         entries = fEvents;
 
     // start of the event loop
@@ -113,33 +122,35 @@ void HRootFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzV
         cout << "get result" << endl;
         cout << result.size() << endl;
         builder.getFitCands(result);
+        Chi2 = builder.getChi2();
+        Prob = builder.getProbability();
 
         // Fill output TClonesArray with fit result
         for (Int_t k = 0; k < result.size(); k++)
         {
-            fit_array[k] = result[k];
+            fitted_cands[k] = result[k];
         }
-        if (fit successfull)
-            fTree_out->Fill();
-
+        fTree_out->Fill();
+/*
         cout << "fill histos" << endl;
         if (result.size() > 2)
         {
             hmLam_prefit->Fill((result[2] + result[3]).M());
             hmLam_post4C->Fill((result[2] + result[3]).M());
         }
-
+*/
     } // end of event loop
-
+/*
     cout << "write output file" << endl;
     outfile->cd();
     hmLam_prefit->Write();
     hmLam_post4C->Write();
     outfile->Close();
-
+*/
     // Write tree to outfile and close
 }
 
+/*
 // Function to fill HRefitCand -- not needed here if input is already HRefitCand
 void HRootFitter::FillData(HParticleCandSim *cand, HRefitCand &outcand, double arr[5], double mass)
 {
@@ -169,3 +180,4 @@ void HRootFitter::FillData(HParticleCandSim *cand, HRefitCand &outcand, double a
     outcand.setZ(cand->getZ());
     outcand.setCovariance(cov);
 }
+*/

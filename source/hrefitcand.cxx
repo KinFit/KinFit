@@ -4,6 +4,7 @@
 HRefitCand::HRefitCand(TLorentzVector* cand, Double_t R, Double_t Z)
     : TLorentzVector(*cand), cand(cand), fMomentum(cand->P()), fTheta(cand->Theta()), fPhi(cand->Phi()), fR(R), fZ(Z)
 {
+    fPid = -1;
 }
 
 HRefitCand::HRefitCand()
@@ -12,6 +13,7 @@ HRefitCand::HRefitCand()
     cand = new TLorentzVector();
     fR = 0;
     fZ = 0;
+    fPid = -1;
 }
 
 void HRefitCand::setCovariance(const TMatrixD& cov)

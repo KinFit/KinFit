@@ -4,7 +4,7 @@ HDecayBuilder::HDecayBuilder(std::vector<std::vector<HRefitCand>> &cands, TStrin
                                                                                                                                                                           fTask(task),
                                                                                                                                                                           fPids(pids),
                                                                                                                                                                           fCombiCounter(0),
-                                                                                                                                                                          fProb(0),
+                                                                                                                                                                          fProb(0.01),
                                                                                                                                                                           fVerbose(0)
 
 {
@@ -35,6 +35,7 @@ void HDecayBuilder::buildDecay()
 
     // For selection of best event according to probability
     fBestProb = 0;
+    fBestChi2 = 1e6;
 
     while (fCombiCounter < (fTotalCombos - 1))
     { // double check this
@@ -54,34 +55,12 @@ void HDecayBuilder::buildDecay()
             continue;
         }
         // Do task that was chosen by user
-        if (fTask == "createNeutral")
-        {
-            createNeutralCandidate();
-        }
-        else if (fTask == "3C")
-        {
-            if (do3cFit())
-                cout << "3C task successful" << endl;
-        }
-        else if (fTask = "4C")
-        {
-            cout << "4C task received" << endl;
-            if (do4cFit())
-                cout << "4C task successful" << endl;
-        }
-        else if (fTask == "missMom")
-        {
-            if (doMissMomFit())
-                cout << "miss mom task successful" << endl;
-        }
-        else
-        {
-            cout << "Task not available" << endl;
-        }
+        doFit();
         cout << "Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombos << endl;
     }
 }
 
+/*
 void HDecayBuilder::createNeutralCandidate()
 {
     if (fVerbose > 0)
@@ -138,29 +117,34 @@ void HDecayBuilder::createNeutralCandidate()
 
     do3cFit();
 }
+*/
 
-bool HDecayBuilder::do4cFit()
+Bool_t HDecayBuilder::doFit()
 {
-    HKinFitter Fitter(fFitCands, fIniSys);
-    Fitter.add4Constraint();
+    HKinFitter Fitter(fFitCands);
+    if (fTask == "4C") Fitter.add4Constraint(fIniSys);
+    else if (fTask == "Mass") Fitter.addMassConstraint(fMass);
+    else cout << "Task not available" << endl;
     cout << "constraint added" << endl;
+
     if (Fitter.fit() && Fitter.getProb() > fProb)
     {
         cout << "fit successful" << endl;
         if (Fitter.getProb() > fBestProb)
         {
             fBestProb = Fitter.getProb();
+            fBestChi2 = Fitter.getChi2();
             fOutputCands.clear();
             Fitter.getDaughters(fOutputCands);
         }
-        return true;
+        return kTRUE;
     }
     else
     {
-        return false;
+        return kFALSE;
     }
 }
-
+/*
 bool HDecayBuilder::do3cFit()
 {
     createNeutralCandidate();
@@ -175,7 +159,7 @@ bool HDecayBuilder::doMissMomFit()
     Fitter.addMomConstraint();
     Fitter.fit();
 }
-
+*/
 void HDecayBuilder::fillFitCands()
 {
     fFitCands.clear();
@@ -222,6 +206,7 @@ void HDecayBuilder::checkDoubleParticle(size_t i)
     cout << "no double particle" << endl;
 }
 
+/*
 void HDecayBuilder::createOutputParticle(HRefitCand refitCand)
 {
     if (fVerbose > 0)
@@ -230,10 +215,14 @@ void HDecayBuilder::createOutputParticle(HRefitCand refitCand)
     }
     HRefitCand newParticle;
 
-    newParticle.setPhi(refitCand.Theta()); //!!!
+    newParticle.setMomentum(refitCand.P());
+    newParticle.setTheta(refitCand.Theta());
+    newParticle.setPhi(refitCand.Phi());
     newParticle.setR(refitCand.getR());
     newParticle.setZ(refitCand.getZ());
-    newParticle.setMomentum(refitCand.P());
+    newParticle.setCovariance(refitCand.getCovariance());
+    newParticle.setPid(refitCand.getPid());
 
     fOutputCands.push_back(newParticle);
 }
+*/
