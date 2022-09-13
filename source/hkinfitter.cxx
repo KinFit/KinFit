@@ -1089,7 +1089,7 @@ Bool_t HKinFitter::fit()
             cout << " calc neueta" << endl;
         }
         neu_alpha = alpha0 - lr * V0 * DT * lambda;
-	delta_alpha = alpha0 - neu_alpha;
+        delta_alpha = alpha0 - neu_alpha;
 
         // Calculate new chi2
         TMatrixD chisqrd(1, 1);
@@ -1164,6 +1164,10 @@ Bool_t HKinFitter::fit()
     // -----------------------------------------
     // Pull
     // -----------------------------------------
+    if (fVerbose > 1)
+    {
+        cout << " calc pulls" << endl;
+    }
     fPull.ResizeTo(fyDim, fyDim);
     for (Int_t b = 0; b < (fyDim); b++)
         fPull(b, b) = -10000;
@@ -1206,6 +1210,10 @@ TLorentzVector HKinFitter::getMissingDaughter()
 
 void HKinFitter::updateDaughters()
 {
+    if (fVerbose > 1)
+    {
+        cout << " update daughters" << endl;
+    }
     for (Int_t val = 0; val < fN; ++val)
     {
         HRefitCand &cand = fCands[val];
