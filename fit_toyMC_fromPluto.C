@@ -38,7 +38,7 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
     // define output file and some histograms
     // -----------------------------------------------------------------------
     // set ouput file
-    TFile* outfile = new TFile("testFit_toyMC_fromPluto.root", "recreate");
+    TFile* outfile = new TFile("testFit_toyMC_fromPluto_mass_wrongp.root", "recreate");
     TH1F* h01 = new TH1F("hLambdaMassPreFit", "", 100, 1.070, 1.250);
     h01->SetXTitle(" M_{p#pi^{-}} [GeV/c^{2}]");
     h01->SetYTitle(" events ");
@@ -193,7 +193,7 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
                     piCandRecoP * std::cos(piCandRecoTheta), 0.13957);
         double pion_errors[] = {0.025*(1/piCandRecoP), 0.0009, 0.0009, 0.5, 1.};
 
-        TLorentzVector lambda = *proton2 + *pion;
+        TLorentzVector lambda = *proton1 + *pion;
         h01->Fill(lambda.M());
         h012->Fill(lambda.P());
 
@@ -212,21 +212,22 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
         std::vector<HRefitCand> cands;
         cands.clear();
         cands.push_back(proton1_fit);
-        cands.push_back(kaon_fit);
-        cands.push_back(proton2_fit);
+        //cands.push_back(kaon_fit);
+        //cands.push_back(proton2_fit);
         cands.push_back(pion_fit);
 
         HKinFitter fitter(cands);
         fitter.setVerbosity(0);
         fitter.setNumberOfIterations(10);
         //fitter.setLearningRate(0.5);
-        //fitter.setConvergenceCriterion(0.01);
-        //fitter.addMassConstraint(1.11568);
-        fitter.add4Constraint(ini);
+        fitter.setConvergenceCriterion(0.01);
+        fitter.addMassConstraint(1.11568);
+        //fitter.addVertexConstraint();
+        //fitter.add4Constraint(ini);
         if(fitter.fit()){
 
-            HRefitCand fcand1 = fitter.getDaughter(2); // proton
-            HRefitCand fcand2 = fitter.getDaughter(3); // pion
+            HRefitCand fcand1 = fitter.getDaughter(0); // proton
+            HRefitCand fcand2 = fitter.getDaughter(1); // pion
 
             h02->Fill(fitter.getChi2());
             h03->Fill(fitter.getProb());
@@ -241,7 +242,7 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
             h058->Fill(fitter.getPull(7));
             h09->Fill(lambda_fit.P());
             
-            if(fitter.getProb()>0.01){
+            if(fitter.getProb()>0.001){
                 h022->Fill(fitter.getChi2());
                 h042->Fill(lambda_fit.M());
                // h072->Fill(all_fit.P());
