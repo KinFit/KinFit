@@ -35,10 +35,12 @@ private:
     Int_t fVerbose;
 
     //Read in data
+    TFile *finFile;
     TTree *fTree;
     TClonesArray *fCands_in = new TClonesArray("HRefitCand");
 
     //Output data
+    TFile *foutFile;
     TTree *fTree_out;
 
     // Fill HRefitCand with necessary information
@@ -46,7 +48,7 @@ private:
     // put to HRefitCand, here cands should be fully filled already
     
 public:
-    HRootFitter(TTree* inTree, Int_t nEvents=-1);
+    HRootFitter(TString inFileName, TString outFileName, Int_t nEvents=-1);
     ~HRootFitter(){};
 
     //User functions
@@ -54,7 +56,6 @@ public:
     //void addFitterTask(TString task, std::vector<Int_t> primPids, std::vector<Int_t> decayPids); // Jenny, for 3C fit
     //void addBuilderTask(TString task, std::vector<Int_t> pids, TLorentzVector lv);
 
-    //void setErrors();
     void setPids(std::vector<Int_t> val){ fPids = val; }
     void setVerbosity(Int_t val){ fVerbose = val; }
 

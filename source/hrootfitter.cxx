@@ -1,9 +1,14 @@
 #include "hrootfitter.h"
 
-HRootFitter::HRootFitter(TTree* inTree, Int_t nEvents) : fTree(inTree),
-                                                         fEvents(nEvents),
-                                                         fVerbose(0)
+HRootFitter::HRootFitter(TString inFileName, TString outFileName, Int_t nEvents) : fEvents(nEvents),
+                                                                                    fVerbose(0)
 {
+    finFile = new TFile(inFileName, "open");
+    fTree = (TTree*)finFile->Get("data");
+
+    foutFile = new TFile(outFileName.Data(),"RECREATE");
+    fTree_out = new TTree();
+
 }
 
 // Select and sort particles according to their PID
@@ -12,7 +17,7 @@ void HRootFitter::selectCandidates()
     Int_t ntracks = fCands_in->GetEntries();
 
     fCandsFit.clear();
-    std::vector<HRefitCand *> tempVec;
+    std::vector<HRefitCand > tempVec;
     HRefitCand *cand = new HRefitCand();
 
     for (size_t it = 0; it < fPids.size(); it++)
@@ -20,11 +25,11 @@ void HRootFitter::selectCandidates()
         tempVec.clear();
         for (Int_t j = 0; j < ntracks; j++)
         {
-            cand = fCands_in[j];
+            HRefitCand *cand = (HRefitCand *)fCands_in->At(j);
 
             if (cand->getPid() == fPids[it])
             {
-                tempVec.push_back(cand);
+                tempVec.push_back(*cand);
             }
         }
         fCandsFit.push_back(tempVec);
@@ -50,31 +55,19 @@ void HRootFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzV
 void HRootFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, HRefitCand mother, Double_t mm)
 {
     cout << "Task added: " << task << endl;
-    /*
-    TFile *outfile = new TFile("test_userfit.root", "recreate");
 
-    TH1F *hmLam_prefit = new TH1F("hLambdaMassPreFit", "", 100, 1070, 1170);
-    hmLam_prefit->SetXTitle(" M_{p#pi^{-}} [MeV/c^{2}]");
-    hmLam_prefit->SetYTitle(" events ");
-    hmLam_prefit->GetXaxis()->SetTitleSize(0.05);
-    hmLam_prefit->GetXaxis()->SetLabelSize(0.05);
-    hmLam_prefit->GetYaxis()->SetTitleSize(0.05);
-    hmLam_prefit->GetYaxis()->SetLabelSize(0.05);
-    hmLam_prefit->SetLineColor(kBlack);
-    TH1F *hmLam_post4C = (TH1F *)hmLam_prefit->Clone("hmLam_post4C");
-    hmLam_post4C->SetLineColor(kBlue);
-*/
     // Read input tree
-    TClonesArray *input_cands = new TClonesArray("HRefitCand");
+    //TClonesArray *input_cands = new TClonesArray("HRefitCand");
     Int_t Event;
-    fTree->SetBranchAddress("cands", &input_cands);
+    fTree->SetBranchAddress("cands", &fCands_in);
     
     // Create output tree
-    fTree_out = fTree->CopyTree();
+    //fTree_out = fTree->CopyTree();
     fTree_out->SetName("data_fitted");
-    fTree_out->BuildIndex("Event");
+    //fTree_out->BuildIndex("Event");
     TString out_branchname = "cands_fitted";
     TClonesArray *fitted_cands = new TClonesArray("HRefitCand");
+    TClonesArray &fit_arrayRef = *fitted_cands;
     Double_t Chi2, Prob;
     //TClonesArray &fit_arrayRef = *fit_array;
 
@@ -126,9 +119,14 @@ void HRootFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzV
         Prob = builder.getProbability();
 
         // Fill output TClonesArray with fit result
+        Int_t ii = 0;
+        fitted_cands->Clear();
         for (Int_t k = 0; k < result.size(); k++)
         {
-            fitted_cands[k] = result[k];
+            HRefitCand *fitted_cand = new (fit_arrayRef[ii]) HRefitCand();
+            fitted_cand = &result[k];
+
+            ii++;
         }
         fTree_out->Fill();
 /*
