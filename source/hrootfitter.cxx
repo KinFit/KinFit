@@ -52,7 +52,7 @@ void HRootFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzV
 }
 */
 
-void HRootFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, HRefitCand mother, Double_t mm)
+void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, HRefitCand mother, Double_t mm)
 {
     cout << "Task added: " << task << endl;
 
@@ -71,9 +71,10 @@ void HRootFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzV
     Double_t Chi2, Prob;
     //TClonesArray &fit_arrayRef = *fit_array;
 
+    fTree_out->Branch("Event", &Event, "Event/I");
     fTree_out->Branch(out_branchname, "TClonesArray", &fitted_cands);
-    fTree_out->Branch("Chi2", &Chi2, "Chi2/I");
-    fTree_out->Branch("Prob", &Prob, "Prob/I");
+    fTree_out->Branch("Chi2", &Chi2, "Chi2/D");
+    fTree_out->Branch("Prob", &Prob, "Prob/D");
 
     setPids(pids);
 /*
@@ -89,6 +90,7 @@ void HRootFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzV
     for (Int_t i = 0; i < fEvents; i++)
     {
         fTree->GetEntry(i);
+        Event = i;
 
         selectCandidates();
 
@@ -146,6 +148,17 @@ void HRootFitter::addFitterTask(TString task, std::vector<Int_t> pids, TLorentzV
     outfile->Close();
 */
     // Write tree to outfile and close
+}
+
+// Close everything
+void HRootFitter::finish()
+{
+    foutFile->cd();
+    fTree_out->Write();
+    foutFile->Save();
+    foutFile->Close();
+
+    finFile->Close();
 }
 
 /*
