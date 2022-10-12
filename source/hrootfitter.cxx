@@ -59,7 +59,8 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
     // Read input tree
     //TClonesArray *input_cands = new TClonesArray("HRefitCand");
     Int_t Event;
-    fTree->SetBranchAddress("cands", &fCands_in);
+    //add error when branch not existing
+    fTree->SetBranchAddress("HRefitCand", &fCands_in);
     
     // Create output tree
     //fTree_out = fTree->CopyTree();
@@ -87,10 +88,11 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
         entries = fEvents;
 
     // start of the event loop
-    for (Int_t i = 0; i < fEvents; i++)
+    for (Int_t i = 0; i < entries; i++)
     {
         fTree->GetEntry(i);
         Event = i;
+            cout << "fCands_in size " << fCands_in->GetEntries() << endl;
 
         selectCandidates();
 
@@ -111,43 +113,136 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
         // initialize DecayBuilder
         cout << "ini Decay Builder" << endl;
         HDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
-        cout << "build decay" << endl;
+        cout << "build decay1" << endl;
+        cout << "build decay2" << endl;
         builder.buildDecay();
+        cout << "make result" << endl;
         std::vector<HRefitCand> result;
+        if(result.size()>0) result.clear();
         cout << "get result" << endl;
-        cout << result.size() << endl;
+        cout << "get result" << endl;
+        cout << "result size: "<<result.size() << endl;
         builder.getFitCands(result);
+        cout << "result size: "<<result.size() << endl;
+        cout << "get chi2" << endl;
         Chi2 = builder.getChi2();
+        cout << "get prob" << endl;
         Prob = builder.getProbability();
 
         // Fill output TClonesArray with fit result
         Int_t ii = 0;
-        fitted_cands->Clear();
+        if(fitted_cands->GetEntries()>0) fitted_cands->Clear();
         for (Int_t k = 0; k < result.size(); k++)
         {
+            cout << "fill cand" << endl;
             HRefitCand *fitted_cand = new (fit_arrayRef[ii]) HRefitCand();
             fitted_cand = &result[k];
 
             ii++;
         }
         fTree_out->Fill();
-/*
-        cout << "fill histos" << endl;
-        if (result.size() > 2)
-        {
-            hmLam_prefit->Fill((result[2] + result[3]).M());
-            hmLam_post4C->Fill((result[2] + result[3]).M());
-        }
-*/
     } // end of event loop
+}
+
+void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t mm, TLorentzVector lv, HRefitCand mother)
+{
+    cout << "Task added: " << task << endl;
+
+    // Read input tree
+    //TClonesArray *input_cands = new TClonesArray("HRefitCand");
+    Int_t Event;
+    fTree->SetBranchAddress("HRefitCand", &fCands_in);
+    
+    // Create output tree
+    //fTree_out = fTree->CopyTree();
+    fTree_out->SetName("data_fitted");
+    //fTree_out->BuildIndex("Event");
+    TString out_branchname = "cands_fitted";
+    TClonesArray *fitted_cands = new TClonesArray("HRefitCand");
+    TClonesArray &fit_arrayRef = *fitted_cands;
+    Double_t Chi2, Prob;
+    //TClonesArray &fit_arrayRef = *fit_array;
+
+    fTree_out->Branch("Event", &Event, "Event/I");
+    fTree_out->Branch(out_branchname, "TClonesArray", &fitted_cands);
+    fTree_out->Branch("Chi2", &Chi2, "Chi2/D");
+    fTree_out->Branch("Prob", &Prob, "Prob/D");
+
+    setPids(pids);
 /*
-    cout << "write output file" << endl;
-    outfile->cd();
-    hmLam_prefit->Write();
-    hmLam_post4C->Write();
-    outfile->Close();
+    TFile tree_file(fInfileList, "read");
+    fTree = (TTree *)tree_file.Get("data");
 */
-    // Write tree to outfile and close
+
+    Int_t entries = fTree->GetEntries();
+    if (fEvents < entries && fEvents > 0)
+        entries = fEvents;
+
+    // start of the event loop
+    for (Int_t i = 0; i < entries; i++)
+    {
+        cout<<"Event: "<<i<<endl;
+        fTree->GetEntry(i);
+        Event = i;
+            cout << "fCands_in size " << fCands_in->GetEntries() << endl;
+
+        selectCandidates();
+
+        // if not all particles are found, skip event
+        bool isIncomplete = false;
+        for (size_t it = 0; it < fPids.size(); it++)
+        {
+            cout << "fCandsFit size " << fCandsFit[it].size() << endl;
+            if (fCandsFit[it].size() == 0)
+            {
+                isIncomplete = true;
+                break;
+            }
+        }
+        if (isIncomplete)
+            continue;
+
+        // initialize DecayBuilder
+        cout << "ini Decay Builder" << endl;
+        HDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
+        cout << "build decay1" << endl;
+        cout << "build decay2" << endl;
+        builder.buildDecay();
+        cout << "make result" << endl;
+        std::vector<HRefitCand> result;
+        if(result.size()>0) result.clear();
+        cout << "get result" << endl;
+        cout << "get result" << endl;
+        cout << "result size: "<<result.size() << endl;
+        builder.getFitCands(result);
+        cout << "result size: "<<result.size() << endl;
+        cout << "get chi2" << endl;
+        Chi2 = builder.getChi2();
+        cout << "get prob" << endl;
+        Prob = builder.getProbability();
+
+        // Fill output TClonesArray with fit result
+        Int_t ii = 0;
+        if(fitted_cands->GetEntries()>0) fitted_cands->Clear();
+        cout << "clear fitted cands" << endl;
+        for (Int_t k = 0; k < result.size(); k++)
+        {
+            cout << "fill cand" << endl;
+            HRefitCand *fitted_cand = new (fit_arrayRef[ii]) HRefitCand();
+            fitted_cand = &result[k];
+
+            ii++;
+        }
+
+        cout << "fill tree" << endl;
+        fTree_out->Fill();
+        fTree_out->Print();
+        fTree->Print();
+        cout << "tree filled" << endl;
+
+        //fTree_out->ResetBranchAddresses();
+        //fTree->ResetBranchAddresses();
+    } // end of event loop
 }
 
 // Close everything

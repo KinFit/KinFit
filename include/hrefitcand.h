@@ -8,6 +8,9 @@
 
 class HRefitCand : public TLorentzVector
 {
+
+ClassDef(HRefitCand, 1);
+
 private:
     TLorentzVector *cand;
     Double_t fMomentum, fTheta, fPhi, fR, fZ;

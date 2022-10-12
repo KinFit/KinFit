@@ -53,6 +53,7 @@ public:
 
     //User functions
     void doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector(), HRefitCand mother = HRefitCand(), Double_t mm=0.);
+    void doFitterTask(TString task, std::vector<Int_t> pids, Double_t mm, TLorentzVector lv = TLorentzVector(), HRefitCand mother = HRefitCand());
     //void addFitterTask(TString task, std::vector<Int_t> primPids, std::vector<Int_t> decayPids); // Jenny, for 3C fit
     //void addBuilderTask(TString task, std::vector<Int_t> pids, TLorentzVector lv);
 

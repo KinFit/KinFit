@@ -19,7 +19,7 @@ HDecayBuilder::HDecayBuilder(std::vector<std::vector<HRefitCand>> &cands, TStrin
 
     // Determine the number of combinations of the input particles
     fTotalCombos = 1;
-    particleCounter.clear();
+    if(particleCounter.size()>0) particleCounter.clear();
     for (size_t i = 0; i < fPids.size(); i++)
     {
         fTotalCombos *= fCands[i].size();
@@ -37,7 +37,7 @@ void HDecayBuilder::buildDecay()
     fBestProb = 0;
     fBestChi2 = 1e6;
 
-    while (fCombiCounter < (fTotalCombos - 1))
+    while (fCombiCounter < (fTotalCombos ))
     { // double check this
         cout << "fill fit cands" << endl;
         // Take one combination of particles
@@ -57,6 +57,7 @@ void HDecayBuilder::buildDecay()
         // Do task that was chosen by user
         doFit();
         cout << "Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombos << endl;
+        cout << "fit finished" <<endl;
     }
 }
 
@@ -134,7 +135,7 @@ Bool_t HDecayBuilder::doFit()
         {
             fBestProb = Fitter.getProb();
             fBestChi2 = Fitter.getChi2();
-            fOutputCands.clear();
+            if(fOutputCands.size() != 0) fOutputCands.clear();
             Fitter.getDaughters(fOutputCands);
         }
         return kTRUE;
@@ -162,7 +163,8 @@ bool HDecayBuilder::doMissMomFit()
 */
 void HDecayBuilder::fillFitCands()
 {
-    fFitCands.clear();
+
+    if(fFitCands.size()>0) fFitCands.clear();
     doubleParticle = false;
     for (size_t i = 0; i < fPids.size(); i++)
     {
@@ -180,9 +182,11 @@ void HDecayBuilder::fillFitCands()
         a--;
         if (a < 0)
         {
-            if (!(fCombiCounter == fTotalCombos))
+            if (!(fCombiCounter == fTotalCombos-1))
                 cout << "counted wrong: " << fCombiCounter << " != " << fTotalCombos << endl;
             break;
+
+            a = 1e6;
         }
     }
     particleCounter[a]++;
