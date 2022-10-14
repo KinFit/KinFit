@@ -124,9 +124,22 @@ Bool_t HDecayBuilder::doFit()
 {
     HKinFitter Fitter(fFitCands);
     if (fTask == "4C") Fitter.add4Constraint(fIniSys);
-    else if (fTask == "Mass") Fitter.addMassConstraint(fMass);
+    else if (fTask == "Mass"){
+        Fitter.addMassConstraint(fMass);
+        cout << "constraint added, Mass = " << fMass << endl;
+        cout << "proton momentum = " << fFitCands[0].getMomentum() << endl;
+        cout << "pion momentum = " << fFitCands[1].getMomentum() << endl;
+        TMatrixD cov_p = fFitCands[0].getCovariance();
+        TMatrixD cov_pi = fFitCands[1].getCovariance();
+        cout << "proton momentum error = " << cov_p(0,0) << endl;
+        cout << "pion momentum error = " << cov_pi(0,0) << endl;
+
+    } 
     else cout << "Task not available" << endl;
-    cout << "constraint added" << endl;
+
+    Fitter.setNumberOfIterations(10);
+    Fitter.setConvergenceCriterion(0.01);
+    //Fitter.setVerbosity(2);
 
     if (Fitter.fit() && Fitter.getProb() > fProb)
     {
@@ -142,6 +155,7 @@ Bool_t HDecayBuilder::doFit()
     }
     else
     {
+        cout << "fit not successful" << endl;
         return kFALSE;
     }
 }

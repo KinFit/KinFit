@@ -123,6 +123,8 @@ void ToyMC_fromPluto_HRefitCand_workaround(TString inFile, Int_t nEvents = 50000
    //Tree loop
    for(Int_t i=0; i<entries; i++)
    {
+      Event = i;
+
       if (i % 10000 == 0)
          std::cout << "Processing Event " << i << " ... " << std::endl;
       
@@ -143,7 +145,7 @@ void ToyMC_fromPluto_HRefitCand_workaround(TString inFile, Int_t nEvents = 50000
       Float_t array[20] = {p1CandTrueP, p1CandTrueTheta, p1CandTruePhi, 0., 0.,
                      KCandTrueP, KCandTrueTheta, KCandTruePhi, 0., 0.,
                      piCandTrueP, piCandTrueTheta, piCandTruePhi, piCandTrueR, piCandTrueZ,
-                     p2CandTrueP, p2CandTrueTheta, p2CandTruePhi, p2CandTrueR, piCandTrueZ};
+                     p2CandTrueP, p2CandTrueTheta, p2CandTruePhi, p2CandTrueR, p2CandTrueZ};
 
       ntuple->Fill(array);
 

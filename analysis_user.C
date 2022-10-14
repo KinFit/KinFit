@@ -21,7 +21,7 @@ Int_t analysis_user(TString infileList="input.root", TString outfile = "fitted.r
     //pids.push_back(14); pids.push_back(11); pids.push_back(14); pids.push_back(9);
     pids.push_back(14); pids.push_back(9);
     //TLorentzVector ppSystem(0,0,4337.96,2*938.272+3500);
-    Double_t mass = 0.938272;
+    Double_t mass = 1.11568;
 
     //RootFitter.addFitterTask("4c", pids, ppSystem);
     RootFitter.doFitterTask("Mass", pids, mass);

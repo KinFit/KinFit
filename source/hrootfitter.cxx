@@ -3,7 +3,7 @@
 HRootFitter::HRootFitter(TString inFileName, TString outFileName, Int_t nEvents) : fEvents(nEvents),
                                                                                     fVerbose(0)
 {
-    finFile = new TFile(inFileName, "open");
+    finFile = new TFile(inFileName, "READ");
     fTree = (TTree*)finFile->Get("data");
 
     foutFile = new TFile(outFileName.Data(),"RECREATE");
@@ -127,11 +127,13 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
         cout << "get chi2" << endl;
         Chi2 = builder.getChi2();
         cout << "get prob" << endl;
-        Prob = builder.getProbability();
+        Prob = builder.getProbability(); 
+        cout << "Best fit probability: " << Prob << endl;
 
         // Fill output TClonesArray with fit result
         Int_t ii = 0;
         if(fitted_cands->GetEntries()>0) fitted_cands->Clear();
+        if(Prob>0){
         for (Int_t k = 0; k < result.size(); k++)
         {
             cout << "fill cand" << endl;
@@ -141,6 +143,7 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
             ii++;
         }
         fTree_out->Fill();
+        }
     } // end of event loop
 }
 
@@ -178,8 +181,10 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
     if (fEvents < entries && fEvents > 0)
         entries = fEvents;
 
+    cout<<"entries: "<<entries<<endl;
+
     // start of the event loop
-    for (Int_t i = 0; i < entries; i++)
+    for (Int_t i = 1; i < entries; i++)
     {
         cout<<"Event: "<<i<<endl;
         fTree->GetEntry(i);
@@ -220,11 +225,13 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
         Chi2 = builder.getChi2();
         cout << "get prob" << endl;
         Prob = builder.getProbability();
+        cout << "Best fit probability: " << Prob << endl;
 
         // Fill output TClonesArray with fit result
         Int_t ii = 0;
         if(fitted_cands->GetEntries()>0) fitted_cands->Clear();
         cout << "clear fitted cands" << endl;
+        if(Prob>0){
         for (Int_t k = 0; k < result.size(); k++)
         {
             cout << "fill cand" << endl;
@@ -239,6 +246,12 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
         fTree_out->Print();
         fTree->Print();
         cout << "tree filled" << endl;
+        }
+        else 
+        {
+            cout << "no candidate found" << endl;
+            continue;
+        }
 
         //fTree_out->ResetBranchAddresses();
         //fTree->ResetBranchAddresses();
