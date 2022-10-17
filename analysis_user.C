@@ -12,7 +12,7 @@
 
 using namespace std;
 
-Int_t analysis_user(TString infileList="input.root", TString outfile = "fitted.root", Int_t nEvents=10){
+Int_t analysis_user(TString infileList="input.root", TString outfile = "fitted.root", Int_t nEvents=1000){
 
     HRootFitter RootFitter(infileList, outfile, nEvents);
     std::vector<int> pids;
@@ -25,7 +25,9 @@ Int_t analysis_user(TString infileList="input.root", TString outfile = "fitted.r
 
     //RootFitter.addFitterTask("4c", pids, ppSystem);
     RootFitter.doFitterTask("Mass", pids, mass);
-    RootFitter.finish();
+    cout<<"fitter task performed"<<endl;
+    //RootFitter.finish();
+    cout<<"finished"<<endl;
     
     return 0;
 }

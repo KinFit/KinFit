@@ -6,8 +6,9 @@ HRootFitter::HRootFitter(TString inFileName, TString outFileName, Int_t nEvents)
     finFile = new TFile(inFileName, "READ");
     fTree = (TTree*)finFile->Get("data");
 
-    foutFile = new TFile(outFileName.Data(),"RECREATE");
-    fTree_out = new TTree();
+    //foutFile = new TFile(outFileName.Data(),"RECREATE");
+    foutFile = new TFile(outFileName,"RECREATE");
+    fTree_out = new TTree("data_fitted", "output_tree");
 
 }
 
@@ -18,7 +19,7 @@ void HRootFitter::selectCandidates()
 
     fCandsFit.clear();
     std::vector<HRefitCand > tempVec;
-    HRefitCand *cand = new HRefitCand();
+    //HRefitCand *cand = new HRefitCand();
 
     for (size_t it = 0; it < fPids.size(); it++)
     {
@@ -167,7 +168,7 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
     //TClonesArray &fit_arrayRef = *fit_array;
 
     fTree_out->Branch("Event", &Event, "Event/I");
-    fTree_out->Branch(out_branchname, "TClonesArray", &fitted_cands);
+    fTree_out->Branch("HRefitCand", "TClonesArray", &fitted_cands);
     fTree_out->Branch("Chi2", &Chi2, "Chi2/D");
     fTree_out->Branch("Prob", &Prob, "Prob/D");
 
@@ -182,6 +183,8 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
         entries = fEvents;
 
     cout<<"entries: "<<entries<<endl;
+
+    HDecayBuilder builder(task, fPids, lv, mother, mm);
 
     // start of the event loop
     for (Int_t i = 1; i < entries; i++)
@@ -209,10 +212,14 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
 
         // initialize DecayBuilder
         cout << "ini Decay Builder" << endl;
-        HDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
+        //HDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
+        builder.setInputCands(fCandsFit);
+        builder.countCombis();
         cout << "build decay1" << endl;
         cout << "build decay2" << endl;
+        
         builder.buildDecay();
+
         cout << "make result" << endl;
         std::vector<HRefitCand> result;
         if(result.size()>0) result.clear();
@@ -235,8 +242,15 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
         for (Int_t k = 0; k < result.size(); k++)
         {
             cout << "fill cand" << endl;
-            HRefitCand *fitted_cand = new (fit_arrayRef[ii]) HRefitCand();
-            fitted_cand = &result[k];
+            HRefitCand *fitted_cand = new (fit_arrayRef[ii]) HRefitCand(&result[k], result[k].getR(), result[k].getZ());
+            fitted_cand->setPid(result[k].getPid());
+            fitted_cand->setCovariance(result[k].getCovariance());
+            cout<<"fitted momentum: "<< result[k].getMomentum() << endl;
+            //fitted_cand = (HRefitCand*)result[k].Clone();
+            //result[k].Delete();
+            cout<<"fitted momentum cand: "<< fitted_cand->getMomentum() << endl;
+            //fitted_cand->setMomentum(result[k].getMomentum());
+            //fitted_cand = &result[k];
 
             ii++;
         }
@@ -255,7 +269,13 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
 
         //fTree_out->ResetBranchAddresses();
         //fTree->ResetBranchAddresses();
+
+        
     } // end of event loop
+    cout<<"Event loop ended"<<endl;
+
+    finish();
+    cout<<"finished"<<endl;
 }
 
 // Close everything

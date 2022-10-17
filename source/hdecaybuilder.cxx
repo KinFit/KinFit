@@ -27,6 +27,37 @@ HDecayBuilder::HDecayBuilder(std::vector<std::vector<HRefitCand>> &cands, TStrin
     }
 }
 
+HDecayBuilder::HDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVector lv, HRefitCand mother, Double_t mass) : fTask(task),
+                                                                                                                            fPids(pids),
+                                                                                                                            fProb(0.01),
+                                                                                                                            fVerbose(0)
+
+{
+    if (fVerbose > 0)
+    {
+        std::cout << "--------------- HDecayBuilder() -----------------" << std::endl;
+    }
+
+    setIniSys(lv);
+    setMother(mother);
+    setMass(mass);
+
+}
+
+void HDecayBuilder::countCombis()
+{
+    fCombiCounter = 0;
+    // Determine the number of combinations of the input particles
+    fTotalCombos = 1;
+    if(particleCounter.size()>0) particleCounter.clear();
+    for (size_t i = 0; i < fPids.size(); i++)
+    {
+        fTotalCombos *= fCands[i].size();
+        particleCounter.push_back(0);
+    }
+
+}
+
 void HDecayBuilder::buildDecay()
 {
 
@@ -42,10 +73,12 @@ void HDecayBuilder::buildDecay()
         cout << "fill fit cands" << endl;
         // Take one combination of particles
         fillFitCands();
+        
         // Check if correct number of particles
         if (fFitCands.size() != fPids.size())
         {
             cout << "wrong number of particles" << endl;
+            fCombiCounter++;
             continue;
         }
         // Check for double usage of same particle
@@ -58,7 +91,10 @@ void HDecayBuilder::buildDecay()
         doFit();
         cout << "Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombos << endl;
         cout << "fit finished" <<endl;
+        
+        
     }
+    
 }
 
 /*
@@ -180,6 +216,7 @@ void HDecayBuilder::fillFitCands()
 
     if(fFitCands.size()>0) fFitCands.clear();
     doubleParticle = false;
+    
     for (size_t i = 0; i < fPids.size(); i++)
     {
         checkDoubleParticle(i);
@@ -206,6 +243,7 @@ void HDecayBuilder::fillFitCands()
     particleCounter[a]++;
     cout << "particle counter " << a << " is " << particleCounter[a] << " now" << endl;
     fCombiCounter++;
+    
 
     if (doubleParticle && (fCombiCounter < fTotalCombos))
         fillFitCands(); // If some particle has been filled more than once into fFitCands, repeat the procedure with the next combination

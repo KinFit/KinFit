@@ -64,11 +64,13 @@ private:
 
 public:
     HDecayBuilder(std::vector<std::vector<HRefitCand>> &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv = TLorentzVector(), HRefitCand mother = HRefitCand(), Double_t mass = 0.);
+    HDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVector lv = TLorentzVector(), HRefitCand mother = HRefitCand(), Double_t mass = 0.);
     ~HDecayBuilder(){};
 
     void setVerbosity(int val) { fVerbose = val; }
 
     // setters
+    void setInputCands(std::vector<std::vector<HRefitCand>> cands) {fCands = cands; }
     void setIniSys(TLorentzVector val) { fIniSys = val; }
     void setMother(HRefitCand val) { fMother = val; }
     void setMass(Double_t val) { fMass = val; }
@@ -85,6 +87,7 @@ public:
 
     Bool_t doFit();
 
+    void countCombis();
     void fillFitCands();
     void checkDoubleParticle(size_t i);
 

@@ -1219,8 +1219,12 @@ void HKinFitter::updateDaughters()
             (1. / y(0 + val * cov_dim, 0)) * std::cos(y(1 + val * cov_dim, 0));
         Double_t M = fM[val];
         cand.SetXYZM(Px, Py, Pz, M);
+        cand.setMomentum(1. / y(0 + val * cov_dim, 0));
+        cand.setTheta(y(1 + val * cov_dim, 0));
+        cand.setPhi((2 + val * cov_dim, 0));
         cand.setR(y(3 + val * cov_dim, 0));
         cand.setZ(y(4 + val * cov_dim, 0));
+        //cand.setPid(fCands[val].getPid());
 
         // ---------------------------------------------------------------------------
         // set covariance
