@@ -61,9 +61,11 @@ void HNeutralCandFinder::setNeutralMotherCand(TVector3 primaryVertex, TVector3 d
 
     Double_t u1 = (-a + c + d - f) / (b - e);
 
-    Double_t valZ = geom_base_Z.getZ() + geom_dir_Z.getZ() * u1;
+    Double_t valZ = geom_base_Z.Z() + geom_dir_Z.Z() * u1;
 
-    Double_t valR = HParticleTool::calculateMinimumDistance(vtx_geom_base, vtx_geom_dir, geom_base_Z, geom_dir_Z);
+    //Double_t valR = HParticleTool::calculateMinimumDistance(vtx_geom_base, vtx_geom_dir, geom_base_Z, geom_dir_Z);
+
+    Double_t valR = -1;
 
     if (primaryVertex.Y() < 0)
     {

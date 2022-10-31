@@ -1,5 +1,5 @@
 /**
- * HVertexFinder.h
+ * HNeutralCandFinder.h
  *
  *
  */
@@ -14,8 +14,8 @@
 #include <cmath>
 // framework includes
 #include "hrefitcand.h"
-#include "hvertexfinder.h"
-#include "hparticletool.h"
+//#include "hvertexfinder.h"
+//#include "hparticletool.h"
 
 using std::cout;
 using std::endl;
