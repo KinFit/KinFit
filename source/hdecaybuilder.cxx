@@ -4,7 +4,7 @@ HDecayBuilder::HDecayBuilder(std::vector<std::vector<HRefitCand>> &cands, TStrin
                                                                                                                                                                           fTask(task),
                                                                                                                                                                           fPids(pids),
                                                                                                                                                                           fCombiCounter(0),
-                                                                                                                                                                          fProb(0),
+                                                                                                                                                                          fProb(0.01),
                                                                                                                                                                           fVerbose(0)
 
 {
@@ -19,12 +19,43 @@ HDecayBuilder::HDecayBuilder(std::vector<std::vector<HRefitCand>> &cands, TStrin
 
     // Determine the number of combinations of the input particles
     fTotalCombos = 1;
-    particleCounter.clear();
+    if(particleCounter.size()>0) particleCounter.clear();
     for (size_t i = 0; i < fPids.size(); i++)
     {
         fTotalCombos *= fCands[i].size();
         particleCounter.push_back(0);
     }
+}
+
+HDecayBuilder::HDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVector lv, HRefitCand mother, Double_t mass) : fTask(task),
+                                                                                                                            fPids(pids),
+                                                                                                                            fProb(0.01),
+                                                                                                                            fVerbose(0)
+
+{
+    if (fVerbose > 0)
+    {
+        std::cout << "--------------- HDecayBuilder() -----------------" << std::endl;
+    }
+
+    setIniSys(lv);
+    setMother(mother);
+    setMass(mass);
+
+}
+
+void HDecayBuilder::countCombis()
+{
+    fCombiCounter = 0;
+    // Determine the number of combinations of the input particles
+    fTotalCombos = 1;
+    if(particleCounter.size()>0) particleCounter.clear();
+    for (size_t i = 0; i < fPids.size(); i++)
+    {
+        fTotalCombos *= fCands[i].size();
+        particleCounter.push_back(0);
+    }
+
 }
 
 void HDecayBuilder::buildDecay()
@@ -35,16 +66,19 @@ void HDecayBuilder::buildDecay()
 
     // For selection of best event according to probability
     fBestProb = 0;
+    fBestChi2 = 1e6;
 
-    while (fCombiCounter < (fTotalCombos - 1))
+    while (fCombiCounter < (fTotalCombos ))
     { // double check this
         cout << "fill fit cands" << endl;
         // Take one combination of particles
         fillFitCands();
+        
         // Check if correct number of particles
         if (fFitCands.size() != fPids.size())
         {
             cout << "wrong number of particles" << endl;
+            fCombiCounter++;
             continue;
         }
         // Check for double usage of same particle
@@ -54,34 +88,16 @@ void HDecayBuilder::buildDecay()
             continue;
         }
         // Do task that was chosen by user
-        if (fTask == "createNeutral")
-        {
-            createNeutralCandidate();
-        }
-        else if (fTask == "3C")
-        {
-            if (do3cFit())
-                cout << "3C task successful" << endl;
-        }
-        else if (fTask = "4C")
-        {
-            cout << "4C task received" << endl;
-            if (do4cFit())
-                cout << "4C task successful" << endl;
-        }
-        else if (fTask == "missMom")
-        {
-            if (doMissMomFit())
-                cout << "miss mom task successful" << endl;
-        }
-        else
-        {
-            cout << "Task not available" << endl;
-        }
+        doFit();
         cout << "Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombos << endl;
+        cout << "fit finished" <<endl;
+        
+        
     }
+    
 }
 
+/*
 void HDecayBuilder::createNeutralCandidate()
 {
     if (fVerbose > 0)
@@ -138,29 +154,48 @@ void HDecayBuilder::createNeutralCandidate()
 
     do3cFit();
 }
+*/
 
-bool HDecayBuilder::do4cFit()
+Bool_t HDecayBuilder::doFit()
 {
-    HKinFitter Fitter(fFitCands, fIniSys);
-    Fitter.add4Constraint();
-    cout << "constraint added" << endl;
+    HKinFitter Fitter(fFitCands);
+    if (fTask == "4C") Fitter.add4Constraint(fIniSys);
+    else if (fTask == "Mass"){
+        Fitter.addMassConstraint(fMass);
+        cout << "constraint added, Mass = " << fMass << endl;
+        cout << "proton momentum = " << fFitCands[0].getMomentum() << endl;
+        cout << "pion momentum = " << fFitCands[1].getMomentum() << endl;
+        TMatrixD cov_p = fFitCands[0].getCovariance();
+        TMatrixD cov_pi = fFitCands[1].getCovariance();
+        cout << "proton momentum error = " << cov_p(0,0) << endl;
+        cout << "pion momentum error = " << cov_pi(0,0) << endl;
+
+    } 
+    else cout << "Task not available" << endl;
+
+    Fitter.setNumberOfIterations(10);
+    Fitter.setConvergenceCriterion(0.01);
+    //Fitter.setVerbosity(2);
+
     if (Fitter.fit() && Fitter.getProb() > fProb)
     {
         cout << "fit successful" << endl;
         if (Fitter.getProb() > fBestProb)
         {
             fBestProb = Fitter.getProb();
-            fOutputCands.clear();
+            fBestChi2 = Fitter.getChi2();
+            if(fOutputCands.size() != 0) fOutputCands.clear();
             Fitter.getDaughters(fOutputCands);
         }
-        return true;
+        return kTRUE;
     }
     else
     {
-        return false;
+        cout << "fit not successful" << endl;
+        return kFALSE;
     }
 }
-
+/*
 bool HDecayBuilder::do3cFit()
 {
     createNeutralCandidate();
@@ -175,11 +210,13 @@ bool HDecayBuilder::doMissMomFit()
     Fitter.addMomConstraint();
     Fitter.fit();
 }
-
+*/
 void HDecayBuilder::fillFitCands()
 {
-    fFitCands.clear();
+
+    if(fFitCands.size()>0) fFitCands.clear();
     doubleParticle = false;
+    
     for (size_t i = 0; i < fPids.size(); i++)
     {
         checkDoubleParticle(i);
@@ -196,14 +233,17 @@ void HDecayBuilder::fillFitCands()
         a--;
         if (a < 0)
         {
-            if (!(fCombiCounter == fTotalCombos))
+            if (!(fCombiCounter == fTotalCombos-1))
                 cout << "counted wrong: " << fCombiCounter << " != " << fTotalCombos << endl;
             break;
+
+            a = 1e6;
         }
     }
     particleCounter[a]++;
     cout << "particle counter " << a << " is " << particleCounter[a] << " now" << endl;
     fCombiCounter++;
+    
 
     if (doubleParticle && (fCombiCounter < fTotalCombos))
         fillFitCands(); // If some particle has been filled more than once into fFitCands, repeat the procedure with the next combination
@@ -222,6 +262,7 @@ void HDecayBuilder::checkDoubleParticle(size_t i)
     cout << "no double particle" << endl;
 }
 
+/*
 void HDecayBuilder::createOutputParticle(HRefitCand refitCand)
 {
     if (fVerbose > 0)
@@ -230,10 +271,14 @@ void HDecayBuilder::createOutputParticle(HRefitCand refitCand)
     }
     HRefitCand newParticle;
 
-    newParticle.setPhi(refitCand.Theta()); //!!!
+    newParticle.setMomentum(refitCand.P());
+    newParticle.setTheta(refitCand.Theta());
+    newParticle.setPhi(refitCand.Phi());
     newParticle.setR(refitCand.getR());
     newParticle.setZ(refitCand.getZ());
-    newParticle.setMomentum(refitCand.P());
+    newParticle.setCovariance(refitCand.getCovariance());
+    newParticle.setPid(refitCand.getPid());
 
     fOutputCands.push_back(newParticle);
 }
+*/

@@ -8,9 +8,13 @@
 
 class HRefitCand : public TLorentzVector
 {
+
+ClassDef(HRefitCand, 1);
+
 private:
     TLorentzVector *cand;
     Double_t fMomentum, fTheta, fPhi, fR, fZ;
+    Int_t fPid;
     TMatrixD fCov;
 
 public:
@@ -23,6 +27,7 @@ public:
     void setR(Double_t val) { fR = val; }
     void setZ(Double_t val) { fZ = val; }
     void setCovariance(const TMatrixD &cov);
+    void setPid(Int_t val) {fPid = val; }
 
     Double_t getMomentum() const { return fMomentum; }
     Double_t getTheta() const { return fTheta; }
@@ -30,6 +35,7 @@ public:
     Double_t getR() const { return fR; }
     Double_t getZ() const { return fZ; }
     TMatrixD getCovariance() const { return fCov; }
+    Int_t getPid() const { return fPid; }
 
     void reset();
     void update();
