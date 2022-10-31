@@ -8,5 +8,6 @@
 
 #pragma link C++ class HKinFitter;
 #pragma link C++ class HRefitCand;
+#pragma link C++ class HNeutralCandFinder;
 
 #endif
