@@ -147,6 +147,44 @@ TVector3 HVertexTools::findVertex(const std::vector<HRefitCand> &cands)
     vertex+=vtx_geom_base_2;
     vertex*=0.5; */
 
+        HGeomVector cross = dir1.vectorProduct(dir2); // cross product: dir1 x dir2
+
+    // straight lines are either skew or have a cross point
+
+    HGeomVector diff = base1;
+    diff-=base2; // Difference of two base vectors base1 - base2
+
+    Double_t D;
+    D =  calcDeterminant(dir2, dir1 ,cross);
+
+    if (!(fabs(D) > 0.))
+    {
+	::Warning(":calculatePointOfClosestApproach","Dirs and cross-product are lin. dependent: returning default Vertex (-20000,-20000,-20000)");
+
+	return HGeomVector(-20000.,-20000.,-20000.);
+    }
+
+    Double_t Dm =  calcDeterminant(diff , dir1, cross);
+    Double_t Dl = -calcDeterminant(diff , dir2, cross);
+
+    HGeomVector vertex;
+    HGeomVector dm;
+    HGeomVector dl;
+
+    dm = dir2;
+    dm *= Dm;
+
+    dl = dir1;
+    dl *= Dl;
+
+    vertex = dm - dl;
+
+    vertex *= ((1.)/D);
+
+    vertex+=base1;
+    vertex+=base2;
+    vertex*=0.5;
+
     fVertex.SetXYZ(vertex.X(), vertex.Y(), vertex.Z());
 
     Double_t distanceFromParticleToVertex_1 = HParticleTool::calculateMinimumDistanceStraightToPoint(vtx_geom_base_1, vtx_geom_dir_1, vertex);

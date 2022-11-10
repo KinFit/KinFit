@@ -13,10 +13,11 @@
 #include <vector>
 #include <cmath>
 
+// ROOT includes
+#include "TMatrixD.h"
+
 // framework includes
 #include "hrefitcand.h"
-#include "hparticletool.h"
-#include "hgeomvertexfit.h"
 
 using std::cout;
 using std::endl;
@@ -32,13 +33,27 @@ private:
     TVector3 fVertex;
     int fVerbose;
 
+    TMatrixD fM; // Temporal matrix for calculations
+
+    TVector3 fDir;
+
+    TVector3 fBase;
+
+protected:
+    TMatrixD fSys; // LSM system inverse matrix
+    TVector3 fB;         // LSM independent term
+
 public:
-    HVertexFinder();
+    HVertexFinder(std::vector<HRefitCand> &);
     ~HVertexFinder(){};
 
     void setVerbosity(int val) { fVerbose = val; }
 
-    TVector3 findVertex(const std::vector<HRefitCand> &cands);
+    void addLinesToVertex(const TVector3 &r, const TVector3 &alpha, const Double_t w = 1.0);
+
+    void reset();
+
+    void findVertex();
 
     TVector3 getVertex() const { return fVertex; }
 };

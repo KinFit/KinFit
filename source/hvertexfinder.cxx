@@ -1,72 +1,180 @@
 #include "hvertexfinder.h"
 
-HVertexFinder::HVertexFinder() : fVerbose(0)
+HVertexFinder::HVertexFinder(std::vector<HRefitCand> &cands) : fVerbose(0), fCands(cands)
 {
+    fM.ResizeTo(3, 3);
+    fSys.ResizeTo(3, 3);
+
+    for (int i_cand = 0; i_cand < fCands.size(); i_cand++)
+    {
+        HRefitCand cand = cands[i_cand];
+
+        double param_theta = cand.Theta();
+        double param_phi = cand.Phi();
+        double param_R = cand.getR();
+        double param_Z = cand.getZ();
+
+        // Direction vector
+        fDir.SetX(std::sin(param_theta) * std::cos(param_phi));
+        fDir.SetY(std::sin(param_theta) * std::sin(param_phi));
+        fDir.SetZ(std::cos(param_theta));
+
+        // Base vector
+        fBase.SetX(param_R * std::cos(param_phi + TMath::PiOver2()));
+        fBase.SetY(param_R * std::sin(param_phi + TMath::PiOver2()));
+        fBase.SetZ(param_Z);
+
+        addLinesToVertex(fBase, fDir, 1); // Function for adding the lines to the vertex
+    }
+
+    findVertex(); //Function for finding the vertex and giving the output
+
+    reset();
 }
 
-TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
+void HVertexFinder::addLinesToVertex(const TVector3 &r, const TVector3 &alpha,
+                             const Double_t w)
 {
+
+    if (fVerbose > 0)
+    {
+        std::cout << " ----------- HVertexFinder::addLinesToVertex() -----------" << std::endl;
+        std::cout << "" << std::endl;
+    }
+
+    fM(0, 0) = w * (alpha.Y() * alpha.Y() + alpha.Z() * alpha.Z());
+    fM(0, 1) = -w * (alpha.X() * alpha.Y());
+    fM(0, 2) = -w * (alpha.X() * alpha.Z());
+    //  fM(1,0)=-(alpha.X() * alpha.Y());
+    fM(1, 1) = w * (alpha.X() * alpha.X() + alpha.Z() * alpha.Z());
+    fM(1, 2) = -w * (alpha.Y() * alpha.Z());
+    // fM(2,0)=-(alpha.X() * alpha.Z());
+    // fM(2,1)=-(alpha.Y() * alpha.Z());
+    fM(2, 2) = w * (alpha.Y() * alpha.Y() + alpha.X() * alpha.X());
+
+    fSys(0, 0) += fM(0, 0);
+    fSys(0, 1) += fM(0, 1);
+    fSys(0, 2) += fM(0, 2);
+    fSys(1, 1) += fM(1, 1);
+    fSys(1, 2) += fM(1, 2);
+    fSys(2, 2) += fM(2, 2);
+
+    fB.SetX(fB.X()+fM(0, 0) * r.X() + fM(0, 1) * r.Y() + fM(0, 2) * r.Z());
+    fB.SetY(fB.Y()+fM(0, 1) * r.X() + fM(1, 1) * r.Y() + fM(1, 2) * r.Z());
+    fB.SetZ(fB.Z()+fM(0, 2) * r.X() + fM(1, 2) * r.Y() + fM(2, 2) * r.Z());
+
+}
+
+void HVertexFinder::findVertex(){
+
     if (fVerbose > 0)
     {
         std::cout << " ----------- HVertexFinder::findVertex() -----------" << std::endl;
         std::cout << "" << std::endl;
     }
 
-    double param_theta, param_phi, param_R, param_Z;
-    // Calculate the base and direction vectors of the two candidates
-    TVector3 vtx_base, vtx_dir;
-    TVector3 vtx_geom_dir, vtx_geom_base;
+    Double_t det = 0;
 
-    if (cands.size() < 2)
+    det = fSys.Determinant();
+
+    fM(0, 0) = fSys(1, 1) * fSys(2, 2) - fSys(1, 2) * fSys(1, 2);
+    fM(0, 1) = fSys(1, 2) * fSys(0, 2) - fSys(0, 1) * fSys(2, 2);
+    fM(0, 2) = fSys(0, 1) * fSys(1, 2) - fSys(1, 1) * fSys(0, 2);
+    fM(1, 1) = fSys(0, 0) * fSys(2, 2) - fSys(0, 2) * fSys(0, 2);
+    fM(1, 2) = fSys(0, 1) * fSys(0, 2) - fSys(0, 0) * fSys(1, 2);
+    fM(2, 2) = fSys(0, 0) * fSys(1, 1) - fSys(0, 1) * fSys(0, 1);
+    fM(1, 0) = fM(0, 1);
+    fM(2, 0) = fM(0, 2);
+    fM(2, 1) = fM(1, 2);
+
+    if (det == 0)
     {
-
-        std::cout << "WARNING: No vertex can be found, not enough charged particles in the event" << std::endl;
-        fVertex.SetXYZ(-2000., -2000., -2000.);
-        return fVertex;
+        fVertex.SetXYZ(-1000., -1000., -1000.);
+        //return;
     }
 
-    TVector3 vertex;
-    HGeomVertexFit *vtxFit = new HGeomVertexFit();
+    fM *= (1. / det);
 
-    for (int i_cands = 0; i_cands < (int)cands.size(); i_cands++)
-    {
+    fVertex = fM * fB;
 
-        HRefitCand cand = cands[i_cands];
+    //return fVertex;
 
-        param_theta = cand.Theta();
-        param_phi = cand.Phi();
-        param_R = cand.getR();
-        param_Z = cand.getZ();
-
-        // Base vectors
-        vtx_base.SetXYZ(param_R * std::cos(param_phi + TMath::PiOver2()),
-                        param_R * std::sin(param_phi + TMath::PiOver2()),
-                        param_Z);
-
-        // Direction vectors
-        vtx_dir.SetXYZ(std::sin(param_theta) * std::cos(param_phi),
-                       std::sin(param_theta) * std::sin(param_phi),
-                       std::cos(param_theta));
-
-        // Direction vectors
-        vtx_geom_dir.SetX(std::sin(param_theta) * std::cos(param_phi));
-        vtx_geom_dir.SetY(std::sin(param_theta) * std::sin(param_phi));
-        vtx_geom_dir.SetZ(std::cos(param_theta));
-
-        // Base vectors
-        vtx_geom_base.SetX(param_R * std::cos(param_phi + TMath::PiOver2()));
-        vtx_geom_base.SetY(param_R * std::sin(param_phi + TMath::PiOver2()));
-        vtx_geom_base.SetZ(param_Z);
-
-        vtxFit->addLine(vtx_geom_base, vtx_geom_dir, 1);
-    }
-
-    vtxFit->getVertex(vertex);
-
-    fVertex.SetXYZ(vertex.X(), vertex.Y(), vertex.Z());
-
-    return fVertex;
 }
+
+void HVertexFinder::reset()
+{
+
+    for (Int_t i = 0; i < 3; i++)
+    {
+        for (Int_t j = 0; j < 3; j++)
+            fM(i, j) = fSys(i, j) = 0.0;
+    }
+    fB.SetXYZ(0.0, 0.0, 0.0);
+}
+
+// TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
+// {
+//     if (fVerbose > 0)
+//     {
+//         std::cout << " ----------- HVertexFinder::findVertex() -----------" << std::endl;
+//         std::cout << "" << std::endl;
+//     }
+
+//     double param_theta, param_phi, param_R, param_Z;
+//     // Calculate the base and direction vectors of the two candidates
+//     TVector3 vtx_base, vtx_dir;
+//     TVector3 vtx_geom_dir, vtx_geom_base;
+
+//     if (cands.size() < 2)
+//     {
+
+//         std::cout << "WARNING: No vertex can be found, not enough charged particles in the event" << std::endl;
+//         fVertex.SetXYZ(-2000., -2000., -2000.);
+//         return fVertex;
+//     }
+
+//     TVector3 vertex;
+//     HGeomVertexFit *vtxFit = new HGeomVertexFit();
+
+//     for (int i_cands = 0; i_cands < (int)cands.size(); i_cands++)
+//     {
+
+//         HRefitCand cand = cands[i_cands];
+
+//         param_theta = cand.Theta();
+//         param_phi = cand.Phi();
+//         param_R = cand.getR();
+//         param_Z = cand.getZ();
+
+//         // Base vectors
+//         vtx_base.SetXYZ(param_R * std::cos(param_phi + TMath::PiOver2()),
+//                         param_R * std::sin(param_phi + TMath::PiOver2()),
+//                         param_Z);
+
+//         // Direction vectors
+//         vtx_dir.SetXYZ(std::sin(param_theta) * std::cos(param_phi),
+//                        std::sin(param_theta) * std::sin(param_phi),
+//                        std::cos(param_theta));
+
+//         // Direction vectors
+//         vtx_geom_dir.SetX(std::sin(param_theta) * std::cos(param_phi));
+//         vtx_geom_dir.SetY(std::sin(param_theta) * std::sin(param_phi));
+//         vtx_geom_dir.SetZ(std::cos(param_theta));
+
+//         // Base vectors
+//         vtx_geom_base.SetX(param_R * std::cos(param_phi + TMath::PiOver2()));
+//         vtx_geom_base.SetY(param_R * std::sin(param_phi + TMath::PiOver2()));
+//         vtx_geom_base.SetZ(param_Z);
+
+//         vtxFit->addLine(vtx_geom_base, vtx_geom_dir, 1);
+//     }
+
+//     vtxFit->getVertex(vertex);
+
+//     fVertex.SetXYZ(vertex.X(), vertex.Y(), vertex.Z());
+
+//     return fVertex;
+// }
 
 // std::vector<HRefitCand> HVertexFinder::UpdateTrackParameters(std::vector<HRefitCand> &cands, TVector3 &vertexPos)
 // {
