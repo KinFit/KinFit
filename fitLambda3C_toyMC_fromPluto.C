@@ -17,6 +17,7 @@
 
 #include "/home/jana/KinFit/include/hkinfitter.h"
 #include "/home/jana/KinFit/include/hvertexfinder.h"
+#include "/home/jana/KinFit/include/hneutralcandfinder.h"
 
 using namespace std;
 
@@ -34,13 +35,13 @@ void FillData(HRefitCand& outcand, double arr[])
     outcand.setCovariance(cov);
 }
 
-Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
+Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
 {
     // -----------------------------------------------------------------------
     // define output file and some histograms
     // -----------------------------------------------------------------------
     // set ouput file
-    TFile* outfile = new TFile("testVertexFinding_toyMC_fromPluto.root", "recreate");
+    TFile* outfile = new TFile("fitLambda3C_toyMC_fromPluto.root", "recreate");
 
     TH3F* hvertex1xyz = new TH3F("hvertex1xyz", "", 100, -2, 2, 100, -2, 2, 100, -5, 5);
     hvertex1xyz->SetXTitle(" Vx ");
@@ -51,57 +52,68 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
     hvertex2xyz->SetYTitle(" Vy ");
     hvertex2xyz->SetYTitle(" Vz ");
 
-    /*
-    TH1F* h01 = new TH1F("hLambdaMassPreFit", "", 100, 1.070, 1.250);
-    h01->SetXTitle(" M_{p#pi^{-}} [GeV/c^{2}]");
-    h01->SetYTitle(" events ");
-    TH1F* h012 = new TH1F("hLambdaMomentumPreFit", "", 100, 2, 4);
-    h01->SetXTitle(" p_{#Lambda} [MGV/c]");
-    h01->SetYTitle(" events ");
+    
+    TH1F* hLambdaMassPreFit = new TH1F("hLambdaMassPreFit", "", 100, 1.070, 1.250);
+    hLambdaMassPreFit->SetXTitle(" M_{p#pi^{-}} [GeV/c^{2}]");
+    hLambdaMassPreFit->SetYTitle(" events ");
+    TH1F* hLambdaMomentumPreFit = new TH1F("hLambdaMomentumPreFit", "", 100, 2, 4);
+    hLambdaMomentumPreFit->SetXTitle(" p_{#Lambda} [GeV/c]");
+    hLambdaMomentumPreFit->SetYTitle(" events ");
+    TH1F* hLambdaThetaPreFit = new TH1F("hLambdaThetaPreFit", "", 100, 0, 3.2);
+    hLambdaThetaPreFit->SetXTitle(" #vartheta_{#Lambda} [rad]");
+    hLambdaThetaPreFit->SetYTitle(" events ");
+    TH1F* hLambdaPhiPreFit = new TH1F("hLambdaPhiPreFit", "", 100, -3.2, 3.2);
+    hLambdaPhiPreFit->SetXTitle(" #varphi_{#Lambda} [rad]");
+    hLambdaPhiPreFit->SetYTitle(" events ");
 
-    TH1F* h02 = new TH1F("hChi2", "", 100, 0, 100);
-    h02->SetXTitle("#chi^{2}");
-    h02->SetYTitle(" counts ");
-    TH1F *h022 = (TH1F*)h02->Clone("hChi2_probCut");
-    h022 -> SetLineColor(kGreen);
-    TH1F *h023 = (TH1F*)h02->Clone("hChi2_converged");
-    h023 -> SetLineColor(kBlue);
+    TH1F* hChi2 = new TH1F("hChi2", "", 100, 0, 100);
+    hChi2->SetXTitle("#chi^{2}");
+    hChi2->SetYTitle(" counts ");
+    TH1F *hChi2_probCut = (TH1F*)hChi2->Clone("hChi2_probCut");
+    hChi2_probCut -> SetLineColor(kGreen);
+    TH1F *hChi2_converged = (TH1F*)hChi2->Clone("hChi2_converged");
+    hChi2_converged -> SetLineColor(kBlue);
 
-    TH1F* h03 = new TH1F("hPChi2", "", 100, 0, 1);
-    h03->SetXTitle("P(#chi^{2})");
-    h03->SetYTitle(" counts ");
+    TH1F* hPChi2 = new TH1F("hPChi2", "", 100, 0, 1);
+    hPChi2->SetXTitle("P(#chi^{2})");
+    hPChi2->SetYTitle(" counts ");
 
-    TH1F* h04 = new TH1F("hLambdaMassPostFit", "", 100, 1.070, 1.250);
-    h04->SetXTitle(" M_{p#pi^{-}} [GeV/c^{2}]");
-    h04->SetYTitle(" events ");
-    h04 -> SetLineColor(kRed);
-    TH1F *h042 = (TH1F*)h04->Clone("hLambdaMassPostFit_probCut");
-    h042 -> SetLineColor(kGreen);
-    TH1F *h043 = (TH1F*)h04->Clone("hLambdaMassPostFit_converged");
-    h043 -> SetLineColor(kBlue);
+    TH1F* hLambdaMassPostFit = new TH1F("hLambdaMassPostFit", "", 100, 1.070, 1.250);
+    hLambdaMassPostFit->SetXTitle(" M_{p#pi^{-}} [GeV/c^{2}]");
+    hLambdaMassPostFit->SetYTitle(" events ");
+    hLambdaMassPostFit -> SetLineColor(kRed);
+    TH1F *hLambdaMassPostFit_probCut = (TH1F*)hLambdaMassPostFit->Clone("hLambdaMassPostFit_probCut");
+    hLambdaMassPostFit_probCut -> SetLineColor(kGreen);
+    TH1F *hLambdaMassPostFit_converged = (TH1F*)hLambdaMassPostFit->Clone("hLambdaMassPostFit_converged");
+    hLambdaMassPostFit_converged -> SetLineColor(kBlue);
 
-    TH1F* h09 = new TH1F("hLambdaMomPostFit", "", 100, 2, 4);
-    h04->SetXTitle(" M_{p#pi^{-}} [GeV/c]");
-    h04->SetYTitle(" events ");
-    h04 -> SetLineColor(kRed);
-    TH1F *h092 = (TH1F*)h09->Clone("hLambdaMomPostFit_probCut");
-    h092 -> SetLineColor(kGreen);
+    TH1F* hLambdaMomPostFit = new TH1F("hLambdaMomPostFit", "", 100, 2, 4);
+    hLambdaMomPostFit->SetXTitle(" P_{#Lambda} [GeV/c]");
+    hLambdaMomPostFit->SetYTitle(" events ");
+    hLambdaMomPostFit -> SetLineColor(kRed);
+    TH1F *hLambdaMomPostFit_probCut = (TH1F*)hLambdaMomPostFit->Clone("hLambdaMomPostFit_probCut");
+    hLambdaMomPostFit_probCut -> SetLineColor(kGreen);
+    TH1F* hLambdaThetaPostFit = new TH1F("hLambdaThetaPostFit", "", 100, 0, 3.2);
+    hLambdaThetaPostFit->SetXTitle(" #vartheta_{#Lambda} [rad]");
+    hLambdaThetaPostFit->SetYTitle(" events ");
+    TH1F* hLambdaPhiPostFit = new TH1F("hLambdaPhiPostFit", "", 100, -3.2, 3.2);
+    hLambdaPhiPostFit->SetXTitle(" #varphi_{#Lambda} [rad]");
+    hLambdaPhiPostFit->SetYTitle(" events ");
 
-    TH1F* h05 = new TH1F("hPull", "", 100, -5, 5);
-    h05->SetXTitle("Pull(1/P_{p})");
-    h05->SetYTitle(" counts ");
-    TH1F *h052 = (TH1F*)h05->Clone("hPull_probCut");
-    h052 -> SetLineColor(kGreen);
-    TH1F *h053 = (TH1F*)h05->Clone("hPull_converged");
-    h053 -> SetLineColor(kBlue);
-    TH1F *h054 = (TH1F*)h05->Clone("hPull_tht");
-    TH1F *h055 = (TH1F*)h05->Clone("hPull_phi");
-    TH1F *h056 = (TH1F*)h05->Clone("hPull_p_pi");
-    TH1F *h057 = (TH1F*)h05->Clone("hPull_tht_pi");
-    TH1F *h058 = (TH1F*)h05->Clone("hPull_phi_pi");
-*/
+    TH1F* hPull = new TH1F("hPull", "", 100, -5, 5);
+    hPull->SetXTitle("Pull(1/P_{p})");
+    hPull->SetYTitle(" counts ");
+    TH1F *hPull_probCut = (TH1F*)hPull->Clone("hPull_probCut");
+    hPull_probCut -> SetLineColor(kGreen);
+    TH1F *hPull_converged = (TH1F*)hPull->Clone("hPull_converged");
+    hPull_converged -> SetLineColor(kBlue);
+    TH1F *hPull_tht = (TH1F*)hPull->Clone("hPull_tht");
+    TH1F *hPull_phi = (TH1F*)hPull->Clone("hPull_phi");
+    TH1F *hPull_p_pi = (TH1F*)hPull->Clone("hPull_p_pi");
+    TH1F *hPull_tht_pi = (TH1F*)hPull->Clone("hPull_tht_pi");
+    TH1F *hPull_phi_pi = (TH1F*)hPull->Clone("hPull_phi_pi");
 
-    /*
+/*
     TH1F* h06 = new TH1F("hTotMomPreFit", "", 100, 3800, 4800);
     h06->SetXTitle(" p [MeV/c]");
     h06->SetYTitle(" events ");
@@ -114,10 +126,11 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
     h072 -> SetLineColor(kGreen);
     TH1F *h073 = (TH1F*)h07->Clone("hTotMomPostFit_converged");
     h073 -> SetLineColor(kBlue);
-    TH1F* h08 = new TH1F("hNIterations", "", 10, 0, 10);
-    h08->SetXTitle(" Iteration");
-    h08->SetYTitle(" events ");
     */
+    TH1F* hNIterations = new TH1F("hNIterations", "", 10, 0, 10);
+    hNIterations->SetXTitle(" Iteration");
+    hNIterations->SetYTitle(" events ");
+    
     
     
     // -----------------------------------------------------------------------
@@ -208,36 +221,10 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
                     piCandRecoP * std::cos(piCandRecoTheta), 0.13957);
         double pion_errors[] = {0.025*(1/piCandRecoP), 0.0009, 0.0009, 0.5, 1.};
 
-/*
-        TLorentzVector *proton1 = new TLorentzVector();
-        proton1->SetXYZM(p1CandTrueP * std::sin(p1CandTrueTheta) * std::cos(p1CandTruePhi),
-                    p1CandTrueP * std::sin(p1CandTrueTheta) * std::sin(p1CandTruePhi),
-                    p1CandTrueP * std::cos(p1CandTrueTheta), 0.938272);
-        double proton1_errors[] = {0.025*(1/p1CandTrueP), 0.0009, 0.0009, 0.5, 1.};
-
-        TLorentzVector *kaon = new TLorentzVector();
-        kaon->SetXYZM(KCandTrueP * std::sin(KCandTrueTheta) * std::cos(KCandTruePhi),
-                    KCandTrueP * std::sin(KCandTrueTheta) * std::sin(KCandTruePhi),
-                    KCandTrueP * std::cos(KCandTrueTheta), 0.493677);
-        double kaon_errors[] = {0.025*(1/KCandTrueP), 0.0009, 0.0009, 0.5, 1.};
-
-        TLorentzVector *proton2 = new TLorentzVector();
-        proton2->SetXYZM(p2CandTrueP * std::sin(p2CandTrueTheta) * std::cos(p2CandTruePhi),
-                    p2CandTrueP * std::sin(p2CandTrueTheta) * std::sin(p2CandTruePhi),
-                    p2CandTrueP * std::cos(p2CandTrueTheta), 0.938272);
-        double proton2_errors[] = {0.025*(1/p2CandTrueP), 0.0009, 0.0009, 0.5, 1.};
-
-        TLorentzVector *pion = new TLorentzVector();
-        pion->SetXYZM(piCandTrueP * std::sin(piCandTrueTheta) * std::cos(piCandTruePhi),
-                    piCandTrueP * std::sin(piCandTrueTheta) * std::sin(piCandTruePhi),
-                    piCandTrueP * std::cos(piCandTrueTheta), 0.13957);
-        double pion_errors[] = {0.025*(1/piCandTrueP), 0.0009, 0.0009, 0.5, 1.};
-        */
-/*
-        TLorentzVector lambda = *proton1 + *pion;
+        /*TLorentzVector lambda = *proton1 + *pion;
         h01->Fill(lambda.M());
-        h012->Fill(lambda.P());
-*/
+        h012->Fill(lambda.P());*/
+
         HRefitCand proton1_fit(proton1,p1CandRecoR,p1CandRecoZ);
         FillData(proton1_fit, proton1_errors);
         HRefitCand kaon_fit(kaon,KCandRecoR,KCandRecoZ);
@@ -248,7 +235,7 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
         FillData(pion_fit, pion_errors);
 
         // ---------------------------------------------------------------------------------
-        // begin kinfit here
+        // find the primary and decay vertex
         // ---------------------------------------------------------------------------------
         std::vector<HRefitCand> cands1, cands2;
         cands1.clear();
@@ -267,47 +254,70 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
         hvertex1xyz->Fill(vtx1.X(), vtx1.Y(), vtx1.Z());
         hvertex2xyz->Fill(vtx2.X(), vtx2.Y(), vtx2.Z());
 
-        /*
-        HKinFitter fitter(cands);
-        fitter.setVerbosity(0);
+        // ---------------------------------------------------------------------------------
+        // find the neutral candidate
+        // ---------------------------------------------------------------------------------
+        HNeutralCandFinder lambdafinder(cands2);
+        lambdafinder.setVerbosity(10);
+        lambdafinder.setMassNeutralCand(1.115683);
+        lambdafinder.setNeutralMotherCand(vtx1, vtx2);
+
+        HRefitCand lambda_cand = lambdafinder.getNeutralMotherCandidate();
+        cout<<"lambda momentum"<<lambda_cand.P()<<endl;
+        cout<<"lambda Z"<<lambda_cand.getZ()<<endl;
+        
+        hLambdaMassPreFit->Fill((*proton2 + *pion).M());
+        hLambdaMomentumPreFit->Fill(lambda_cand.P());
+        hLambdaThetaPreFit->Fill(lambda_cand.Theta());
+        hLambdaPhiPreFit->Fill(lambda_cand.Phi());
+
+     TMatrixD covariance = lambda_cand.getCovariance();
+     std::cout << "Lambda covariances: " << covariance(0, 0) << " "<< covariance(1, 1) << " " << covariance(2, 2) << " " << covariance(3, 3) << " " << covariance(4, 4) <<  std::endl;
+        
+        // ---------------------------------------------------------------------------------
+        // do 3C fit in decay vertex
+        // ---------------------------------------------------------------------------------
+        HKinFitter fitter(cands2);
+        fitter.setVerbosity(10);
         fitter.setNumberOfIterations(10);
         //fitter.setLearningRate(0.5);
         fitter.setConvergenceCriterion(0.01);
-        fitter.addMassConstraint(1.11568);
+        fitter.add3Constraint(lambda_cand);
         //fitter.addVertexConstraint();
         //fitter.add4Constraint(ini);
         if(fitter.fit()){
 
             HRefitCand fcand1 = fitter.getDaughter(0); // proton
             HRefitCand fcand2 = fitter.getDaughter(1); // pion
+            HRefitCand flambda = fitter.getMother();
 
-            h02->Fill(fitter.getChi2());
-            h03->Fill(fitter.getProb());
+            hChi2->Fill(fitter.getChi2());
+            hPChi2->Fill(fitter.getProb());
             TLorentzVector lambda_fit = fcand1 + fcand2;
-            h04->Fill(lambda_fit.M());
+            hLambdaMassPostFit->Fill(lambda_fit.M());
             // get Pull example (1/P for the fitted proton)
-            h05->Fill(fitter.getPull(0));
-            h054->Fill(fitter.getPull(1));
-            h055->Fill(fitter.getPull(2));
-            h056->Fill(fitter.getPull(5));
-            h057->Fill(fitter.getPull(6));
-            h058->Fill(fitter.getPull(7));
-            h09->Fill(lambda_fit.P());
+            hPull->Fill(fitter.getPull(0));
+            hPull_tht->Fill(fitter.getPull(1));
+            hPull_phi->Fill(fitter.getPull(2));
+            hPull_p_pi->Fill(fitter.getPull(5));
+            hPull_tht_pi->Fill(fitter.getPull(6));
+            hPull_phi_pi->Fill(fitter.getPull(7));
+            hLambdaMomPostFit->Fill(lambda_fit.P());
             
             if(fitter.getProb()>0.01){
-                h022->Fill(fitter.getChi2());
-                h042->Fill(lambda_fit.M());
+                hChi2_probCut->Fill(fitter.getChi2());
+                hLambdaMassPostFit_probCut->Fill(lambda_fit.M());
                // h072->Fill(all_fit.P());
 
                 // get Pull example (1/P for the fitted proton)
-                h052->Fill(fitter.getPull(0));
-                h092->Fill(lambda_fit.P());
+                hPull_probCut->Fill(fitter.getPull(0));
+                hLambdaMomPostFit_probCut->Fill(lambda_fit.P());
             }
 
-            h08->Fill(fitter.getIteration());
+            hNIterations->Fill(fitter.getIteration());
 
         }
-        */
+        
     }
 
     // write histograms to the output file
@@ -315,34 +325,29 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
 
     hvertex1xyz->Write();
     hvertex2xyz->Write();
-/*
-    h01->Write();
-    h012->Write();
-    h02->Write();
-    h022->Write();
-    h023->Write();
-    h03->Write();
-    h04->Write();
-    h042->Write();
-    h043->Write();
-    h05->Write();
-    h052->Write();
-    h053->Write();
-    h054->Write();
-    h055->Write();
-    h056->Write();
-    h057->Write();
-    h058->Write();
-    */
-    /*
-    h06->Write();
-    h07->Write();
-    h072->Write();
-    h073->Write();
-    h08->Write();
-    h09->Write();
-    h092->Write();
-    */
+
+    hLambdaMassPreFit->Write();
+    hLambdaMomentumPreFit->Write();
+    hLambdaThetaPreFit->Write();
+    hLambdaPhiPreFit->Write();
+
+
+    hChi2->Write();
+    hChi2_probCut->Write();
+    hPChi2->Write();
+    hLambdaMassPostFit->Write();
+    hLambdaMassPostFit_probCut->Write();
+    hLambdaMomPostFit->Write();
+    hLambdaMomPostFit_probCut->Write();
+    hPull->Write();
+    hPull_probCut->Write();
+    hPull_tht->Write();
+    hPull_phi->Write();
+    hPull_p_pi->Write();
+    hPull_tht_pi->Write();
+    hPull_phi_pi->Write();
+    hNIterations->Write();
+
     outfile->Close();
 
     return 0;
