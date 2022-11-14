@@ -1,18 +1,30 @@
 #include "hneutralcandfinder.h"
 
-HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands) : fCands(cands), fVerbose(0), fMomentumAfterDecay(-1.), fNeutralCandMass(1115.683), fPrimaryVertexFound(false)
+HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands, TVector3 decayVertex, TVector3 primaryVertex) : fCands(cands), fVerbose(0), fMomentumAfterDecay(-1.), fDecayVertex(decayVertex), fPrimaryVertex(primaryVertex), fNeutralCandMass(1115.683), fPrimVtxResX(1.78590), fPrimVtxResY(1.75516), fPrimVtxResZ(3.00431), fDecVtxResX(5.75369), fDecVtxResY(5.57198), fDecVtxResZ(10.2602)
 {
     if (fVerbose > 0)
     {
         std::cout << "--------------- HNeutralCandFinder -----------------" << std::endl;
     }
+}
+
+HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands, double neutralCandMass, TVector3 decayVertex, TVector3 primaryVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ) : fCands(cands), fVerbose(0), fMomentumAfterDecay(-1.), fDecayVertex(decayVertex), fPrimaryVertex(primaryVertex), fNeutralCandMass(neutralCandMass), fPrimVtxResX(primVtxResX), fPrimVtxResY(primVtxResY), fPrimVtxResZ(primVtxResZ), fDecVtxResX(decVtxResX), fDecVtxResY(decVtxResY), fDecVtxResZ(decVtxResZ)
+{
+    if (fVerbose > 0)
+    {
+        std::cout << "--------------- HNeutralCandFinder -----------------" << std::endl;
+    }
+}
+
+void HNeutralCandFinder::setNeutralMotherCand()
+{
     Double_t param_p1, param_p2;
 
-    HRefitCand cand1 = cands[0];
+    HRefitCand cand1 = fCands[0];
 
     param_p1 = cand1.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
 
-    HRefitCand cand2 = cands[1];
+    HRefitCand cand2 = fCands[1];
 
     param_p2 = cand2.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
 
@@ -21,10 +33,9 @@ HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands) : f
     energy_cand2 = std::sqrt(param_p2 * param_p2 + cand2.M() * cand2.M());
 
     fMomentumAfterDecay = std::sqrt(energy_cand1 * energy_cand1 + 2 * energy_cand1 * energy_cand2 + energy_cand2 * energy_cand2 - fNeutralCandMass * fNeutralCandMass);
-}
 
-void HNeutralCandFinder::setNeutralMotherCand(TVector3 primaryVertex, TVector3 decayVertex)
-{
+    TVector3 primaryVertex = fPrimaryVertex;
+    TVector3 decayVertex = fDecayVertex;
 
     if (fVerbose > 0)
     {
@@ -124,9 +135,13 @@ void HNeutralCandFinder::setNeutralMotherCand(TVector3 primaryVertex, TVector3 d
 
     // the errors below are estimated from difference distributions between reconstructed - MC truth for the vertex
     // The errors are estimated from the histograms where both vertices were found in an event
-    Double_t sigma_x = std::sqrt(1.78590 * 1.78590 + 5.75369 * 5.75369); // when fwhm were used: std::sqrt(16.97*16.97+14.56*14.56);  // In mm
-    Double_t sigma_y = std::sqrt(1.75516 * 1.75516 + 5.57198 * 5.57198); // when fwhm were used: std::sqrt(16.80*16.80+14.59*14.59);  // In mm
-    Double_t sigma_z = std::sqrt(3.00431 * 3.00431 + 10.2602 * 10.2602); // when fwhm were used: std::sqrt(25.81*25.81+19.84*19.84);  // In mm
+    // Double_t sigma_x = std::sqrt(1.78590 * 1.78590 + 5.75369 * 5.75369); // when fwhm were used: std::sqrt(16.97*16.97+14.56*14.56);  // In mm
+    // Double_t sigma_y = std::sqrt(1.75516 * 1.75516 + 5.57198 * 5.57198); // when fwhm were used: std::sqrt(16.80*16.80+14.59*14.59);  // In mm
+    // Double_t sigma_z = std::sqrt(3.00431 * 3.00431 + 10.2602 * 10.2602); // when fwhm were used: std::sqrt(25.81*25.81+19.84*19.84);  // In mm
+
+    double sigma_x = sqrt(fPrimVtxResX * fPrimVtxResX + fDecVtxResX * fDecVtxResX);
+    double sigma_y = sqrt(fPrimVtxResY * fPrimVtxResY + fDecVtxResY * fDecVtxResY);
+    double sigma_z = sqrt(fPrimVtxResZ * fPrimVtxResZ + fDecVtxResZ * fDecVtxResZ);
 
     // Use coordinate transformation cartesian->polar to estimate error in theta and phi
 
@@ -207,6 +222,16 @@ void HNeutralCandFinder::setNeutralMotherCand(TVector3 primaryVertex, TVector3 d
     fCovarianceNeutralMother(4, 4) = sigma_z * sigma_z;
 
     fNeutralMotherCandidate.setCovariance(fCovarianceNeutralMother);
+
+    fNeutralMotherCandidate.setMomentum(fMomentumAfterDecay);
+
+    // Set angles
+
+
+
+
+
+
 
     // TMatrixD covariance = fNeutralMotherCandidate.getCovariance();
     // std::cout << "Neutral cand finder " << std::endl;
