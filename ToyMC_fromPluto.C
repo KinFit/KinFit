@@ -15,7 +15,7 @@ TVector3 calcPoca(TVector3 vertex, TVector3 mom){
 
 void ToyMC_fromPluto(TString inFile, Int_t nEvents = 500000)
 {
-   TFile *outFile = new TFile("toy_montecarlo_rz.root", "recreate");
+   TFile *outFile = new TFile("toy_montecarlo_rz_vtx.root", "recreate");
 
    TNtuple *ntuple = new TNtuple("data", "output flat tree", "p1CandTrueP:p1CandTrueTheta:p1CandTruePhi:p1CandTrueR:p1CandTrueZ:"
                                                              "p1CandRecoP:p1CandRecoTheta:p1CandRecoPhi:p1CandRecoR:p1CandRecoZ:"
@@ -24,14 +24,16 @@ void ToyMC_fromPluto(TString inFile, Int_t nEvents = 500000)
                                                              "p2CandTrueP:p2CandTrueTheta:p2CandTruePhi:p2CandTrueR:p2CandTrueZ:"
                                                              "p2CandRecoP:p2CandRecoTheta:p2CandRecoPhi:p2CandRecoR:p2CandRecoZ:"
                                                              "piCandTrueP:piCandTrueTheta:piCandTruePhi:piCandTrueR:piCandTrueZ:"
-                                                             "piCandRecoP:piCandRecoTheta:piCandRecoPhi:piCandRecoR:piCandRecoZ:");
+                                                             "piCandRecoP:piCandRecoTheta:piCandRecoPhi:piCandRecoR:piCandRecoZ:"
+                                                             "trueDecVtxX:trueDecVtxY:trueDecVtxZ");
 
    
    TClonesArray *cands = new TClonesArray("PParticle");
    Float_t p1CandTrueP, p1CandTrueTheta, p1CandTrueR, p1CandTrueZ, p1CandRecoP, p1CandRecoTheta, p1CandRecoPhi, p1CandRecoR, p1CandRecoZ,
             KCandTrueP, KCandTrueTheta, KCandTrueR, KCandTrueZ, KCandRecoP, KCandRecoTheta, KCandRecoPhi,  KCandRecoR, KCandRecoZ,
             p2CandTrueP, p2CandTrueTheta, p2CandTrueR, p2CandTrueZ, p2CandRecoP, p2CandRecoTheta, p2CandRecoPhi,  p2CandRecoR, p2CandRecoZ,
-            piCandTrueP, piCandTrueTheta, piCandTrueR, piCandTrueZ, piCandRecoP, piCandRecoTheta, piCandRecoPhi,  piCandRecoR, piCandRecoZ;
+            piCandTrueP, piCandTrueTheta, piCandTrueR, piCandTrueZ, piCandRecoP, piCandRecoTheta, piCandRecoPhi,  piCandRecoR, piCandRecoZ,
+            trueDecVtxX, trueDecVtxY, trueDecVtxZ;
     
    TFile tree_file(inFile, "READ");
    TTree *t = (TTree*)tree_file.Get("data");
@@ -101,16 +103,16 @@ void ToyMC_fromPluto(TString inFile, Int_t nEvents = 500000)
 
       // store in the tree
       // arranged as first all MC values then all reco values for all particles
-      Float_t array[40] = {Float_t(p1->P()), Float_t(p1->Theta()), Float_t(p1->Phi()), 0., 0.,  p1Cand_p, p1Cand_theta, p1Cand_phi, p1Cand_R, p1Cand_Z,
+      Float_t array[43] = {Float_t(p1->P()), Float_t(p1->Theta()), Float_t(p1->Phi()), 0., 0.,  p1Cand_p, p1Cand_theta, p1Cand_phi, p1Cand_R, p1Cand_Z,
                      Float_t(K->P()), Float_t(K->Theta()), Float_t(K->Phi()), 0., 0.,  KCand_p, KCand_theta, KCand_phi, KCand_R, KCand_Z,
                      Float_t(p2->P()), Float_t(p2->Theta()), Float_t(p2->Phi()), Float_t(poca_p2.X()/cos(p2Cand_phi+M_PI/2)), Float_t(poca_p2.Z()),  p2Cand_p, p2Cand_theta, p2Cand_phi, p2Cand_R, p2Cand_Z,
-                     Float_t(pi->P()), Float_t(pi->Theta()), Float_t(pi->Phi()), Float_t(poca_pi.X()/cos(piCand_phi+M_PI/2)), Float_t(poca_pi.Z()),  piCand_p, piCand_theta, piCand_phi, piCand_R, piCand_Z};
+                     Float_t(pi->P()), Float_t(pi->Theta()), Float_t(pi->Phi()), Float_t(poca_pi.X()/cos(piCand_phi+M_PI/2)), Float_t(poca_pi.Z()),  piCand_p, piCand_theta, piCand_phi, piCand_R, piCand_Z,
+                     Float_t(pi->X()), Float_t(pi->Y()), Float_t(pi->Z())};
       /*ntuple->Fill(p1->P(), p1->Theta(), p1->Phi(), 0, 0,  p1Cand_p, p1Cand_theta, p1Cand_phi, p1Cand_R, p1Cand_Z,
                      K->P(), K->Theta(), K->Phi(), 0, 0,  KCand_p, KCand_theta, KCand_phi, KCand_R, KCand_Z,
                      p2->P(), p2->Theta(), p2->Phi(), p2->R(), p2->Z(),  p2Cand_p, p2Cand_theta, p2Cand_phi, p2Cand_R, p2Cand_Z,
                      pi->P(), pi->Theta(), pi->Phi(), pi->R(), pi->Z(),  piCand_p, piCand_theta, piCand_phi, piCand_R, piCand_Z);*/
       ntuple->Fill(array);
-
    }
 
    outFile->cd();

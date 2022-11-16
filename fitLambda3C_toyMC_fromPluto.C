@@ -51,6 +51,10 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     hvertex2xyz->SetXTitle(" Vx ");
     hvertex2xyz->SetYTitle(" Vy ");
     hvertex2xyz->SetYTitle(" Vz ");
+    TH3F* hvertex2xyzres = new TH3F("hvertex2xyzres", "", 100, -2, 2, 100, -2, 2, 100, -5, 5);
+    hvertex2xyzres->SetXTitle(" Vx_{gen}-Vx_{reco} ");
+    hvertex2xyzres->SetYTitle(" Vy_{gen}-Vy_{reco} ");
+    hvertex2xyzres->SetYTitle(" Vz_{gen}-Vz_{reco} ");
 
     
     TH1F* hLambdaMassPreFit = new TH1F("hLambdaMassPreFit", "", 100, 1.070, 1.250);
@@ -65,6 +69,15 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     TH1F* hLambdaPhiPreFit = new TH1F("hLambdaPhiPreFit", "", 100, -3.2, 3.2);
     hLambdaPhiPreFit->SetXTitle(" #varphi_{#Lambda} [rad]");
     hLambdaPhiPreFit->SetYTitle(" events ");
+    TH1F* hLambdaMomentumPreFitRes = new TH1F("hLambdaMomentumPreFitRes", "", 100, -2, 2);
+    hLambdaMomentumPreFitRes->SetXTitle(" p_{gen}-p_{reco}(#Lambda) [GeV/c]");
+    hLambdaMomentumPreFitRes->SetYTitle(" events ");
+    TH1F* hLambdaThetaPreFitRes = new TH1F("hLambdaThetaPreFitRes", "", 100, -1.5, 1.5);
+    hLambdaThetaPreFitRes->SetXTitle(" #vartheta_{gen}-#vartheta_{reco}(#Lambda) [rad]");
+    hLambdaThetaPreFitRes->SetYTitle(" events ");
+    TH1F* hLambdaPhiPreFitRes = new TH1F("hLambdaPhiPreFitRes", "", 100, -3.2, 3.2);
+    hLambdaPhiPreFitRes->SetXTitle(" #varphi_{gen}-#varphi_{reco}(#Lambda) [rad]");
+    hLambdaPhiPreFitRes->SetYTitle(" events ");
 
     TH1F* hChi2 = new TH1F("hChi2", "", 100, 0, 100);
     hChi2->SetXTitle("#chi^{2}");
@@ -99,6 +112,15 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     TH1F* hLambdaPhiPostFit = new TH1F("hLambdaPhiPostFit", "", 100, -3.2, 3.2);
     hLambdaPhiPostFit->SetXTitle(" #varphi_{#Lambda} [rad]");
     hLambdaPhiPostFit->SetYTitle(" events ");
+    TH1F* hLambdaMomPostFitRes = new TH1F("hLambdaMomPostFitRes", "", 100, -2, 2);
+    hLambdaMomPostFitRes->SetXTitle(" p_{gen}-p_{reco}(#Lambda) [GeV/c]");
+    hLambdaMomPostFitRes->SetYTitle(" events ");
+    TH1F* hLambdaThetaPostFitRes = new TH1F("hLambdaThetaPostFitRes", "", 100, -1.5, 1.5);
+    hLambdaThetaPostFitRes->SetXTitle(" #vartheta_{gen}-#vartheta_{reco}(#Lambda) [rad]");
+    hLambdaThetaPostFitRes->SetYTitle(" events ");
+    TH1F* hLambdaPhiPostFitRes = new TH1F("hLambdaPhiPostFitRes", "", 100, -3.2, 3.2);
+    hLambdaPhiPostFitRes->SetXTitle(" #varphi_{gen}-#varphi_{reco}(#Lambda) [rad]");
+    hLambdaPhiPostFitRes->SetYTitle(" events ");
 
     TH1F* hPull = new TH1F("hPull", "", 100, -5, 5);
     hPull->SetXTitle("Pull(1/P_{p})");
@@ -139,7 +161,8 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
    Float_t p1CandTrueP, p1CandTrueTheta, p1CandTruePhi, p1CandTrueR, p1CandTrueZ, p1CandRecoP, p1CandRecoTheta, p1CandRecoPhi, p1CandRecoR, p1CandRecoZ,
             KCandTrueP, KCandTrueTheta, KCandTruePhi, KCandTrueR, KCandTrueZ, KCandRecoP, KCandRecoTheta, KCandRecoPhi,  KCandRecoR, KCandRecoZ,
             p2CandTrueP, p2CandTrueTheta, p2CandTruePhi, p2CandTrueR, p2CandTrueZ, p2CandRecoP, p2CandRecoTheta, p2CandRecoPhi,  p2CandRecoR, p2CandRecoZ,
-            piCandTrueP, piCandTrueTheta, piCandTruePhi, piCandTrueR, piCandTrueZ, piCandRecoP, piCandRecoTheta, piCandRecoPhi,  piCandRecoR, piCandRecoZ;
+            piCandTrueP, piCandTrueTheta, piCandTruePhi, piCandTrueR, piCandTrueZ, piCandRecoP, piCandRecoTheta, piCandRecoPhi,  piCandRecoR, piCandRecoZ,
+            trueDecVtxX, trueDecVtxY, trueDecVtxZ;
     
     TFile tree_file(infile, "READ");
     TTree *t = (TTree*)tree_file.Get("data");
@@ -184,6 +207,9 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     t->SetBranchAddress("piCandRecoR", &piCandRecoR);
     t->SetBranchAddress("piCandTrueZ", &piCandTrueZ);
     t->SetBranchAddress("piCandRecoZ", &piCandRecoZ);
+    t->SetBranchAddress("trueDecVtxX", &trueDecVtxX);
+    t->SetBranchAddress("trueDecVtxY", &trueDecVtxY);
+    t->SetBranchAddress("trueDecVtxZ", &trueDecVtxZ);
 
     Double_t mp = 0.9382720813;
     Double_t p01 = sqrt(pow((4.500+mp),2)-pow(mp,2));
@@ -196,6 +222,16 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     for (Long64_t ev = 0; ev < nEvents; ev++)
     {
         t->GetEntry(ev);
+
+        TLorentzVector *proton2_gen = new TLorentzVector();
+        proton2_gen->SetXYZM(p2CandTrueP * std::sin(p2CandTrueTheta) * std::cos(p2CandTruePhi),
+                    p2CandTrueP * std::sin(p2CandTrueTheta) * std::sin(p2CandTruePhi),
+                    p2CandTrueP * std::cos(p2CandTrueTheta), 0.938272);
+
+        TLorentzVector *pion_Gen = new TLorentzVector();
+        pion_gen->SetXYZM(piCandTrueP * std::sin(piCandTrueTheta) * std::cos(piCandTruePhi),
+                    piCandTrueP * std::sin(piCandTrueTheta) * std::sin(piCandTruePhi),
+                    piCandTrueP * std::cos(piCandTrueTheta), 0.13957);
 
         TLorentzVector *proton1 = new TLorentzVector();
         proton1->SetXYZM(p1CandRecoP * std::sin(p1CandRecoTheta) * std::cos(p1CandRecoPhi),
@@ -221,7 +257,7 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
                     piCandRecoP * std::cos(piCandRecoTheta), 0.13957);
         double pion_errors[] = {0.025*(1/piCandRecoP), 0.0009, 0.0009, 0.5, 1.};
 
-        /*TLorentzVector lambda = *proton1 + *pion;
+        TLorentzVector lambda_gen = *proton2_gen + *pion_gen;
         h01->Fill(lambda.M());
         h012->Fill(lambda.P());*/
 
@@ -253,14 +289,14 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
 
         hvertex1xyz->Fill(vtx1.X(), vtx1.Y(), vtx1.Z());
         hvertex2xyz->Fill(vtx2.X(), vtx2.Y(), vtx2.Z());
+        hvertex2xyz->Fill(trueDecVtxX-vtx2.X(), trueDecVtxY-vtx2.Y(), trueDecVtxZ-vtx2.Z());
 
         // ---------------------------------------------------------------------------------
         // find the neutral candidate
         // ---------------------------------------------------------------------------------
-        HNeutralCandFinder lambdafinder(cands2);
+        HNeutralCandFinder lambdafinder(cands2, vtx1, vtx2, 1.115683, 0.26, 0.26, 0.69, 0.26, 0.26, 0.69);
         lambdafinder.setVerbosity(10);
-        lambdafinder.setMassNeutralCand(1.115683);
-        lambdafinder.setNeutralMotherCand(vtx1, vtx2);
+        lambdafinder.setNeutralMotherCand();
 
         HRefitCand lambda_cand = lambdafinder.getNeutralMotherCandidate();
         cout<<"lambda momentum"<<lambda_cand.P()<<endl;
@@ -270,6 +306,10 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
         hLambdaMomentumPreFit->Fill(lambda_cand.P());
         hLambdaThetaPreFit->Fill(lambda_cand.Theta());
         hLambdaPhiPreFit->Fill(lambda_cand.Phi());
+
+        hLambdaMomentumPreFitRes->Fill(lambda_cand.P()-lambda_gen.P());
+        hLambdaThetaPreFitRes->Fill(lambda_cand.Theta()-lambda_gen.Theta());
+        hLambdaPhiPreFitRes->Fill(lambda_cand.Phi()-lambda_gen.Phi());
 
      TMatrixD covariance = lambda_cand.getCovariance();
      std::cout << "Lambda covariances: " << covariance(0, 0) << " "<< covariance(1, 1) << " " << covariance(2, 2) << " " << covariance(3, 3) << " " << covariance(4, 4) <<  std::endl;
@@ -303,6 +343,11 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
             hPull_tht_pi->Fill(fitter.getPull(6));
             hPull_phi_pi->Fill(fitter.getPull(7));
             hLambdaMomPostFit->Fill(lambda_fit.P());
+            hLambdaThetaPostFit->Fill(lambda_fit.Theta());
+            hLambdaPhiPostFit->Fill(lambda_fit.Phi());
+            hLambdaMomPostFitRes->Fill(lambda_fit.P()-lambda_gen.P());
+            hLambdaThetaPostFitRes->Fill(lambda_fit.Theta()-lambda_gen.Theta());
+            hLambdaPhiPostFitRes->Fill(lambda_fit.Phi()-lambda_Gen.Phi());
             
             if(fitter.getProb()>0.01){
                 hChi2_probCut->Fill(fitter.getChi2());
@@ -330,6 +375,9 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     hLambdaMomentumPreFit->Write();
     hLambdaThetaPreFit->Write();
     hLambdaPhiPreFit->Write();
+    hLambdaMomentumPreFitRes->Write();
+    hLambdaThetaPreFitRes->Write();
+    hLambdaPhiPreFitRes->Write();
 
 
     hChi2->Write();
@@ -339,6 +387,11 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     hLambdaMassPostFit_probCut->Write();
     hLambdaMomPostFit->Write();
     hLambdaMomPostFit_probCut->Write();
+    hLambdaThetaPostFit->Write();
+    hLambdaPhiPostFit->Write();
+    hLambdaMomPostFitRes->Write();
+    hLambdaThetaPostFitRes->Write();
+    hLambdaPhiPostFitRes->Write();
     hPull->Write();
     hPull_probCut->Write();
     hPull_tht->Write();

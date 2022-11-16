@@ -58,15 +58,9 @@ public:
 
     // The first function is for creating a neutral mother candidate if only information of the decay vertex is available
     // The second function is for creating the neutral candidate if information about the primary vertex is also available
-<<<<<<< HEAD
     //void setNeutralMotherCand(Double_t valMomentum, Double_t valTheta, Double_t valPhi, Double_t valR, Double_t ValZ, TVector3 decayVertex);
     void setNeutralMotherCand();
     //void setMassNutralCand(Double_t val) { fNeutralCandMass = val; }
-=======
-    void setNeutralMotherCand(Double_t valMomentum, Double_t valTheta, Double_t valPhi, Double_t valR, Double_t ValZ, TVector3 decayVertex);
-    void setNeutralMotherCand(TVector3 primVtx, TVector3 decayVtx);
-    void setMassNeutralCand(Double_t val) { fNeutralCandMass = val; }
->>>>>>> test Lambda fitting procedure
 
     HRefitCand getNeutralMotherCandidate() { return fNeutralMotherCandidate; }
 

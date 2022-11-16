@@ -133,7 +133,6 @@ void HNeutralCandFinder::setNeutralMotherCand()
 
     // the errors below are estimated from difference distributions between reconstructed - MC truth for the vertex
     // The errors are estimated from the histograms where both vertices were found in an event
-<<<<<<< HEAD
     // Double_t sigma_x = std::sqrt(1.78590 * 1.78590 + 5.75369 * 5.75369); // when fwhm were used: std::sqrt(16.97*16.97+14.56*14.56);  // In mm
     // Double_t sigma_y = std::sqrt(1.75516 * 1.75516 + 5.57198 * 5.57198); // when fwhm were used: std::sqrt(16.80*16.80+14.59*14.59);  // In mm
     // Double_t sigma_z = std::sqrt(3.00431 * 3.00431 + 10.2602 * 10.2602); // when fwhm were used: std::sqrt(25.81*25.81+19.84*19.84);  // In mm
@@ -142,14 +141,6 @@ void HNeutralCandFinder::setNeutralMotherCand()
     double sigma_x = sqrt(fPrimVtxResX * fPrimVtxResX + fDecVtxResX * fDecVtxResX);
     double sigma_y = sqrt(fPrimVtxResY * fPrimVtxResY + fDecVtxResY * fDecVtxResY);
     double sigma_z = sqrt(fPrimVtxResZ * fPrimVtxResZ + fDecVtxResZ * fDecVtxResZ);
-=======
-    //Double_t sigma_x = std::sqrt(1.78590 * 1.78590 + 5.75369 * 5.75369); // when fwhm were used: std::sqrt(16.97*16.97+14.56*14.56);  // In mm
-    //Double_t sigma_y = std::sqrt(1.75516 * 1.75516 + 5.57198 * 5.57198); // when fwhm were used: std::sqrt(16.80*16.80+14.59*14.59);  // In mm
-    //Double_t sigma_z = std::sqrt(3.00431 * 3.00431 + 10.2602 * 10.2602); // when fwhm were used: std::sqrt(25.81*25.81+19.84*19.84);  // In mm
-    Double_t sigma_x = std::sqrt(2*0.26*0.26); // when fwhm were used: std::sqrt(16.97*16.97+14.56*14.56);  // In mm
-    Double_t sigma_y = std::sqrt(2*0.26*0.26); // when fwhm were used: std::sqrt(16.80*16.80+14.59*14.59);  // In mm
-    Double_t sigma_z = std::sqrt(2*0.7*0.7); // when fwhm were used: std::sqrt(25.81*25.81+19.84*19.84);  // In mm
->>>>>>> test Lambda fitting procedure
 
     // Use coordinate transformation cartesian->polar to estimate error in theta and phi
 
