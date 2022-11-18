@@ -8,7 +8,7 @@
 #include <TLorentzVector.h>
 
 // framework includes
-#include "hparticletool.h"
+//#include "hparticletool.h"
 
 class HRefitCand : public TLorentzVector
 {
@@ -24,7 +24,7 @@ private:
 public:
     HRefitCand(TLorentzVector *cand, Double_t R, Double_t Z);
     HRefitCand(TLorentzVector *cand, Double_t X, Double_t Y, Double_t Z);
-    HRefitCand(); // Does that work like this? See https://os.mbed.com/users/fpucher/code/HIM0Board/wiki/Vererbung-in-C%2B%2B
+    HRefitCand(); 
     ~HRefitCand(){};
     void setMomentum(Double_t val) { fMomentum = val; }
     void setTheta(Double_t val) { fTheta = val; }

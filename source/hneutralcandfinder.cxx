@@ -74,9 +74,10 @@ void HNeutralCandFinder::setNeutralMotherCand()
 
     Double_t valZ = geom_base_Z.Z() + geom_dir_Z.Z() * u1;
 
-    //Double_t valR = HParticleTool::calculateMinimumDistance(vtx_geom_base, vtx_geom_dir, geom_base_Z, geom_dir_Z);
+    TVector3 cross = vtx_geom_dir.Cross(geom_dir_Z);
+    TVector3 diff=vtx_geom_base-geom_base_Z;
 
-    Double_t valR = -1;
+    double valR = abs(diff.Dot(cross)/(cross.Mag()));
 
     if (primaryVertex.Y() < 0)
     {
@@ -88,25 +89,8 @@ void HNeutralCandFinder::setNeutralMotherCand()
     thetaPrimaryToSecondaryVertex = vecPrimToDecayVertex.Theta();
     phiPrimaryToSecondaryVertex = vecPrimToDecayVertex.Phi();
 
-    // fNeutralMotherCandidate.setTheta(TMath::RadToDeg() * thetaPrimaryToSecondaryVertex);
-    // fNeutralMotherCandidate.setPhi(TMath::RadToDeg() * phiPrimaryToSecondaryVertex);
-    // fNeutralMotherCandidate.SetTheta(thetaPrimaryToSecondaryVertex);
-    // fNeutralMotherCandidate.SetPhi(phiPrimaryToSecondaryVertex);
     fNeutralMotherCandidate.setR(valR);
     fNeutralMotherCandidate.setZ(valZ);
-
-    // std::cout << "Neutral cand finder " << std::endl;
-    // std::cout << "Lambda cand angles: " << fNeutralMotherCandidate.Theta() << " " << fNeutralMotherCandidate.Phi() << std::endl;
-
-    // Double_t Px = (fMomentumAfterDecay*
-    //             std::sin(thetaPrimaryToSecondaryVertex*TMath::DegToRad()) *
-    //             std::cos(phiPrimaryToSecondaryVertex*TMath::DegToRad()));
-    // Double_t Py = (fMomentumAfterDecay *
-    //              std::sin(thetaPrimaryToSecondaryVertex*TMath::DegToRad()) *
-    //             std::sin(phiPrimaryToSecondaryVertex*TMath::DegToRad()));
-    // Double_t Pz =
-    //     (fMomentumAfterDecay * std::cos(thetaPrimaryToSecondaryVertex*TMath::DegToRad()));
-    // Double_t M = fNeutralCandMass;
 
     Double_t Px = (fMomentumAfterDecay *
                    std::sin(thetaPrimaryToSecondaryVertex) *
@@ -120,10 +104,6 @@ void HNeutralCandFinder::setNeutralMotherCand()
 
     fNeutralMotherCandidate.SetXYZM(Px, Py, Pz, M);
 
-    // std::cout << "Lambda cand angles 2: " << fNeutralMotherCandidate.Theta() << " " << fNeutralMotherCandidate.Phi() << std::endl;
-
-    // fNeutralMotherCandidate.setMomentum(fMomentumAfterDecay);
-
     if (fVerbose > 0)
     {
         std::cout << "setNeutralMotherCandidate, fNeutralMotherCandidate: theta= " << fNeutralMotherCandidate.Theta() << " and phi = " << fNeutralMotherCandidate.Phi() << std::endl;
@@ -132,12 +112,6 @@ void HNeutralCandFinder::setNeutralMotherCand()
     Double_t x_vertex = vecPrimToDecayVertex.X();
     Double_t y_vertex = vecPrimToDecayVertex.Y();
     Double_t z_vertex = vecPrimToDecayVertex.Z();
-
-    // the errors below are estimated from difference distributions between reconstructed - MC truth for the vertex
-    // The errors are estimated from the histograms where both vertices were found in an event
-    // Double_t sigma_x = std::sqrt(1.78590 * 1.78590 + 5.75369 * 5.75369); // when fwhm were used: std::sqrt(16.97*16.97+14.56*14.56);  // In mm
-    // Double_t sigma_y = std::sqrt(1.75516 * 1.75516 + 5.57198 * 5.57198); // when fwhm were used: std::sqrt(16.80*16.80+14.59*14.59);  // In mm
-    // Double_t sigma_z = std::sqrt(3.00431 * 3.00431 + 10.2602 * 10.2602); // when fwhm were used: std::sqrt(25.81*25.81+19.84*19.84);  // In mm
 
     double sigma_x = sqrt(fPrimVtxResX * fPrimVtxResX + fDecVtxResX * fDecVtxResX);
     double sigma_y = sqrt(fPrimVtxResY * fPrimVtxResY + fDecVtxResY * fDecVtxResY);
@@ -212,8 +186,6 @@ void HNeutralCandFinder::setNeutralMotherCand()
 
     fCovarianceNeutralMother.ResizeTo(5, 5);
     fCovarianceNeutralMother(0, 0) = 9999999;
-    // fCovarianceNeutralMother(1, 1) = sigma_theta * sigma_theta;
-    // fCovarianceNeutralMother(2, 2) = sigma_phi * sigma_phi;
     fCovarianceNeutralMother(1, 1) = covarianceNeutralMother(1, 1);
     fCovarianceNeutralMother(2, 2) = covarianceNeutralMother(2, 2);
     fCovarianceNeutralMother(1, 2) = covarianceNeutralMother(1, 2);
@@ -227,18 +199,6 @@ void HNeutralCandFinder::setNeutralMotherCand()
 
     // Set angles
 
-
-
-
-
-
-
-    // TMatrixD covariance = fNeutralMotherCandidate.getCovariance();
-    // std::cout << "Neutral cand finder " << std::endl;
-    // std::cout << "Lambda covariances: " << covariance(0, 0) << " "<< covariance(1, 1) << " " << covariance(2, 2) << " " << covariance(3, 3) << " " << covariance(4, 4) <<  std::endl;
-
-    // Jenny: Comments below are for testing so that the covariance matrix is read in correctly
-    // std::cout << "Nautral Cand Finder" << std::endl;
-    // std::cout << "Diag elements: " << fCovarianceNeutralMother(1, 1) << " " << fCovarianceNeutralMother(2, 2) << std::endl;
-    // std::cout << "Off diag elements: " << fCovarianceNeutralMother(1,2) << " " <<  fCovarianceNeutralMother(2,1) << std::endl;
+    fNeutralMotherCandidate.setTheta(thetaPrimaryToSecondaryVertex);
+    fNeutralMotherCandidate.setPhi(phiPrimaryToSecondaryVertex);
 }

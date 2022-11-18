@@ -12,16 +12,42 @@ HRefitCand::HRefitCand(TLorentzVector *cand, Double_t X, Double_t Y, Double_t Z)
 {
     Double_t deg2rad = TMath::DegToRad();
 
+    // Base and direction vettor of particle cand
     TVector3 base(X, Y, Z);
-    TVector3 beam_base, beam_dir;
     TVector3 dir(TMath::Sin(fTheta) * TMath::Cos(fPhi),
                  TMath::Sin(fTheta) * TMath::Sin(fPhi),
                  TMath::Cos(fTheta));
+    
+    // Base and direction vector of beamline
+    TVector3 beam_base(0,0,1); 
+    TVector3 beam_dir(0,0,1);
 
-    HParticleTool::calcSegVector(1, 0, 0, 0, beam_base, beam_dir);
-    TVector3 POCA = HParticleTool::calculatePointOfClosestApproach(base, dir, beam_base, beam_dir);
-    fR = base.Y() * TMath::Cos(fPhi) - base.X() * TMath::Sin(fPhi);
-    fZ = POCA.Z();
+    TVector3 cross = dir.Cross(beam_dir);
+    TVector3 diff=base-beam_base;
+
+    fR = abs(diff.Dot(cross)/(cross.Mag()));
+    
+    Double_t a = beam_base.Dot(beam_dir);
+    Double_t b = beam_dir.Dot(beam_dir);
+    Double_t c = base.Dot(beam_dir);
+    Double_t d = (beam_base.Dot(dir)) * (dir.Dot(beam_dir)) / dir.Dot(dir);
+    Double_t e = (beam_dir.Dot(dir)) * (dir.Dot(beam_dir)) / dir.Dot(dir);
+    Double_t f = (base.Dot(dir)) * (dir.Dot(beam_dir)) / dir.Dot(dir);
+    Double_t u1 = (-a + c + d - f) / (b - e);
+
+    fZ = beam_base.Z() + beam_dir.Z() * u1;
+
+    double y = beam_base.Y() + dir.Y() * u1;
+
+    if(y < 0){
+
+        fR = -1 * fR;
+    }
+
+    //HParticleTool::calcSegVector(1, 0, 0, 0, beam_base, beam_dir);
+    //TVector3 POCA = HParticleTool::calculatePointOfClosestApproach(base, dir, beam_base, beam_dir);
+    //fR = base.Y() * TMath::Cos(fPhi) - base.X() * TMath::Sin(fPhi);
+    //fZ = POCA.Z();
 
     fPid = -1;
 }
