@@ -6,7 +6,7 @@ HRefitCand::HRefitCand(TLorentzVector *cand, Double_t R, Double_t Z)
 {
     fPid = -1;
 }
-/*
+
 HRefitCand::HRefitCand(TLorentzVector *cand, Double_t X, Double_t Y, Double_t Z)
     : TLorentzVector(*cand), cand(cand), fMomentum(cand->P()), fTheta(cand->Theta()), fPhi(cand->Phi())
 {
@@ -50,7 +50,7 @@ HRefitCand::HRefitCand(TLorentzVector *cand, Double_t X, Double_t Y, Double_t Z)
     //fZ = POCA.Z();
 
     fPid = -1;
-}*/
+}
 
 HRefitCand::HRefitCand()
     : TLorentzVector()

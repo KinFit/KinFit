@@ -101,6 +101,8 @@ void HKinFitter::add3Constraint(HRefitCand mother)
     y.Zero();
     V.Zero();
 
+    fM.clear();
+
     // set y to measurements and the covariance, set mass
     std::cout << "set measurement " <<endl;
     for (Int_t ix = 0; ix < fN; ix++) // for daughters
@@ -126,6 +128,7 @@ void HKinFitter::add3Constraint(HRefitCand mother)
     }
 
     // for mother
+
     std::cout << "set mother " <<endl;
     TMatrixD test = fMother.getCovariance();
     test.ResizeTo(5,5);
@@ -136,12 +139,12 @@ void HKinFitter::add3Constraint(HRefitCand mother)
     y(fN * cov_dim, 0) = fMother.Theta();
     std::cout << "theta "<<fMother.Theta() <<endl;
     y(1 + fN * cov_dim, 0) = fMother.Phi();
-    std::cout << "phi "<<fMother.Theta() <<endl;
+    std::cout << "phi "<<fMother.Phi() <<endl;
     y(2 + fN * cov_dim, 0) = fMother.getR();
     std::cout << "R "<<fMother.Theta() <<endl;
     y(3 + fN * cov_dim, 0) = fMother.getZ();
-    fM.push_back(mother.M());
-    std::cout << "M "<<fMother.M() <<endl;
+    fM.push_back(fMother.M());
+    std::cout << "M "<<fM[fN] <<endl;
         std::cout << "lambda direction: " << fMother.X() << ", " << fMother.Y() << ", " << fMother.Z() << ", " << fMother.E() << std::endl;
 
     std::cout << "set mother " <<endl;
