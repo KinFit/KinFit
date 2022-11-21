@@ -79,10 +79,10 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     TH1F* hLambdaMomentumPreFitRes = new TH1F("hLambdaMomentumPreFitRes", "", 100, -0.5, 0.5);
     hLambdaMomentumPreFitRes->SetXTitle(" p_{gen}-p_{reco}(#Lambda) [GeV/c]");
     hLambdaMomentumPreFitRes->SetYTitle(" events ");
-    TH1F* hLambdaThetaPreFitRes = new TH1F("hLambdaThetaPreFitRes", "", 100, -0.5, 0.5);
+    TH1F* hLambdaThetaPreFitRes = new TH1F("hLambdaThetaPreFitRes", "", 100, -3.5, 3.5);
     hLambdaThetaPreFitRes->SetXTitle(" #vartheta_{gen}-#vartheta_{reco}(#Lambda) [rad]");
     hLambdaThetaPreFitRes->SetYTitle(" events ");
-    TH1F* hLambdaPhiPreFitRes = new TH1F("hLambdaPhiPreFitRes", "", 100, -0.5, 0.5);
+    TH1F* hLambdaPhiPreFitRes = new TH1F("hLambdaPhiPreFitRes", "", 100, -6.5, 6.5);
     hLambdaPhiPreFitRes->SetXTitle(" #varphi_{gen}-#varphi_{reco}(#Lambda) [rad]");
     hLambdaPhiPreFitRes->SetYTitle(" events ");
 
@@ -122,10 +122,10 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     TH1F* hLambdaMomPostFitRes = new TH1F("hLambdaMomPostFitRes", "", 100, -0.5, 0.5);
     hLambdaMomPostFitRes->SetXTitle(" p_{gen}-p_{reco}(#Lambda) [GeV/c]");
     hLambdaMomPostFitRes->SetYTitle(" events ");
-    TH1F* hLambdaThetaPostFitRes = new TH1F("hLambdaThetaPostFitRes", "", 100, -0.05, 0.05);
+    TH1F* hLambdaThetaPostFitRes = new TH1F("hLambdaThetaPostFitRes", "", 100, -3.05, 3.05);
     hLambdaThetaPostFitRes->SetXTitle(" #vartheta_{gen}-#vartheta_{reco}(#Lambda) [rad]");
     hLambdaThetaPostFitRes->SetYTitle(" events ");
-    TH1F* hLambdaPhiPostFitRes = new TH1F("hLambdaPhiPostFitRes", "", 100, -0.05, 0.05);
+    TH1F* hLambdaPhiPostFitRes = new TH1F("hLambdaPhiPostFitRes", "", 100, -6.05, 6.05);
     hLambdaPhiPostFitRes->SetXTitle(" #varphi_{gen}-#varphi_{reco}(#Lambda) [rad]");
     hLambdaPhiPostFitRes->SetYTitle(" events ");
 
@@ -142,21 +142,8 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     TH1F *hPull_tht_pi = (TH1F*)hPull->Clone("hPull_tht_pi");
     TH1F *hPull_phi_pi = (TH1F*)hPull->Clone("hPull_phi_pi");
 
-/*
-    TH1F* h06 = new TH1F("hTotMomPreFit", "", 100, 3800, 4800);
-    h06->SetXTitle(" p [MeV/c]");
-    h06->SetYTitle(" events ");
-    
-    TH1F* h07 = new TH1F("hTotMomPostFit", "", 100, 3800, 4800);
-    h07->SetXTitle(" p [MeV/c]");
-    h07->SetYTitle(" events ");
-    h07 -> SetLineColor(kRed);
-    TH1F *h072 = (TH1F*)h07->Clone("hTotMomPostFit_probCut");
-    h072 -> SetLineColor(kGreen);
-    TH1F *h073 = (TH1F*)h07->Clone("hTotMomPostFit_converged");
-    h073 -> SetLineColor(kBlue);
-    */
-    TH1F* hNIterations = new TH1F("hNIterations", "", 10, 0, 10);
+
+    TH1F* hNIterations = new TH1F("hNIterations", "", 20, 0, 20);
     hNIterations->SetXTitle(" Iteration");
     hNIterations->SetYTitle(" events ");
     
@@ -272,18 +259,16 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
         double pion_errors[] = {0.025*(1/piCandRecoP), 0.0009, 0.0009, 0.5, 1.};
 
         TLorentzVector lambda_gen = *proton2_gen + *pion_gen;
-        //h01->Fill(lambda_gen.M());
-        //h012->Fill(lambda_gen.P());
 
         HRefitCand proton1_fit(proton1,p1CandRecoR,p1CandRecoZ);
         FillData(proton1_fit, proton1_errors);
         HRefitCand kaon_fit(kaon,KCandRecoR,KCandRecoZ);
         FillData(kaon_fit, kaon_errors);
         HRefitCand proton2_fit(proton2,p2CandRecoR,p2CandRecoZ);
-        //HRefitCand proton2_fit(proton2,trueDecVtxX,trueDecVtxY,trueDecVtxZ);
+        //HRefitCand proton2_fit(proton2,trueDecVtxX,trueDecVtxY,trueDecVtxZ);      // Use this for calculating R and Z with HRefitCand functions instead
         FillData(proton2_fit, proton2_errors);
         HRefitCand pion_fit(pion,piCandRecoR, piCandRecoZ);
-        //HRefitCand pion_fit(pion,trueDecVtxX, trueDecVtxY, trueDecVtxZ);
+        //HRefitCand pion_fit(pion,trueDecVtxX, trueDecVtxY, trueDecVtxZ);          // Use this for calculating R and Z with HRefitCand functions instead 
         FillData(pion_fit, pion_errors);
 
         // ---------------------------------------------------------------------------------
@@ -320,12 +305,10 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
 
         HNeutralCandFinder lambdafinder(cands2, 1.115683, vtx2, vtx1, 0.26, 0.26, 0.69, 0.26, 0.26, 0.7);
         //HNeutralCandFinder lambdafinder(cands2, 1.115683, vtx2, vtx1, 0.5, 0.5, 1, 0.5, 0.5, 1);
-        lambdafinder.setVerbosity(10);
+        lambdafinder.setVerbosity(0);
         lambdafinder.setNeutralMotherCand();
 
         HRefitCand lambda_cand = lambdafinder.getNeutralMotherCandidate();
-        cout<<"lambda momentum"<<lambda_cand.P()<<endl;
-        cout<<"lambda Z"<<lambda_cand.getZ()<<endl;
         
         //hLambdaMassPreFit->Fill((proton2_fit + pion_fit).M());
         hLambdaMassPreFit->Fill((lambda_cand).M());
@@ -336,17 +319,6 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
         hLambdaMomentumPreFitRes->Fill(lambda_cand.P()-lambda_gen.P());
         hLambdaThetaPreFitRes->Fill(lambda_cand.Theta()-lambda_gen.Theta());
         hLambdaPhiPreFitRes->Fill(lambda_cand.Phi()-lambda_gen.Phi());
-/*
-     TMatrixD covariance = lambda_cand.getCovariance();
-     std::cout << "Lambda covariances: " << covariance(0, 0) << " "<< covariance(1, 1) << " " << covariance(2, 2) << " " << covariance(3, 3) << " " << covariance(4, 4) <<  std::endl;
-     covariance.Zero();
-     covariance(0,0) = 1e7;
-     covariance(1,1) = 0.075*0.075;
-     covariance(2,2) = 0.1*0.1;
-     covariance(3,3) = 0.1*0.1;
-     covariance(4,4) = 0.1*0.1;
-     lambda_cand.setCovariance(covariance);
-     */
         
         // ---------------------------------------------------------------------------------
         // do 3C fit in decay vertex
@@ -354,11 +326,9 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
         HKinFitter fitter(cands2);
         fitter.setVerbosity(0);
         //fitter.setLearningRate(0.5);
-        fitter.setConvergenceCriteria(0.01, 1e6, 1e6);
-        fitter.setNumberOfIterations(10);
+        //fitter.setConvergenceCriteria(0.01, 1e6, 1e6);
+        fitter.setNumberOfIterations(20);
         fitter.add3Constraint(lambda_cand);
-        //fitter.addVertexConstraint();
-        //fitter.add4Constraint(ini);
         fitter.fit();
         if(1){
 
@@ -374,7 +344,6 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
             hPChi2->Fill(fitter.getProb());
             //TLorentzVector lambda_fit = fcand1 + fcand2;
             hLambdaMassPostFit->Fill(lambda_fit.M());
-            cout<<"LAmbda Mass: "<<lambda_fit.M()<<endl;
             // get Pull example (1/P for the fitted proton)
             hPull->Fill(fitter.getPull(0));
             hPull_tht->Fill(fitter.getPull(1));
@@ -392,7 +361,6 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
             if(fitter.getProb()>0.01){
                 hChi2_probCut->Fill(fitter.getChi2());
                 hLambdaMassPostFit_probCut->Fill(lambda_fit.M());
-               // h072->Fill(all_fit.P());
 
                 // get Pull example (1/P for the fitted proton)
                 hPull_probCut->Fill(fitter.getPull(0));

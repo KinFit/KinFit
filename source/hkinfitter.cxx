@@ -33,9 +33,9 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
     fMMConstraint = false;
     fMassVtxConstraint = false;
 
-    fConvergenceCriterionChi2 = 0.01;
-    fConvergenceCriterionD = 0.01;
-    fConvergenceCriterionAlpha = 0.01;
+    fConvergenceCriterionChi2 = 1e-4;
+    fConvergenceCriterionD = 1e-4;
+    fConvergenceCriterionAlpha = 1e-4;
 
 
     // set 'y=alpha' measurements
@@ -96,7 +96,6 @@ void HKinFitter::add4Constraint(TLorentzVector lv)
 
 void HKinFitter::add3Constraint(HRefitCand mother)
 {
-    std::cout << "add 3constr " <<endl;
     fyDim = (fN + 1) * cov_dim - 1; // Dimension of full covariance matrix (number of measured variables x cov_dim). Mother momentum is not measured
 
     y.ResizeTo(fyDim, 1);
@@ -108,7 +107,6 @@ void HKinFitter::add3Constraint(HRefitCand mother)
     fM.clear();
 
     // set y to measurements and the covariance, set mass
-    std::cout << "set measurement " <<endl;
     for (Int_t ix = 0; ix < fN; ix++) // for daughters
     {
         HRefitCand cand = fCands[ix];
@@ -118,7 +116,6 @@ void HKinFitter::add3Constraint(HRefitCand mother)
         y(2 + ix * cov_dim, 0) = cand.Phi();
         y(3 + ix * cov_dim, 0) = cand.getR();
         y(4 + ix * cov_dim, 0) = cand.getZ();
-        std::cout << "Other direction: " << cand.X() << ", " << cand.Y() << ", " << cand.Z() << ", " << cand.E() << std::endl;
         fM.push_back(cand.M());
 
         // FIX ME: only for diagonal elements
@@ -128,32 +125,22 @@ void HKinFitter::add3Constraint(HRefitCand mother)
         V(2 + ix * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
         V(3 + ix * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
         V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
-    std::cout << "Other covariances: " << covariance(0, 0) << " "<< covariance(1, 1) << " " << covariance(2, 2) << " " << covariance(3, 3) << " " << covariance(4, 4) <<  std::endl;
     }
 
     // for mother
-
-    std::cout << "set mother " <<endl;
     TMatrixD test = fMother.getCovariance();
     test.ResizeTo(5,5);
     fMother.setCovariance(test);
     fMother = mother;
 
-    std::cout << "set mother " <<endl;
     y(fN * cov_dim, 0) = fMother.Theta();
-    std::cout << "theta "<<fMother.Theta() <<endl;
     y(1 + fN * cov_dim, 0) = fMother.Phi();
-    std::cout << "phi "<<fMother.Phi() <<endl;
     y(2 + fN * cov_dim, 0) = fMother.getR();
-    std::cout << "R "<<fMother.Theta() <<endl;
     y(3 + fN * cov_dim, 0) = fMother.getZ();
     fM.push_back(fMother.M());
-    std::cout << "M "<<fM[fN] <<endl;
-        std::cout << "lambda direction: " << fMother.X() << ", " << fMother.Y() << ", " << fMother.Z() << ", " << fMother.E() << std::endl;
-
-    std::cout << "set mother " <<endl;
+    
     TMatrixD covariance = fMother.getCovariance();
-    std::cout << "Lambda covariances: " << covariance(0, 0) << " "<< covariance(1, 1) << " " << covariance(2, 2) << " " << covariance(3, 3) << " " << covariance(4, 4) <<  std::endl;
+    //std::cout << "Lambda covariances: " << covariance(0, 0) << " "<< covariance(1, 1) << " " << covariance(2, 2) << " " << covariance(3, 3) << " " << covariance(4, 4) <<  std::endl;
      
     V(0 + fN * cov_dim, 0 + fN * cov_dim) = covariance(1, 1);
     V(1 + fN * cov_dim, 1 + fN * cov_dim) = covariance(2, 2);
@@ -1131,13 +1118,19 @@ Bool_t HKinFitter::fit()
         fIteration = q;
         fDNorm = 0;
         fAlphaNorm = 0;
-        for (Int_t i=0; i<d.GetNrows(); i++) fDNorm += pow(i,2);
+        TMatrixD delta_alpha_it = alpha-neu_alpha;
+        for (Int_t i=0; i<d.GetNrows(); i++) fDNorm += pow(d(1,0),2);
         fDNorm = sqrt(fDNorm);
-        for (Int_t i=0; i<delta_alpha.GetNrows(); i++) fAlphaNorm  += pow(i,2);
+        for (Int_t i=0; i<delta_alpha.GetNrows(); i++) fAlphaNorm  += pow(delta_alpha_it(i,0),2);
         if (f3Constraint || fMomConstraint){
-            for (Int_t i=0; i<delta_xi.GetNrows(); i++) fAlphaNorm  += pow(i,2);
+            for (Int_t i=0; i<delta_xi.GetNrows(); i++) fAlphaNorm  += pow(delta_xi(i,0),2);
         }
         fAlphaNorm = sqrt(fAlphaNorm);
+        if(fVerbose>2){
+            cout<<"chi2: "<<fabs(chi2 - chisqrd(0, 0))<<endl;
+            cout<<"delta apha norm: "<<fAlphaNorm<<endl;
+            cout<<"constraints norm: "<<fDNorm<<endl;
+        }
         if (fabs(chi2 - chisqrd(0, 0)) < fConvergenceCriterionChi2 && fDNorm < fConvergenceCriterionD && fAlphaNorm < fConvergenceCriterionAlpha)
         {
             fConverged = true;
