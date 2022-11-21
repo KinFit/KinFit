@@ -41,7 +41,7 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     // define output file and some histograms
     // -----------------------------------------------------------------------
     // set ouput file
-    TFile* outfile = new TFile("fitLambda3C_toyMC_fromPluto_myRZ.root", "recreate");
+    TFile* outfile = new TFile("fitLambda3C_toyMC_myRZ.root", "recreate");
 
     TH3F* hvertex1xyz = new TH3F("hvertex1xyz", "", 100, -2, 2, 100, -2, 2, 100, -5, 5);
     hvertex1xyz->SetXTitle(" Vx ");
@@ -55,6 +55,13 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     hvertex2xyzres->SetXTitle(" Vx_{gen}-Vx_{reco} ");
     hvertex2xyzres->SetYTitle(" Vy_{gen}-Vy_{reco} ");
     hvertex2xyzres->SetYTitle(" Vz_{gen}-Vz_{reco} ");
+
+    TH2F* hvertexPrim = new TH2F("hvertexPrim", "Primary Vertex Position", 100, -5, 5, 100, -2, 2);
+    hvertexPrim->SetXTitle(" Z ");
+    hvertexPrim->SetYTitle(" X ");
+    TH2F* hvertexDec = new TH2F("hvertexDec", "Decay Vertex Position", 100, -5, 100, 100, -5, 5);
+    hvertexDec->SetXTitle(" Z ");
+    hvertexDec->SetYTitle(" X ");
 
     
     TH1F* hLambdaMassPreFit = new TH1F("hLambdaMassPreFit", "", 100, 1.070, 1.250);
@@ -162,7 +169,8 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
             KCandTrueP, KCandTrueTheta, KCandTruePhi, KCandTrueR, KCandTrueZ, KCandRecoP, KCandRecoTheta, KCandRecoPhi,  KCandRecoR, KCandRecoZ,
             p2CandTrueP, p2CandTrueTheta, p2CandTruePhi, p2CandTrueR, p2CandTrueZ, p2CandRecoP, p2CandRecoTheta, p2CandRecoPhi,  p2CandRecoR, p2CandRecoZ,
             piCandTrueP, piCandTrueTheta, piCandTruePhi, piCandTrueR, piCandTrueZ, piCandRecoP, piCandRecoTheta, piCandRecoPhi,  piCandRecoR, piCandRecoZ,
-            trueDecVtxX, trueDecVtxY, trueDecVtxZ;
+            trueDecVtxX, trueDecVtxY, trueDecVtxZ,
+            recoPrimVtxX, recoPrimVtxY, recoPrimVtxZ, recoDecVtxX, recoDecVtxY, recoDecVtxZ;
     
     TFile tree_file(infile, "READ");
     TTree *t = (TTree*)tree_file.Get("data");
@@ -210,6 +218,12 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     t->SetBranchAddress("trueDecVtxX", &trueDecVtxX);
     t->SetBranchAddress("trueDecVtxY", &trueDecVtxY);
     t->SetBranchAddress("trueDecVtxZ", &trueDecVtxZ);
+    t->SetBranchAddress("recoPrimVtxX", &recoPrimVtxX);
+    t->SetBranchAddress("recoPrimVtxY", &recoPrimVtxY);
+    t->SetBranchAddress("recoPrimVtxZ", &recoPrimVtxZ);
+    t->SetBranchAddress("recoDecVtxX", &recoDecVtxX);
+    t->SetBranchAddress("recoDecVtxY", &recoDecVtxY);
+    t->SetBranchAddress("recoDecVtxZ", &recoDecVtxZ);
 
     Double_t mp = 0.9382720813;
     Double_t p01 = sqrt(pow((4.500+mp),2)-pow(mp,2));
@@ -289,15 +303,23 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
         TVector3 vtx1 = vtx1finder.getVertex();
         TVector3 vtx2 = vtx2finder.getVertex();
 
+        Double_t vtx1R = sqrt(vtx1.X()*vtx1.X() + vtx1.Y()*vtx1.Y());
+        if (vtx1.Y()<0) vtx1R = -vtx1R;
+        Double_t vtx2R = sqrt(vtx2.X()*vtx2.X() + vtx2.Y()*vtx2.Y());
+        if (vtx2.Y()<0) vtx2R = -vtx2R;
+
         hvertex1xyz->Fill(vtx1.X(), vtx1.Y(), vtx1.Z());
         hvertex2xyz->Fill(vtx2.X(), vtx2.Y(), vtx2.Z());
         hvertex2xyzres->Fill(trueDecVtxX-vtx2.X(), trueDecVtxY-vtx2.Y(), trueDecVtxZ-vtx2.Z());
+        hvertexPrim->Fill(vtx1.Z(), vtx1.X());
+        hvertexDec->Fill(vtx2.Z(), vtx2.X());
 
         // ---------------------------------------------------------------------------------
         // find the neutral candidate
         // ---------------------------------------------------------------------------------
 
         HNeutralCandFinder lambdafinder(cands2, 1.115683, vtx2, vtx1, 0.26, 0.26, 0.69, 0.26, 0.26, 0.7);
+        //HNeutralCandFinder lambdafinder(cands2, 1.115683, vtx2, vtx1, 0.5, 0.5, 1, 0.5, 0.5, 1);
         lambdafinder.setVerbosity(10);
         lambdafinder.setNeutralMotherCand();
 
@@ -332,7 +354,7 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
         HKinFitter fitter(cands2);
         fitter.setVerbosity(0);
         //fitter.setLearningRate(0.5);
-        fitter.setConvergenceCriterion(0.01);
+        fitter.setConvergenceCriteria(0.01, 1e6, 1e6);
         fitter.setNumberOfIterations(10);
         fitter.add3Constraint(lambda_cand);
         //fitter.addVertexConstraint();
@@ -389,6 +411,8 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     hvertex1xyz->Write();
     hvertex2xyz->Write();
     hvertex2xyzres->Write();
+    hvertexPrim->Write();
+    hvertexDec->Write();
 
     hLambdaMassPreFit->Write();
     hLambdaMomentumPreFit->Write();

@@ -6,8 +6,7 @@ const size_t cov_dim = 5;
 HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
                                                                fVerbose(0),
                                                                fLearningRate(1),
-                                                               fNumIterations(10),
-                                                               fConvergenceCriterion(1)
+                                                               fNumIterations(10)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = fCands.size();
@@ -33,6 +32,11 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
     fMassConstraint = false;
     fMMConstraint = false;
     fMassVtxConstraint = false;
+
+    fConvergenceCriterionChi2 = 0.01;
+    fConvergenceCriterionD = 0.01;
+    fConvergenceCriterionAlpha = 0.01;
+
 
     // set 'y=alpha' measurements
     // and the covariance
@@ -1125,7 +1129,16 @@ Bool_t HKinFitter::fit()
 
         // for checking convergence
         fIteration = q;
-        if (fabs(chi2 - chisqrd(0, 0)) < fConvergenceCriterion)
+        fDNorm = 0;
+        fAlphaNorm = 0;
+        for (Int_t i=0; i<d.GetNrows(); i++) fDNorm += pow(i,2);
+        fDNorm = sqrt(fDNorm);
+        for (Int_t i=0; i<delta_alpha.GetNrows(); i++) fAlphaNorm  += pow(i,2);
+        if (f3Constraint || fMomConstraint){
+            for (Int_t i=0; i<delta_xi.GetNrows(); i++) fAlphaNorm  += pow(i,2);
+        }
+        fAlphaNorm = sqrt(fAlphaNorm);
+        if (fabs(chi2 - chisqrd(0, 0)) < fConvergenceCriterionChi2 && fDNorm < fConvergenceCriterionD && fAlphaNorm < fConvergenceCriterionAlpha)
         {
             fConverged = true;
             chi2 = chisqrd(0, 0);
@@ -1304,6 +1317,14 @@ void HKinFitter::update()
         HRefitCand &cand = fCands[val];
         cand.update();
     }
+}
+
+
+void HKinFitter::setConvergenceCriteria(Double_t val1, Double_t val2, Double_t val3)
+{ 
+    fConvergenceCriterionChi2 = val1;
+    fConvergenceCriterionD = val2; 
+    fConvergenceCriterionAlpha = val3; 
 }
 
 ClassImp(HKinFitter)
