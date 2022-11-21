@@ -56,6 +56,7 @@ private:
     TMatrixD y, x, V, Vx, fPull;
     Double_t fChi2, fProb;
     Bool_t fConverged;
+    Double_t fDNorm, fAlphaNorm;
     Int_t fIteration, fN, fyDim;
     std::vector<HRefitCand> fCands;
     HRefitCand fMother;
@@ -72,7 +73,7 @@ private:
 
     Double_t fLearningRate;
     Int_t fNumIterations;
-    Double_t fConvergenceCriterion;
+    Double_t fConvergenceCriterionChi2, fConvergenceCriterionD, fConvergenceCriterionAlpha;
 
 public:
     HKinFitter(const std::vector<HRefitCand> &cands);
@@ -94,7 +95,7 @@ public:
 
     void setLearningRate(Double_t val) { fLearningRate = val; }
     void setNumberOfIterations(Int_t val) { fNumIterations = val; }
-    void setConvergenceCriterion(Double_t val) { fConvergenceCriterion = val; }
+    void setConvergenceCriteria(Double_t val1, Double_t val2, Double_t val3);
     void setCovariance(TMatrixD &val) { V = val; }
     void setMeasurement(TMatrixD &val) { y = val; }
 

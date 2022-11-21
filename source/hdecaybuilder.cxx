@@ -174,7 +174,7 @@ Bool_t HDecayBuilder::doFit()
     else cout << "Task not available" << endl;
 
     Fitter.setNumberOfIterations(10);
-    Fitter.setConvergenceCriterion(0.01);
+    Fitter.setConvergenceCriteria(0.01, 0.01, 0.01);
     //Fitter.setVerbosity(2);
 
     if (Fitter.fit() && Fitter.getProb() > fProb)

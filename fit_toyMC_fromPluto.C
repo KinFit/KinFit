@@ -6,6 +6,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TCutG.h"
+#include "TLorentzVector.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -31,13 +32,13 @@ void FillData(HRefitCand& outcand, double arr[])
     outcand.setCovariance(cov);
 }
 
-Int_t fit_toyMC(TString infile, Int_t nEvents)
+Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
 {
     // -----------------------------------------------------------------------
     // define output file and some histograms
     // -----------------------------------------------------------------------
     // set ouput file
-    TFile* outfile = new TFile("testFit_toyMC_M.root", "recreate");
+    TFile* outfile = new TFile("testFit_toyMC_fromPluto_mass_wrongp.root", "recreate");
     TH1F* h01 = new TH1F("hLambdaMassPreFit", "", 100, 1.070, 1.250);
     h01->SetXTitle(" M_{p#pi^{-}} [GeV/c^{2}]");
     h01->SetYTitle(" events ");
@@ -106,27 +107,59 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
     
     // -----------------------------------------------------------------------
     
-    Float_t pCandTrueP, pCandRecoP, pCandTrueTheta, pCandRecoTheta, pCandTruePhi, pCandRecoPhi, 
-                piCandTrueP, piCandRecoP, piCandTrueTheta, piCandRecoTheta, piCandTruePhi, piCandRecoPhi;
+    
+   Float_t p1CandTrueP, p1CandTrueTheta, p1CandTruePhi, p1CandTrueR, p1CandTrueZ, p1CandRecoP, p1CandRecoTheta, p1CandRecoPhi, p1CandRecoR, p1CandRecoZ,
+            KCandTrueP, KCandTrueTheta, KCandTruePhi, KCandTrueR, KCandTrueZ, KCandRecoP, KCandRecoTheta, KCandRecoPhi,  KCandRecoR, KCandRecoZ,
+            p2CandTrueP, p2CandTrueTheta, p2CandTruePhi, p2CandTrueR, p2CandTrueZ, p2CandRecoP, p2CandRecoTheta, p2CandRecoPhi,  p2CandRecoR, p2CandRecoZ,
+            piCandTrueP, piCandTrueTheta, piCandTruePhi, piCandTrueR, piCandTrueZ, piCandRecoP, piCandRecoTheta, piCandRecoPhi,  piCandRecoR, piCandRecoZ;
     
     TFile tree_file(infile, "READ");
     TTree *t = (TTree*)tree_file.Get("data");
 
-    t->SetBranchAddress("pCandTrueP", &pCandTrueP);
-    t->SetBranchAddress("pCandRecoP", &pCandRecoP);
-    t->SetBranchAddress("pCandTrueTheta", &pCandTrueTheta);
-    t->SetBranchAddress("pCandRecoTheta", &pCandRecoTheta);
-    t->SetBranchAddress("pCandTruePhi", &pCandTruePhi);
-    t->SetBranchAddress("pCandRecoPhi", &pCandRecoPhi);
+    t->SetBranchAddress("p1CandTrueP", &p1CandTrueP);
+    t->SetBranchAddress("p1CandRecoP", &p1CandRecoP);
+    t->SetBranchAddress("p1CandTrueTheta", &p1CandTrueTheta);
+    t->SetBranchAddress("p1CandRecoTheta", &p1CandRecoTheta);
+    t->SetBranchAddress("p1CandTruePhi", &p1CandTruePhi);
+    t->SetBranchAddress("p1CandRecoPhi", &p1CandRecoPhi);
+    t->SetBranchAddress("p1CandTrueR", &p1CandTrueR);
+    t->SetBranchAddress("p1CandRecoR", &p1CandRecoR);
+    t->SetBranchAddress("p1CandTrueZ", &p1CandTrueZ);
+    t->SetBranchAddress("p1CandRecoZ", &p1CandRecoZ);
+    t->SetBranchAddress("KCandTrueP", &KCandTrueP);
+    t->SetBranchAddress("KCandRecoP", &KCandRecoP);
+    t->SetBranchAddress("KCandTrueTheta", &KCandTrueTheta);
+    t->SetBranchAddress("KCandRecoTheta", &KCandRecoTheta);
+    t->SetBranchAddress("KCandTruePhi", &KCandTruePhi);
+    t->SetBranchAddress("KCandRecoPhi", &KCandRecoPhi);
+    t->SetBranchAddress("KCandTrueR", &KCandTrueR);
+    t->SetBranchAddress("KCandRecoR", &KCandRecoR);
+    t->SetBranchAddress("KCandTrueZ", &KCandTrueZ);
+    t->SetBranchAddress("KCandRecoZ", &KCandRecoZ);
+    t->SetBranchAddress("p2CandTrueP", &p2CandTrueP);
+    t->SetBranchAddress("p2CandRecoP", &p2CandRecoP);
+    t->SetBranchAddress("p2CandTrueTheta", &p2CandTrueTheta);
+    t->SetBranchAddress("p2CandRecoTheta", &p2CandRecoTheta);
+    t->SetBranchAddress("p2CandTruePhi", &p2CandTruePhi);
+    t->SetBranchAddress("p2CandRecoPhi", &p2CandRecoPhi);
+    t->SetBranchAddress("p2CandTrueR", &p2CandTrueR);
+    t->SetBranchAddress("p2CandRecoR", &p2CandRecoR);
+    t->SetBranchAddress("p2CandTrueZ", &p2CandTrueZ);
+    t->SetBranchAddress("p2CandRecoZ", &p2CandRecoZ);
     t->SetBranchAddress("piCandTrueP", &piCandTrueP);
     t->SetBranchAddress("piCandRecoP", &piCandRecoP);
     t->SetBranchAddress("piCandTrueTheta", &piCandTrueTheta);
     t->SetBranchAddress("piCandRecoTheta", &piCandRecoTheta);
     t->SetBranchAddress("piCandTruePhi", &piCandTruePhi);
     t->SetBranchAddress("piCandRecoPhi", &piCandRecoPhi);
+    t->SetBranchAddress("piCandTrueR", &piCandTrueR);
+    t->SetBranchAddress("piCandRecoR", &piCandRecoR);
+    t->SetBranchAddress("piCandTrueZ", &piCandTrueZ);
+    t->SetBranchAddress("piCandRecoZ", &piCandRecoZ);
 
-    TLorentzVector ini;
-    ini.SetXYZM(0.1, .1, 3., 1.11568);
+    Double_t mp = 0.9382720813;
+    Double_t p01 = sqrt(pow((4.500+mp),2)-pow(mp,2));
+    TLorentzVector ini(0, 0, p01, 4.500+2*mp);  //M=3459
 
     Long64_t nevts = t->GetEntries();
     if (nEvents <= 0 || nEvents > nevts)
@@ -136,25 +169,41 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
     {
         t->GetEntry(ev);
 
-        TLorentzVector *proton = new TLorentzVector();
-        proton->SetXYZM(pCandRecoP * std::sin(pCandRecoTheta) * std::cos(pCandRecoPhi),
-                    pCandRecoP * std::sin(pCandRecoTheta) * std::sin(pCandRecoPhi),
-                    pCandRecoP * std::cos(pCandRecoTheta), 0.938272);
-        double proton_errors[] = {0.025*(1/pCandRecoP), 0.0009, 0.0009, 0.0001, 0.0001};
+        TLorentzVector *proton1 = new TLorentzVector();
+        proton1->SetXYZM(p1CandRecoP * std::sin(p1CandRecoTheta) * std::cos(p1CandRecoPhi),
+                    p1CandRecoP * std::sin(p1CandRecoTheta) * std::sin(p1CandRecoPhi),
+                    p1CandRecoP * std::cos(p1CandRecoTheta), 0.938272);
+        double proton1_errors[] = {0.025*(1/p1CandRecoP), 0.0009, 0.0009, 0.5, 1.};
+
+        TLorentzVector *kaon = new TLorentzVector();
+        kaon->SetXYZM(KCandRecoP * std::sin(KCandRecoTheta) * std::cos(KCandRecoPhi),
+                    KCandRecoP * std::sin(KCandRecoTheta) * std::sin(KCandRecoPhi),
+                    KCandRecoP * std::cos(KCandRecoTheta), 0.493677);
+        double kaon_errors[] = {0.025*(1/KCandRecoP), 0.0009, 0.0009, 0.5, 1.};
+
+        TLorentzVector *proton2 = new TLorentzVector();
+        proton2->SetXYZM(p2CandRecoP * std::sin(p2CandRecoTheta) * std::cos(p2CandRecoPhi),
+                    p2CandRecoP * std::sin(p2CandRecoTheta) * std::sin(p2CandRecoPhi),
+                    p2CandRecoP * std::cos(p2CandRecoTheta), 0.938272);
+        double proton2_errors[] = {0.025*(1/p2CandRecoP), 0.0009, 0.0009, 0.5, 1.};
 
         TLorentzVector *pion = new TLorentzVector();
         pion->SetXYZM(piCandRecoP * std::sin(piCandRecoTheta) * std::cos(piCandRecoPhi),
                     piCandRecoP * std::sin(piCandRecoTheta) * std::sin(piCandRecoPhi),
                     piCandRecoP * std::cos(piCandRecoTheta), 0.13957);
-        double pion_errors[] = {0.025*(1/piCandRecoP), 0.0009, 0.0009, 0.0001, 0.0001};
+        double pion_errors[] = {0.025*(1/piCandRecoP), 0.0009, 0.0009, 0.5, 1.};
 
-        TLorentzVector lambda = *proton + *pion;
+        TLorentzVector lambda = *proton1 + *pion;
         h01->Fill(lambda.M());
         h012->Fill(lambda.P());
 
-        HRefitCand proton_fit(proton,0,0);
-        FillData(proton_fit, proton_errors);
-        HRefitCand pion_fit(pion,0,0);
+        HRefitCand proton1_fit(proton1,p1CandRecoR,p1CandRecoZ);
+        FillData(proton1_fit, proton1_errors);
+        HRefitCand kaon_fit(kaon,KCandRecoR,KCandRecoZ);
+        FillData(kaon_fit, kaon_errors);
+        HRefitCand proton2_fit(proton2,p2CandRecoR,p2CandRecoZ);
+        FillData(proton2_fit, proton2_errors);
+        HRefitCand pion_fit(pion,piCandRecoR, piCandRecoZ);
         FillData(pion_fit, pion_errors);
 
         // ---------------------------------------------------------------------------------
@@ -162,15 +211,18 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
         // ---------------------------------------------------------------------------------
         std::vector<HRefitCand> cands;
         cands.clear();
-        cands.push_back(proton_fit);
+        cands.push_back(proton1_fit);
+        //cands.push_back(kaon_fit);
+        //cands.push_back(proton2_fit);
         cands.push_back(pion_fit);
 
         HKinFitter fitter(cands);
         fitter.setVerbosity(0);
         fitter.setNumberOfIterations(10);
         //fitter.setLearningRate(0.5);
-        //fitter.setConvergenceCriterion(0.01);
+        fitter.setConvergenceCriterion(0.01);
         fitter.addMassConstraint(1.11568);
+        //fitter.addVertexConstraint();
         //fitter.add4Constraint(ini);
         if(fitter.fit()){
 

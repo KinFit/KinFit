@@ -50,10 +50,14 @@ void HNeutralCandFinder::setNeutralMotherCand()
     vtx_geom_base.SetX(vecPrimToDecayVertex.X());
     vtx_geom_base.SetY(vecPrimToDecayVertex.Y());
     vtx_geom_base.SetZ(vecPrimToDecayVertex.Z());
-
+/*
     vtx_geom_dir.SetX(std::sin(TMath::RadToDeg() * vecPrimToDecayVertex.Theta()) * std::cos(TMath::RadToDeg() * vecPrimToDecayVertex.Phi()));
     vtx_geom_dir.SetY(std::sin(TMath::RadToDeg() * vecPrimToDecayVertex.Theta()) * std::sin(TMath::RadToDeg() * vecPrimToDecayVertex.Phi()));
     vtx_geom_dir.SetZ(std::cos(TMath::RadToDeg() * vecPrimToDecayVertex.Theta()));
+*/
+    vtx_geom_dir.SetX(std::sin(vecPrimToDecayVertex.Theta()) * std::cos(vecPrimToDecayVertex.Phi()));
+    vtx_geom_dir.SetY(std::sin(vecPrimToDecayVertex.Theta()) * std::sin(vecPrimToDecayVertex.Phi()));
+    vtx_geom_dir.SetZ(std::cos(vecPrimToDecayVertex.Theta()));
 
     geom_dir_Z.SetX(0);
     geom_dir_Z.SetY(0);

@@ -41,8 +41,8 @@ Set(INCLUDE_DIRECTORIES
 
 Include_Directories(${INCLUDE_DIRECTORIES})
 
-FILE(GLOB SRCFILES source/hkinfitter.cxx source/hrefitcand.cxx source/hrootfitter.cxx source/hdecaybuilder.cxx source/hneutralcandfinder.cxx source/hvertexfinder.cxx)
-FILE(GLOB HFILES include/hkinfitter.h include/hrefitcand.h include/hrootfitter.h include/hdecaybuilder.h include/hneutralcandfinder.h include/hvertexfinder.h)
+FILE(GLOB SRCFILES source/hkinfitter.cxx source/hrefitcand.cxx source/hrootfitter.cxx source/hdecaybuilder.cxx source/hneutralcandfinder.cxx source/hvertexfinder.cxx) ## source/hvertextools.cxx)
+FILE(GLOB HFILES include/hkinfitter.h include/hrefitcand.h include/hrootfitter.h include/hdecaybuilder.h include/hneutralcandfinder.h include/hvertexfinder.h) ## include/hvertextools.h)
 
 message (STATUS "${BoldGreen}ROOT${ColourReset} at " ${CMAKE_CURRENT_SOURCE_DIR})
 
