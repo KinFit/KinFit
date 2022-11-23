@@ -38,7 +38,7 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
     // define output file and some histograms
     // -----------------------------------------------------------------------
     // set ouput file
-    TFile* outfile = new TFile("testFit_toyMC_fromPluto_mass_wrongp.root", "recreate");
+    TFile* outfile = new TFile("testFit_toyMC_fromPluto_massvtx.root", "recreate");
     TH1F* h01 = new TH1F("hLambdaMassPreFit", "", 100, 1.070, 1.250);
     h01->SetXTitle(" M_{p#pi^{-}} [GeV/c^{2}]");
     h01->SetYTitle(" events ");
@@ -211,18 +211,19 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
         // ---------------------------------------------------------------------------------
         std::vector<HRefitCand> cands;
         cands.clear();
-        cands.push_back(proton1_fit);
+        //cands.push_back(proton1_fit);
         //cands.push_back(kaon_fit);
-        //cands.push_back(proton2_fit);
+        cands.push_back(proton2_fit);
         cands.push_back(pion_fit);
 
         HKinFitter fitter(cands);
         fitter.setVerbosity(0);
         fitter.setNumberOfIterations(10);
         //fitter.setLearningRate(0.5);
-        fitter.setConvergenceCriterion(0.01);
-        fitter.addMassConstraint(1.11568);
-        //fitter.addVertexConstraint();
+        fitter.setConvergenceCriteria(0.01, 1e6, 1e6);
+        //fitter.addMassVtxConstraint(1.11568);
+        //fitter.addMassConstraint(1.11568);
+        fitter.addVertexConstraint();
         //fitter.add4Constraint(ini);
         if(fitter.fit()){
 

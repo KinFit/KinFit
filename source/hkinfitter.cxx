@@ -1119,7 +1119,7 @@ Bool_t HKinFitter::fit()
         fDNorm = 0;
         fAlphaNorm = 0;
         TMatrixD delta_alpha_it = alpha-neu_alpha;
-        for (Int_t i=0; i<d.GetNrows(); i++) fDNorm += pow(d(1,0),2);
+        for (Int_t i=0; i<d.GetNrows(); i++) fDNorm += pow(d(i,0),2);
         fDNorm = sqrt(fDNorm);
         for (Int_t i=0; i<delta_alpha.GetNrows(); i++) fAlphaNorm  += pow(delta_alpha_it(i,0),2);
         if (f3Constraint || fMomConstraint){
