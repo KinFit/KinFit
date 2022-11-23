@@ -1,6 +1,17 @@
 {
     "files.associations": {
         "fit_toyMC.C": "cpp",
-        "ToyMC.C": "cpp"
+        "ToyMC.C": "cpp",
+        "ToyMC_fromPluto.C": "cpp",
+        "analysis_user.C": "cpp",
+        "findVertices_toyMC_fromPluto.C": "cpp",
+        "fit_toyMC_fromPluto_protoncombis.C": "cpp",
+        "fit_toyMC_fromPluto.C": "cpp",
+        "fitLambda3C_toyMC_fromPluto.C": "cpp",
+        "test_toyMC_fromPluto.C": "cpp",
+        "test_toyMC.C": "cpp",
+        "ToyMC_fromPluto_HRefitCand_workaround.C": "cpp",
+        "ToyMC_fromPluto_HRefitCand.C": "cpp",
+        "ToyMC_fromPluto_vtxSmear.C": "cpp"
     }
 }

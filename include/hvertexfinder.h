@@ -17,7 +17,7 @@
 #include "TMatrixD.h"
 
 // framework includes
-#include "hrefitcand.h"
+#include "KFitParticle.h"
 
 using std::cout;
 using std::endl;
@@ -26,7 +26,7 @@ class HVertexFinder
 {
 
 private:
-    std::vector<HRefitCand> fCands;
+    std::vector<KFitParticle> fCands;
     // std::vector<int> fPids; // Index of a Pid in this vector correspond to that of the cand on the corresponding index in fCands.
     // std::vector<double> fWeight;
 
@@ -44,7 +44,7 @@ protected:
     TVector3 fB;         // LSM independent term
 
 public:
-    HVertexFinder(std::vector<HRefitCand> &);
+    HVertexFinder(std::vector<KFitParticle> &);
     ~HVertexFinder(){};
 
     void setVerbosity(int val) { fVerbose = val; }

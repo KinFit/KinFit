@@ -1,6 +1,6 @@
 #include "hdecaybuilder.h"
 
-HDecayBuilder::HDecayBuilder(std::vector<std::vector<HRefitCand>> &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv, HRefitCand mother, Double_t mass) : fCands(cands),
+HDecayBuilder::HDecayBuilder(std::vector<std::vector<KFitParticle>> &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv, KFitParticle mother, Double_t mass) : fCands(cands),
                                                                                                                                                                           fTask(task),
                                                                                                                                                                           fPids(pids),
                                                                                                                                                                           fCombiCounter(0),
@@ -27,7 +27,7 @@ HDecayBuilder::HDecayBuilder(std::vector<std::vector<HRefitCand>> &cands, TStrin
     }
 }
 
-HDecayBuilder::HDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVector lv, HRefitCand mother, Double_t mass) : fTask(task),
+HDecayBuilder::HDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVector lv, KFitParticle mother, Double_t mass) : fTask(task),
                                                                                                                             fPids(pids),
                                                                                                                             fProb(0.01),
                                                                                                                             fVerbose(0)
@@ -105,8 +105,8 @@ void HDecayBuilder::createNeutralCandidate()
         std::cout << "--------------- HDecayBuilder::createNeutralCandidate() -----------------" << std::endl;
     }
 
-    std::vector<HRefitCand> candsPrim;
-    std::vector<HRefitCand> candsDecay;
+    std::vector<KFitParticle> candsPrim;
+    std::vector<KFitParticle> candsDecay;
     Int_t tempPid;
 
     for (Int_t i_pids = 0; i_pids = (Int_t)fPids.size(); i_pids++)
@@ -263,13 +263,13 @@ void HDecayBuilder::checkDoubleParticle(size_t i)
 }
 
 /*
-void HDecayBuilder::createOutputParticle(HRefitCand refitCand)
+void HDecayBuilder::createOutputParticle(KFitParticle refitCand)
 {
     if (fVerbose > 0)
     {
         std::cout << "--------------- HDecayBuilder::createOutputParticle() -----------------" << std::endl;
     }
-    HRefitCand newParticle;
+    KFitParticle newParticle;
 
     newParticle.setMomentum(refitCand.P());
     newParticle.setTheta(refitCand.Theta());

@@ -1,5 +1,5 @@
 
-void ToyMC_fromPluto_HRefitCand(TStrng inFile, Int_t nEvents = 500000)
+void ToyMC_fromPluto_KFitParticle(TStrng inFile, Int_t nEvents = 500000)
 {
    TFile *outFile = new TFile("toy_montecarlo.root", "recreate");
 

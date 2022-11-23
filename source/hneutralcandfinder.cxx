@@ -1,6 +1,6 @@
 #include "hneutralcandfinder.h"
 
-HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands, TVector3 decayVertex, TVector3 primaryVertex) : fCands(cands), fVerbose(0), fMomentumAfterDecay(-1.), fDecayVertex(decayVertex), fPrimaryVertex(primaryVertex), fNeutralCandMass(1115.683), fPrimVtxResX(1.78590), fPrimVtxResY(1.75516), fPrimVtxResZ(3.00431), fDecVtxResX(5.75369), fDecVtxResY(5.57198), fDecVtxResZ(10.2602)
+HNeutralCandFinder::HNeutralCandFinder(const std::vector<KFitParticle> &cands, TVector3 decayVertex, TVector3 primaryVertex) : fCands(cands), fVerbose(0), fMomentumAfterDecay(-1.), fDecayVertex(decayVertex), fPrimaryVertex(primaryVertex), fNeutralCandMass(1115.683), fPrimVtxResX(1.78590), fPrimVtxResY(1.75516), fPrimVtxResZ(3.00431), fDecVtxResX(5.75369), fDecVtxResY(5.57198), fDecVtxResZ(10.2602)
 {
     if (fVerbose > 0)
     {
@@ -8,7 +8,7 @@ HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands, TVe
     }
 }
 
-HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands, double neutralCandMass, TVector3 decayVertex, TVector3 primaryVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ) : fCands(cands), fVerbose(0), fMomentumAfterDecay(-1.), fDecayVertex(decayVertex), fPrimaryVertex(primaryVertex), fNeutralCandMass(neutralCandMass), fPrimVtxResX(primVtxResX), fPrimVtxResY(primVtxResY), fPrimVtxResZ(primVtxResZ), fDecVtxResX(decVtxResX), fDecVtxResY(decVtxResY), fDecVtxResZ(decVtxResZ)
+HNeutralCandFinder::HNeutralCandFinder(const std::vector<KFitParticle> &cands, double neutralCandMass, TVector3 decayVertex, TVector3 primaryVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ) : fCands(cands), fVerbose(0), fMomentumAfterDecay(-1.), fDecayVertex(decayVertex), fPrimaryVertex(primaryVertex), fNeutralCandMass(neutralCandMass), fPrimVtxResX(primVtxResX), fPrimVtxResY(primVtxResY), fPrimVtxResZ(primVtxResZ), fDecVtxResX(decVtxResX), fDecVtxResY(decVtxResY), fDecVtxResZ(decVtxResZ)
 {
     if (fVerbose > 0)
     {
@@ -20,11 +20,11 @@ void HNeutralCandFinder::setNeutralMotherCand()
 {
     Double_t param_p1, param_p2;
 
-    HRefitCand cand1 = fCands[0];
+    KFitParticle cand1 = fCands[0];
 
     param_p1 = cand1.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
 
-    HRefitCand cand2 = fCands[1];
+    KFitParticle cand2 = fCands[1];
 
     param_p2 = cand2.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
 

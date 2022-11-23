@@ -14,7 +14,7 @@
 #include <cmath>
 
 // framework includes
-#include "hrefitcand.h"
+#include "KFitParticle.h"
 #include "hkinfitter.h"
 //#include "hvertexfinder.h"
 //#include "hneutralcandfinder.h"
@@ -34,11 +34,11 @@ class HDecayBuilder
 {
 private:
     // Working Particles
-    std::vector<HRefitCand> fFitCands;
-    std::vector<std::vector<HRefitCand>> fCands;
+    std::vector<KFitParticle> fFitCands;
+    std::vector<std::vector<KFitParticle>> fCands;
 
     // Output particles after fitting
-    std::vector<HRefitCand> fOutputCands;
+    std::vector<KFitParticle> fOutputCands;
 
     // Fitter input variables
     TString fTask;
@@ -46,7 +46,7 @@ private:
     //std::vector<int> fPidsPrim;
     //std::vector<int> fPidsDecay;
     TLorentzVector fIniSys;
-    HRefitCand fMother;
+    KFitParticle fMother;
     Double_t fMass;
 
     // For combinatorics
@@ -63,16 +63,16 @@ private:
     Int_t fVerbose;
 
 public:
-    HDecayBuilder(std::vector<std::vector<HRefitCand>> &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv = TLorentzVector(), HRefitCand mother = HRefitCand(), Double_t mass = 0.);
-    HDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVector lv = TLorentzVector(), HRefitCand mother = HRefitCand(), Double_t mass = 0.);
+    HDecayBuilder(std::vector<std::vector<KFitParticle>> &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), Double_t mass = 0.);
+    HDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), Double_t mass = 0.);
     ~HDecayBuilder(){};
 
     void setVerbosity(int val) { fVerbose = val; }
 
     // setters
-    void setInputCands(std::vector<std::vector<HRefitCand>> cands) {fCands = cands; }
+    void setInputCands(std::vector<std::vector<KFitParticle>> cands) {fCands = cands; }
     void setIniSys(TLorentzVector val) { fIniSys = val; }
-    void setMother(HRefitCand val) { fMother = val; }
+    void setMother(KFitParticle val) { fMother = val; }
     void setMass(Double_t val) { fMass = val; }
 /*
     void setPidsInVertices(std::vector<int> val1, std::vector<int> val2)
@@ -91,8 +91,8 @@ public:
     void fillFitCands();
     void checkDoubleParticle(size_t i);
 
-    void createOutputParticle(HRefitCand FittedCand);
-    void getFitCands(std::vector<HRefitCand> &cands) { cands = fOutputCands; }
+    void createOutputParticle(KFitParticle FittedCand);
+    void getFitCands(std::vector<KFitParticle> &cands) { cands = fOutputCands; }
     Double_t getChi2() { return fBestChi2; }
     Double_t getProbability() { return fBestProb; }
 };

@@ -3,7 +3,7 @@
 const size_t cov_dim = 5;
 
 // general HKinFitter constructor
-HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
+HKinFitter::HKinFitter(const std::vector<KFitParticle> &cands) : fCands(cands),
                                                                fVerbose(0),
                                                                fLearningRate(1),
                                                                fNumIterations(10)
@@ -42,7 +42,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
     // and the covariance
     for (Int_t ix = 0; ix < fN; ix++)
     {
-        HRefitCand cand = fCands[ix];
+        KFitParticle cand = fCands[ix];
         y(0 + ix * cov_dim, 0) = 1. / cand.P();
         y(1 + ix * cov_dim, 0) = cand.Theta();
         y(2 + ix * cov_dim, 0) = cand.Phi();
@@ -94,7 +94,7 @@ void HKinFitter::add4Constraint(TLorentzVector lv)
     f4Constraint = true;
 }
 
-void HKinFitter::add3Constraint(HRefitCand mother)
+void HKinFitter::add3Constraint(KFitParticle mother)
 {
     fyDim = (fN + 1) * cov_dim - 1; // Dimension of full covariance matrix (number of measured variables x cov_dim). Mother momentum is not measured
 
@@ -109,7 +109,7 @@ void HKinFitter::add3Constraint(HRefitCand mother)
     // set y to measurements and the covariance, set mass
     for (Int_t ix = 0; ix < fN; ix++) // for daughters
     {
-        HRefitCand cand = fCands[ix];
+        KFitParticle cand = fCands[ix];
 
         y(0 + ix * cov_dim, 0) = 1. / cand.P();
         y(1 + ix * cov_dim, 0) = cand.Theta();
@@ -1219,12 +1219,12 @@ Bool_t HKinFitter::fit()
     else return fConverged; // for number of iterations equal to 1
 }
 
-HRefitCand HKinFitter::getDaughter(Int_t val)
+KFitParticle HKinFitter::getDaughter(Int_t val)
 {
     return fCands[val];
 }
 
-HRefitCand HKinFitter::getMother()
+KFitParticle HKinFitter::getMother()
 {
     return fMother;
 }
@@ -1242,7 +1242,7 @@ void HKinFitter::updateDaughters()
     }
     for (Int_t val = 0; val < fN; ++val)
     {
-        HRefitCand &cand = fCands[val];
+        KFitParticle &cand = fCands[val];
         Double_t Px = (1. / y(0 + val * cov_dim, 0)) *
                       std::sin(y(1 + val * cov_dim, 0)) *
                       std::cos(y(2 + val * cov_dim, 0));
@@ -1276,7 +1276,7 @@ void HKinFitter::updateDaughters()
 
 void HKinFitter::updateMother()
 {
-    HRefitCand &mother = fMother;
+    KFitParticle &mother = fMother;
     Double_t Px = (1. / x(0, 0)) *
                   std::sin(y(0 + fN * cov_dim, 0)) *
                   std::cos(y(1 + fN * cov_dim, 0));
@@ -1307,7 +1307,7 @@ void HKinFitter::update()
 {
     for (Int_t val = 0; val < fN; ++val)
     {
-        HRefitCand &cand = fCands[val];
+        KFitParticle &cand = fCands[val];
         cand.update();
     }
 }

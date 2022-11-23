@@ -14,7 +14,7 @@
 #include <cmath>
 
 // framework includes
-#include "hrefitcand.h"
+#include "KFitParticle.h"
 #include "hparticletool.h"
 #include "hgeomvertexfit.h"
 
@@ -25,7 +25,7 @@ class HVertexTools
 
 {
 private:
-    std::vector<HRefitCand> fCands;
+    std::vector<KFitParticle> fCands;
 
     TVector3 fVertex;
     TVector3 fPrimaryVertex;
@@ -58,9 +58,9 @@ public:
 
     void setVerbosity(Int_t val) { fVerbose = val; }
 
-    TVector3 findVertex(const std::vector<HRefitCand> &cands);
-    TVector3 findPrimaryVertex(const std::vector<HRefitCand> &cands);
-    std::vector<HRefitCand> UpdateTrackParameters(std::vector<HRefitCand> &cands, TVector3 &VertexPos);
+    TVector3 findVertex(const std::vector<KFitParticle> &cands);
+    TVector3 findPrimaryVertex(const std::vector<KFitParticle> &cands);
+    std::vector<KFitParticle> UpdateTrackParameters(std::vector<KFitParticle> &cands, TVector3 &VertexPos);
     void calculateVertexProperties(TVector3 primaryVertex, TVector3 decayVertex);
 
     TVector3 getVertex() const { return fVertex; }               // Function that the user should use in the analysis macro

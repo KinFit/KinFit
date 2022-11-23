@@ -21,7 +21,7 @@
 
 using namespace std;
 
-void FillData(HRefitCand& outcand, double arr[])
+void FillData(KFitParticle& outcand, double arr[])
 {
     double deg2rad = TMath::DegToRad();
 
@@ -260,21 +260,21 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
 
         TLorentzVector lambda_gen = *proton2_gen + *pion_gen;
 
-        HRefitCand proton1_fit(proton1,p1CandRecoR,p1CandRecoZ);
+        KFitParticle proton1_fit(proton1,p1CandRecoR,p1CandRecoZ);
         FillData(proton1_fit, proton1_errors);
-        HRefitCand kaon_fit(kaon,KCandRecoR,KCandRecoZ);
+        KFitParticle kaon_fit(kaon,KCandRecoR,KCandRecoZ);
         FillData(kaon_fit, kaon_errors);
-        HRefitCand proton2_fit(proton2,p2CandRecoR,p2CandRecoZ);
-        //HRefitCand proton2_fit(proton2,trueDecVtxX,trueDecVtxY,trueDecVtxZ);      // Use this for calculating R and Z with HRefitCand functions instead
+        KFitParticle proton2_fit(proton2,p2CandRecoR,p2CandRecoZ);
+        //KFitParticle proton2_fit(proton2,trueDecVtxX,trueDecVtxY,trueDecVtxZ);      // Use this for calculating R and Z with KFitParticle functions instead
         FillData(proton2_fit, proton2_errors);
-        HRefitCand pion_fit(pion,piCandRecoR, piCandRecoZ);
-        //HRefitCand pion_fit(pion,trueDecVtxX, trueDecVtxY, trueDecVtxZ);          // Use this for calculating R and Z with HRefitCand functions instead 
+        KFitParticle pion_fit(pion,piCandRecoR, piCandRecoZ);
+        //KFitParticle pion_fit(pion,trueDecVtxX, trueDecVtxY, trueDecVtxZ);          // Use this for calculating R and Z with KFitParticle functions instead 
         FillData(pion_fit, pion_errors);
 
         // ---------------------------------------------------------------------------------
         // find the primary and decay vertex
         // ---------------------------------------------------------------------------------
-        std::vector<HRefitCand> cands1, cands2;
+        std::vector<KFitParticle> cands1, cands2;
         cands1.clear();
         cands1.push_back(proton1_fit);
         cands1.push_back(kaon_fit);
@@ -308,7 +308,7 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
         lambdafinder.setVerbosity(0);
         lambdafinder.setNeutralMotherCand();
 
-        HRefitCand lambda_cand = lambdafinder.getNeutralMotherCandidate();
+        KFitParticle lambda_cand = lambdafinder.getNeutralMotherCandidate();
         
         //hLambdaMassPreFit->Fill((proton2_fit + pion_fit).M());
         hLambdaMassPreFit->Fill((lambda_cand).M());
@@ -332,9 +332,9 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
         fitter.fit();
         if(1){
 
-            HRefitCand fcand1 = fitter.getDaughter(0); // proton
-            HRefitCand fcand2 = fitter.getDaughter(1); // pion
-            HRefitCand lambda_fit;
+            KFitParticle fcand1 = fitter.getDaughter(0); // proton
+            KFitParticle fcand2 = fitter.getDaughter(1); // pion
+            KFitParticle lambda_fit;
             TMatrixD test = lambda_fit.getCovariance();
             test.ResizeTo(5,5);
             lambda_fit.setCovariance(test);

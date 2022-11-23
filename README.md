@@ -5,7 +5,7 @@ Input: A root file containing
 - R, Z and PID for every track
 - Covariance matrix for every track
 - Primary event vertex
-To decide: Tree structure: Track parameters summarized in object (TClonesArray of HRefitCand) or flat tree structure
+To decide: Tree structure: Track parameters summarized in object (TClonesArray of KFitParticle) or flat tree structure
 
 Output: Same structure as input
 To decide: Several fitted candidates for same event or just best probability? Orgaization of fitted/unfitted tracks. Fit probablility/chi2 in addition?

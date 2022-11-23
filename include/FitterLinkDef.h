@@ -7,7 +7,7 @@
 #pragma link off all typedef;
 
 #pragma link C++ class HKinFitter;
-#pragma link C++ class HRefitCand;
+#pragma link C++ class KFitParticle;
 #pragma link C++ class HNeutralCandFinder;
 #pragma link C++ class HVertexFinder;
 

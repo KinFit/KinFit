@@ -1,5 +1,5 @@
-#ifndef HREFITCAND_H
-#define HREFITCAND_H
+#ifndef KFITPARTICLE_H
+#define KFITPARTICLE_H
 
 // ROOT includes
 #include <TMath.h>
@@ -10,10 +10,10 @@
 // framework includes
 //#include "hparticletool.h"
 
-class HRefitCand : public TLorentzVector
+class KFitParticle : public TLorentzVector
 {
 
-    ClassDef(HRefitCand, 1);
+    ClassDef(KFitParticle, 1);
 
 private:
     TLorentzVector *cand;
@@ -22,10 +22,10 @@ private:
     TMatrixD fCov;
 
 public:
-    HRefitCand(TLorentzVector *cand, Double_t R, Double_t Z);
-    HRefitCand(TLorentzVector *cand, Double_t X, Double_t Y, Double_t Z);
-    HRefitCand(); 
-    ~HRefitCand(){};
+    KFitParticle(TLorentzVector *cand, Double_t R, Double_t Z);
+    KFitParticle(TLorentzVector *cand, Double_t X, Double_t Y, Double_t Z);
+    KFitParticle(); 
+    ~KFitParticle(){};
     void setMomentum(Double_t val) { fMomentum = val; }
     void setTheta(Double_t val) { fTheta = val; }
     void setPhi(Double_t val) { fPhi = val; }
@@ -46,4 +46,4 @@ public:
     void update();
 };
 
-#endif /* HREFITCAND_H */
+#endif /* KFITPARTICLE_H */

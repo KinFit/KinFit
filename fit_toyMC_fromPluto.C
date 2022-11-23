@@ -18,7 +18,7 @@
 
 using namespace std;
 
-void FillData(HRefitCand& outcand, double arr[])
+void FillData(KFitParticle& outcand, double arr[])
 {
     double deg2rad = TMath::DegToRad();
 
@@ -197,19 +197,19 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
         h01->Fill(lambda.M());
         h012->Fill(lambda.P());
 
-        HRefitCand proton1_fit(proton1,p1CandRecoR,p1CandRecoZ);
+        KFitParticle proton1_fit(proton1,p1CandRecoR,p1CandRecoZ);
         FillData(proton1_fit, proton1_errors);
-        HRefitCand kaon_fit(kaon,KCandRecoR,KCandRecoZ);
+        KFitParticle kaon_fit(kaon,KCandRecoR,KCandRecoZ);
         FillData(kaon_fit, kaon_errors);
-        HRefitCand proton2_fit(proton2,p2CandRecoR,p2CandRecoZ);
+        KFitParticle proton2_fit(proton2,p2CandRecoR,p2CandRecoZ);
         FillData(proton2_fit, proton2_errors);
-        HRefitCand pion_fit(pion,piCandRecoR, piCandRecoZ);
+        KFitParticle pion_fit(pion,piCandRecoR, piCandRecoZ);
         FillData(pion_fit, pion_errors);
 
         // ---------------------------------------------------------------------------------
         // begin kinfit here
         // ---------------------------------------------------------------------------------
-        std::vector<HRefitCand> cands;
+        std::vector<KFitParticle> cands;
         cands.clear();
         cands.push_back(proton1_fit);
         //cands.push_back(kaon_fit);
@@ -226,8 +226,8 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
         //fitter.add4Constraint(ini);
         if(fitter.fit()){
 
-            HRefitCand fcand1 = fitter.getDaughter(0); // proton
-            HRefitCand fcand2 = fitter.getDaughter(1); // pion
+            KFitParticle fcand1 = fitter.getDaughter(0); // proton
+            KFitParticle fcand2 = fitter.getDaughter(1); // pion
 
             h02->Fill(fitter.getChi2());
             h03->Fill(fitter.getProb());

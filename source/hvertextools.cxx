@@ -4,7 +4,7 @@ HVertexTools::HVertexTools() : fVerbose(0), fPrimaryVertexFound(false), fUsePrim
 {
 }
 
-TVector3 HVertexTools::findVertex(const std::vector<HRefitCand> &cands)
+TVector3 HVertexTools::findVertex(const std::vector<KFitParticle> &cands)
 {
     if (fVerbose > 0)
     {
@@ -23,14 +23,14 @@ TVector3 HVertexTools::findVertex(const std::vector<HRefitCand> &cands)
         return fVertex;
     }
 
-    HRefitCand cand1 = cands[0];
+    KFitParticle cand1 = cands[0];
 
     param_theta1 = cand1.Theta();
     param_phi1 = cand1.Phi();
     param_R1 = cand1.getR();
     param_Z1 = cand1.getZ();
 
-    HRefitCand cand2 = cands[1];
+    KFitParticle cand2 = cands[1];
 
     param_theta2 = cand2.Theta();
     param_phi2 = cand2.Phi();
@@ -225,7 +225,7 @@ TVector3 HVertexTools::findVertex(const std::vector<HRefitCand> &cands)
     return fVertex;
 }
 
-std::vector<HRefitCand> HVertexTools::UpdateTrackParameters(std::vector<HRefitCand> &cands, TVector3 &vertexPos)
+std::vector<KFitParticle> HVertexTools::UpdateTrackParameters(std::vector<KFitParticle> &cands, TVector3 &vertexPos)
 {
     if (fVerbose > 0)
     {
@@ -236,7 +236,7 @@ std::vector<HRefitCand> HVertexTools::UpdateTrackParameters(std::vector<HRefitCa
     Double_t param_theta1, param_phi1, param_R1, param_Z1;
     Double_t param_theta2, param_phi2, param_R2, param_Z2;
 
-    HRefitCand cand1 = cands[0];
+    KFitParticle cand1 = cands[0];
 
     // param_p_inv1 = 1. / cand1.P();
     param_theta1 = cand1.Theta();
@@ -244,7 +244,7 @@ std::vector<HRefitCand> HVertexTools::UpdateTrackParameters(std::vector<HRefitCa
     param_R1 = cand1.getR();
     param_Z1 = cand1.getZ();
 
-    HRefitCand cand2 = cands[1];
+    KFitParticle cand2 = cands[1];
 
     // param_p_inv2 = 1. / cand2.P();
     param_theta2 = cand2.Theta();
@@ -345,7 +345,7 @@ std::vector<HRefitCand> HVertexTools::UpdateTrackParameters(std::vector<HRefitCa
         std::cout << "Cand2, phi: " << cand2.Phi() << std::endl;
     }
 
-    std::vector<HRefitCand> newCands;
+    std::vector<KFitParticle> newCands;
     newCands.clear();
     newCands.push_back(cand1);
     newCands.push_back(cand2);
@@ -353,7 +353,7 @@ std::vector<HRefitCand> HVertexTools::UpdateTrackParameters(std::vector<HRefitCa
     return newCands;
 }
 
-TVector3 HVertexTools::findPrimaryVertex(const std::vector<HRefitCand> &cands)
+TVector3 HVertexTools::findPrimaryVertex(const std::vector<KFitParticle> &cands)
 {
     if (fVerbose > 0)
     {
@@ -365,14 +365,14 @@ TVector3 HVertexTools::findPrimaryVertex(const std::vector<HRefitCand> &cands)
     Double_t param_theta2, param_phi2, param_R2, param_Z2;
 
     // All found protons in the event
-    HRefitCand primaryCand1 = cands[0];
+    KFitParticle primaryCand1 = cands[0];
 
     param_theta1 = primaryCand1.Theta();
     param_phi1 = primaryCand1.Phi();
     param_R1 = primaryCand1.getR();
     param_Z1 = primaryCand1.getZ();
 
-    HRefitCand primaryCand2 = cands[2];
+    KFitParticle primaryCand2 = cands[2];
     param_theta2 = primaryCand2.Theta();
     param_phi2 = primaryCand2.Phi();
     param_R2 = primaryCand2.getR();

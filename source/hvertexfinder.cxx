@@ -1,13 +1,13 @@
 #include "hvertexfinder.h"
 
-HVertexFinder::HVertexFinder(std::vector<HRefitCand> &cands) : fVerbose(0), fCands(cands)
+HVertexFinder::HVertexFinder(std::vector<KFitParticle> &cands) : fVerbose(0), fCands(cands)
 {
     fM.ResizeTo(3, 3);
     fSys.ResizeTo(3, 3);
 
     for (int i_cand = 0; i_cand < fCands.size(); i_cand++)
     {
-        HRefitCand cand = cands[i_cand];
+        KFitParticle cand = cands[i_cand];
 
         double param_theta = cand.Theta();
         double param_phi = cand.Phi();
@@ -112,7 +112,7 @@ void HVertexFinder::reset()
     fB.SetXYZ(0.0, 0.0, 0.0);
 }
 
-// TVector3 HVertexFinder::findVertex(const std::vector<HRefitCand> &cands)
+// TVector3 HVertexFinder::findVertex(const std::vector<KFitParticle> &cands)
 // {
 //     if (fVerbose > 0)
 //     {
@@ -139,7 +139,7 @@ void HVertexFinder::reset()
 //     for (int i_cands = 0; i_cands < (int)cands.size(); i_cands++)
 //     {
 
-//         HRefitCand cand = cands[i_cands];
+//         KFitParticle cand = cands[i_cands];
 
 //         param_theta = cand.Theta();
 //         param_phi = cand.Phi();
@@ -176,7 +176,7 @@ void HVertexFinder::reset()
 //     return fVertex;
 // }
 
-// std::vector<HRefitCand> HVertexFinder::UpdateTrackParameters(std::vector<HRefitCand> &cands, TVector3 &vertexPos)
+// std::vector<KFitParticle> HVertexFinder::UpdateTrackParameters(std::vector<KFitParticle> &cands, TVector3 &vertexPos)
 // {
 //     if (fVerbose > 0)
 //     {
@@ -187,7 +187,7 @@ void HVertexFinder::reset()
 //     double param_theta1, param_phi1, param_R1, param_Z1;
 //     double param_theta2, param_phi2, param_R2, param_Z2;
 
-//     HRefitCand cand1 = cands[0];
+//     KFitParticle cand1 = cands[0];
 
 //     //param_p_inv1 = 1. / cand1.P();
 //     param_theta1 = cand1.Theta();
@@ -195,7 +195,7 @@ void HVertexFinder::reset()
 //     param_R1 = cand1.getR();
 //     param_Z1 = cand1.getZ();
 
-//     HRefitCand cand2 = cands[1];
+//     KFitParticle cand2 = cands[1];
 
 //     //param_p_inv2 = 1. / cand2.P();
 //     param_theta2 = cand2.Theta();
@@ -296,7 +296,7 @@ void HVertexFinder::reset()
 //         std::cout << "Cand2, phi: " << cand2.Phi() << std::endl;
 //     }
 
-//     std::vector<HRefitCand> newCands;
+//     std::vector<KFitParticle> newCands;
 //     newCands.clear();
 //     newCands.push_back(cand1);
 //     newCands.push_back(cand2);
@@ -304,7 +304,7 @@ void HVertexFinder::reset()
 //     return newCands;
 // }
 
-// TVector3 HVertexFinder::findPrimaryVertex(const std::vector<HRefitCand> &cands)
+// TVector3 HVertexFinder::findPrimaryVertex(const std::vector<KFitParticle> &cands)
 // {
 //     if (fVerbose > 0)
 //     {
@@ -316,14 +316,14 @@ void HVertexFinder::reset()
 //     double param_theta2, param_phi2, param_R2, param_Z2;
 
 //     // All found protons in the event
-//     HRefitCand primaryCand1 = cands[0];
+//     KFitParticle primaryCand1 = cands[0];
 
 //     param_theta1 = primaryCand1.Theta();
 //     param_phi1 = primaryCand1.Phi();
 //     param_R1 = primaryCand1.getR();
 //     param_Z1 = primaryCand1.getZ();
 
-//     HRefitCand primaryCand2 = cands[2];
+//     KFitParticle primaryCand2 = cands[2];
 //     param_theta2 = primaryCand2.Theta();
 //     param_phi2 = primaryCand2.Phi();
 //     param_R2 = primaryCand2.getR();
