@@ -9,14 +9,15 @@
 #define HGEOMVERTEXFIT_H
 
 #include "TMatrixD.h"
+#include "TVector3.h"
 
 class HGeomVertexFit
 {
 private:
-    TMatrixD fM(3, 3); // Temporal matrix for calculations
+    TMatrixD fM; // Temporal matrix for calculations
 protected:
-    TMatrixD fSys(3, 3); // LSM system inverse matrix
-    TVector3 fB;         // LSM independent term
+    TMatrixD fSys; // LSM system inverse matrix
+    TVector3 fB;   // LSM independent term
 public:
     HGeomVertexFit(void);
     ~HGeomVertexFit(void);

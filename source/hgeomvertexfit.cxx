@@ -18,6 +18,8 @@
 HGeomVertexFit::HGeomVertexFit(void)
 {
     // The default constructor
+    fM.ResizeTo(3, 3);
+    fSys.ResizeTo(3, 3);
 }
 
 HGeomVertexFit::~HGeomVertexFit(void)
@@ -34,15 +36,15 @@ void HGeomVertexFit::addLine(const TVector3 &r, const TVector3 &alpha,
     //   alpha --> normalized direction vector
     //   w --> weight of this line in the fit
 
-    fM(0, 0) = w * (alpha.GetY() * alpha.GetY() + alpha.GetZ() * alpha.GetZ());
-    fM(0, 1) = -w * (alpha.GetX() * alpha.GetY());
-    fM(0, 2) = -w * (alpha.GetX() * alpha.GetZ());
+    fM(0, 0) = w * (alpha.Y() * alpha.Y() + alpha.Z() * alpha.Z());
+    fM(0, 1) = -w * (alpha.X() * alpha.Y());
+    fM(0, 2) = -w * (alpha.X() * alpha.Z());
     //  fM(1,0)=-(alpha.X() * alpha.Y());
-    fM(1, 1) = w * (alpha.GetX() * alpha.GetX() + alpha.GetZ() * alpha.GetZ());
-    fM(1, 2) = -w * (alpha.GetY() * alpha.GetZ());
+    fM(1, 1) = w * (alpha.X() * alpha.X() + alpha.Z() * alpha.Z());
+    fM(1, 2) = -w * (alpha.Y() * alpha.Z());
     // fM(2,0)=-(alpha.X() * alpha.Z());
     // fM(2,1)=-(alpha.Y() * alpha.Z());
-    fM(2, 2) = w * (alpha.GetY() * alpha.GetY() + alpha.GetX() * alpha.GetX());
+    fM(2, 2) = w * (alpha.Y() * alpha.Y() + alpha.X() * alpha.X());
 
     fSys(0, 0) += fM(0, 0);
     fSys(0, 1) += fM(0, 1);
@@ -51,12 +53,12 @@ void HGeomVertexFit::addLine(const TVector3 &r, const TVector3 &alpha,
     fSys(1, 2) += fM(1, 2);
     fSys(2, 2) += fM(2, 2);
 
-    fB.X() += fM(0, 0) * r.GetX() + fM(0, 1) * r.GetY() + fM(0, 2) * r.GetZ();
-    fB.Y() += fM(0, 1) * r.GetX() + fM(1, 1) * r.GetY() + fM(1, 2) * r.GetZ();
-    fB.Z() += fM(0, 2) * r.GetX() + fM(1, 2) * r.GetY() + fM(2, 2) * r.GetZ();
+    fB.X() += fM(0, 0) * r.X() + fM(0, 1) * r.Y() + fM(0, 2) * r.Z();
+    fB.Y() += fM(0, 1) * r.X() + fM(1, 1) * r.Y() + fM(1, 2) * r.Z();
+    fB.Z() += fM(0, 2) * r.X() + fM(1, 2) * r.Y() + fM(2, 2) * r.Z();
 }
 
-void HGeomVertexFit::getVertex(TVector3 &out)
+void HGeomVertexFit::getVertex(TVector3 &out);
 {
     // This method fills the vector "out" with the coordinates
     // of the point of maximun approach to the lines added with

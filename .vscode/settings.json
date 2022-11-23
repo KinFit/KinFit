@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "fit_toyMC.C": "cpp",
+        "ToyMC.C": "cpp"
+    }
+}

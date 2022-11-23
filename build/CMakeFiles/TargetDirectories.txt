@@ -1,4 +1,0 @@
-/mnt/d/waleed/pp45/KinFit/KinFit/build/CMakeFiles/rebuild_cache.dir
-/mnt/d/waleed/pp45/KinFit/KinFit/build/CMakeFiles/edit_cache.dir
-/mnt/d/waleed/pp45/KinFit/KinFit/build/CMakeFiles/KinFit.dir
-/mnt/d/waleed/pp45/KinFit/KinFit/build/CMakeFiles/KinFitDict.dir
