@@ -1,22 +1,22 @@
-#include "hneutralcandfinder.h"
+#include "KFitNeutralCandFinder.h"
 
-HNeutralCandFinder::HNeutralCandFinder(const std::vector<KFitParticle> &cands, TVector3 decayVertex, TVector3 primaryVertex) : fCands(cands), fVerbose(0), fMomentumAfterDecay(-1.), fDecayVertex(decayVertex), fPrimaryVertex(primaryVertex), fNeutralCandMass(1115.683), fPrimVtxResX(1.78590), fPrimVtxResY(1.75516), fPrimVtxResZ(3.00431), fDecVtxResX(5.75369), fDecVtxResY(5.57198), fDecVtxResZ(10.2602)
+KFitNeutralCandFinder::KFitNeutralCandFinder(const std::vector<KFitParticle> &cands, TVector3 decayVertex, TVector3 primaryVertex) : fCands(cands), fVerbose(0), fMomentumAfterDecay(-1.), fDecayVertex(decayVertex), fPrimaryVertex(primaryVertex), fNeutralCandMass(1115.683), fPrimVtxResX(1.78590), fPrimVtxResY(1.75516), fPrimVtxResZ(3.00431), fDecVtxResX(5.75369), fDecVtxResY(5.57198), fDecVtxResZ(10.2602)
 {
     if (fVerbose > 0)
     {
-        std::cout << "--------------- HNeutralCandFinder -----------------" << std::endl;
+        std::cout << "--------------- KFitNeutralCandFinder -----------------" << std::endl;
     }
 }
 
-HNeutralCandFinder::HNeutralCandFinder(const std::vector<KFitParticle> &cands, double neutralCandMass, TVector3 decayVertex, TVector3 primaryVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ) : fCands(cands), fVerbose(0), fMomentumAfterDecay(-1.), fDecayVertex(decayVertex), fPrimaryVertex(primaryVertex), fNeutralCandMass(neutralCandMass), fPrimVtxResX(primVtxResX), fPrimVtxResY(primVtxResY), fPrimVtxResZ(primVtxResZ), fDecVtxResX(decVtxResX), fDecVtxResY(decVtxResY), fDecVtxResZ(decVtxResZ)
+KFitNeutralCandFinder::KFitNeutralCandFinder(const std::vector<KFitParticle> &cands, double neutralCandMass, TVector3 decayVertex, TVector3 primaryVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ) : fCands(cands), fVerbose(0), fMomentumAfterDecay(-1.), fDecayVertex(decayVertex), fPrimaryVertex(primaryVertex), fNeutralCandMass(neutralCandMass), fPrimVtxResX(primVtxResX), fPrimVtxResY(primVtxResY), fPrimVtxResZ(primVtxResZ), fDecVtxResX(decVtxResX), fDecVtxResY(decVtxResY), fDecVtxResZ(decVtxResZ)
 {
     if (fVerbose > 0)
     {
-        std::cout << "--------------- HNeutralCandFinder -----------------" << std::endl;
+        std::cout << "--------------- KFitNeutralCandFinder -----------------" << std::endl;
     }
 }
 
-void HNeutralCandFinder::setNeutralMotherCand()
+void KFitNeutralCandFinder::setNeutralMotherCand()
 {
     Double_t param_p1, param_p2;
 
@@ -39,7 +39,7 @@ void HNeutralCandFinder::setNeutralMotherCand()
 
     if (fVerbose > 0)
     {
-        std::cout << " ----------- HNeutralCandFinder::setNeutralMotherCand() -----------" << std::endl;
+        std::cout << " ----------- KFitNeutralCandFinder::setNeutralMotherCand() -----------" << std::endl;
         std::cout << "" << std::endl;
     }
 

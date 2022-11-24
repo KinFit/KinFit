@@ -8,13 +8,13 @@
 #include <math.h>
 
 
-#include "hrootfitter.h"
+#include "KFitRootAnalyzer.h"
 
 using namespace std;
 
 Int_t analysis_user(TString infileList="input.root", TString outfile = "fitted.root", Int_t nEvents=1000){
 
-    HRootFitter RootFitter(infileList, outfile, nEvents);
+    KFitRootAnalyzer RootAnalyzer(infileList, outfile, nEvents);
     std::vector<int> pids;
     //std::vector<int> pidsPrimVertex; // Jenny: User must set this for 3C fit
     //stc::vector<int> pidsDecayVertex; // Jenny: User must set this for 3C fit
@@ -24,7 +24,7 @@ Int_t analysis_user(TString infileList="input.root", TString outfile = "fitted.r
     Double_t mass = 1.11568;
 
     //RootFitter.addFitterTask("4c", pids, ppSystem);
-    RootFitter.doFitterTask("Mass", pids, mass);
+    RootAnalyzer.doFitterTask("Mass", pids, mass);
     cout<<"fitter task performed"<<endl;
     //RootFitter.finish();
     cout<<"finished"<<endl;

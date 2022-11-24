@@ -1,6 +1,6 @@
-#include "hdecaybuilder.h"
+#include "KFitDecayBuilder.h"
 
-HDecayBuilder::HDecayBuilder(std::vector<std::vector<KFitParticle>> &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv, KFitParticle mother, Double_t mass) : fCands(cands),
+KFitDecayBuilder::KFitDecayBuilder(std::vector<std::vector<KFitParticle>> &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv, KFitParticle mother, Double_t mass) : fCands(cands),
                                                                                                                                                                           fTask(task),
                                                                                                                                                                           fPids(pids),
                                                                                                                                                                           fCombiCounter(0),
@@ -10,7 +10,7 @@ HDecayBuilder::HDecayBuilder(std::vector<std::vector<KFitParticle>> &cands, TStr
 {
     if (fVerbose > 0)
     {
-        std::cout << "--------------- HDecayBuilder() -----------------" << std::endl;
+        std::cout << "--------------- KFitDecayBuilder() -----------------" << std::endl;
     }
 
     setIniSys(lv);
@@ -27,7 +27,7 @@ HDecayBuilder::HDecayBuilder(std::vector<std::vector<KFitParticle>> &cands, TStr
     }
 }
 
-HDecayBuilder::HDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVector lv, KFitParticle mother, Double_t mass) : fTask(task),
+KFitDecayBuilder::KFitDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVector lv, KFitParticle mother, Double_t mass) : fTask(task),
                                                                                                                             fPids(pids),
                                                                                                                             fProb(0.01),
                                                                                                                             fVerbose(0)
@@ -35,7 +35,7 @@ HDecayBuilder::HDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVe
 {
     if (fVerbose > 0)
     {
-        std::cout << "--------------- HDecayBuilder() -----------------" << std::endl;
+        std::cout << "--------------- KFitDecayBuilder() -----------------" << std::endl;
     }
 
     setIniSys(lv);
@@ -44,7 +44,7 @@ HDecayBuilder::HDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVe
 
 }
 
-void HDecayBuilder::countCombis()
+void KFitDecayBuilder::countCombis()
 {
     fCombiCounter = 0;
     // Determine the number of combinations of the input particles
@@ -58,7 +58,7 @@ void HDecayBuilder::countCombis()
 
 }
 
-void HDecayBuilder::buildDecay()
+void KFitDecayBuilder::buildDecay()
 {
 
     cout << "Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombos << endl;
@@ -98,11 +98,11 @@ void HDecayBuilder::buildDecay()
 }
 
 /*
-void HDecayBuilder::createNeutralCandidate()
+void KFitDecayBuilder::createNeutralCandidate()
 {
     if (fVerbose > 0)
     {
-        std::cout << "--------------- HDecayBuilder::createNeutralCandidate() -----------------" << std::endl;
+        std::cout << "--------------- KFitDecayBuilder::createNeutralCandidate() -----------------" << std::endl;
     }
 
     std::vector<KFitParticle> candsPrim;
@@ -138,15 +138,15 @@ void HDecayBuilder::createNeutralCandidate()
 
     // Find first vertex from all particle combinations if user set PIDs
 
-    HVertexFinder *vtxFinderPrim = new HVertexFinder();
+    KFitVertexFinder *vtxFinderPrim = new KFitVertexFinder();
     primVertex = vtxFinderPrim->findVertex(candsPrim);
 
     // Find second vertex from all particle combinations of user set PIDs
 
-    HVertexFinder *vtxFinderSec = new HVertexFinder();
+    KFitVertexFinder *vtxFinderSec = new KFitVertexFinder();
     decayVertex = vtxFinderSec->findVertex(candsDecay);
 
-    HNeutralCandFinder candFinder(candsDecay);
+    KFitNeutralCandFinder candFinder(candsDecay);
     candFinder.setNeutralMotherCand(primVertex, decayVertex);
 
     fFitCands = candsDecay;
@@ -156,7 +156,7 @@ void HDecayBuilder::createNeutralCandidate()
 }
 */
 
-Bool_t HDecayBuilder::doFit()
+Bool_t KFitDecayBuilder::doFit()
 {
     HKinFitter Fitter(fFitCands);
     if (fTask == "4C") Fitter.add4Constraint(fIniSys);
@@ -196,7 +196,7 @@ Bool_t HDecayBuilder::doFit()
     }
 }
 /*
-bool HDecayBuilder::do3cFit()
+bool KFitDecayBuilder::do3cFit()
 {
     createNeutralCandidate();
     HKinFitter Fitter(fFitCands, fMother);
@@ -204,14 +204,14 @@ bool HDecayBuilder::do3cFit()
     Fitter.fit();
 }
 
-bool HDecayBuilder::doMissMomFit()
+bool KFitDecayBuilder::doMissMomFit()
 {
     HKinFitter Fitter(fFitCands, fIniSys, fMass);
     Fitter.addMomConstraint();
     Fitter.fit();
 }
 */
-void HDecayBuilder::fillFitCands()
+void KFitDecayBuilder::fillFitCands()
 {
 
     if(fFitCands.size()>0) fFitCands.clear();
@@ -249,7 +249,7 @@ void HDecayBuilder::fillFitCands()
         fillFitCands(); // If some particle has been filled more than once into fFitCands, repeat the procedure with the next combination
 }
 
-void HDecayBuilder::checkDoubleParticle(size_t i)
+void KFitDecayBuilder::checkDoubleParticle(size_t i)
 {
     for (size_t j = 0; j < i; j++)
     {
@@ -263,11 +263,11 @@ void HDecayBuilder::checkDoubleParticle(size_t i)
 }
 
 /*
-void HDecayBuilder::createOutputParticle(KFitParticle refitCand)
+void KFitDecayBuilder::createOutputParticle(KFitParticle refitCand)
 {
     if (fVerbose > 0)
     {
-        std::cout << "--------------- HDecayBuilder::createOutputParticle() -----------------" << std::endl;
+        std::cout << "--------------- KFitDecayBuilder::createOutputParticle() -----------------" << std::endl;
     }
     KFitParticle newParticle;
 

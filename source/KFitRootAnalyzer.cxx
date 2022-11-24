@@ -1,6 +1,6 @@
-#include "hrootfitter.h"
+#include "KFitRootAnalyzer.h"
 
-HRootFitter::HRootFitter(TString inFileName, TString outFileName, Int_t nEvents) : fEvents(nEvents),
+KFitRootAnalyzer::KFitRootAnalyzer(TString inFileName, TString outFileName, Int_t nEvents) : fEvents(nEvents),
                                                                                     fVerbose(0)
 {
     finFile = new TFile(inFileName, "READ");
@@ -13,7 +13,7 @@ HRootFitter::HRootFitter(TString inFileName, TString outFileName, Int_t nEvents)
 }
 
 // Select and sort particles according to their PID
-void HRootFitter::selectCandidates()
+void KFitRootAnalyzer::selectCandidates()
 {
     Int_t ntracks = fCands_in->GetEntries();
 
@@ -39,7 +39,7 @@ void HRootFitter::selectCandidates()
 }
 
 /*
-void HRootFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector())
+void KFitRootAnalyzer::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector())
 {
 
     // fCandsFit.Clear();
@@ -53,7 +53,7 @@ void HRootFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzV
 }
 */
 
-void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, KFitParticle mother, Double_t mm)
+void KFitRootAnalyzer::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, KFitParticle mother, Double_t mm)
 {
     cout << "Task added: " << task << endl;
 
@@ -113,7 +113,7 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
 
         // initialize DecayBuilder
         cout << "ini Decay Builder" << endl;
-        HDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
+        KFitDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
         cout << "build decay1" << endl;
         cout << "build decay2" << endl;
         builder.buildDecay();
@@ -148,7 +148,7 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
     } // end of event loop
 }
 
-void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t mm, TLorentzVector lv, KFitParticle mother)
+void KFitRootAnalyzer::doFitterTask(TString task, std::vector<Int_t> pids, Double_t mm, TLorentzVector lv, KFitParticle mother)
 {
     cout << "Task added: " << task << endl;
 
@@ -184,7 +184,7 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
 
     cout<<"entries: "<<entries<<endl;
 
-    HDecayBuilder builder(task, fPids, lv, mother, mm);
+    KFitDecayBuilder builder(task, fPids, lv, mother, mm);
 
     // start of the event loop
     for (Int_t i = 1; i < entries; i++)
@@ -212,7 +212,7 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
 
         // initialize DecayBuilder
         cout << "ini Decay Builder" << endl;
-        //HDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
+        //KFitDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
         builder.setInputCands(fCandsFit);
         builder.countCombis();
         cout << "build decay1" << endl;
@@ -279,7 +279,7 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
 }
 
 // Close everything
-void HRootFitter::finish()
+void KFitRootAnalyzer::finish()
 {
     foutFile->cd();
     fTree_out->Write();
@@ -291,12 +291,12 @@ void HRootFitter::finish()
 
 /*
 // Function to fill KFitParticle -- not needed here if input is already KFitParticle
-void HRootFitter::FillData(HParticleCandSim *cand, KFitParticle &outcand, double arr[5], double mass)
+void KFitRootAnalyzer::FillData(HParticleCandSim *cand, KFitParticle &outcand, double arr[5], double mass)
 {
 
     if (fVerbose > 0)
     {
-        std::cout << " ----------- HRootFitter::FillData() -----------" << std::endl;
+        std::cout << " ----------- KFitRootAnalyzer::FillData() -----------" << std::endl;
         std::cout << "" << std::endl;
     }
 

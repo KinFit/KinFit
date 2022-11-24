@@ -16,8 +16,8 @@
 #include <vector>
 
 #include "/home/jana/KinFit/include/hkinfitter.h"
-#include "/home/jana/KinFit/include/hvertexfinder.h"
-#include "/home/jana/KinFit/include/hneutralcandfinder.h"
+#include "/home/jana/KinFit/include/KFitVertexFinder.h"
+#include "/home/jana/KinFit/include/KFitNeutralCandFinder.h"
 
 using namespace std;
 
@@ -282,8 +282,8 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
         cands2.push_back(proton2_fit);
         cands2.push_back(pion_fit);
 
-        HVertexFinder vtx1finder(cands1);
-        HVertexFinder vtx2finder(cands2);
+        KFitVertexFinder vtx1finder(cands1);
+        KFitVertexFinder vtx2finder(cands2);
 
         TVector3 vtx1 = vtx1finder.getVertex();
         TVector3 vtx2 = vtx2finder.getVertex();
@@ -303,8 +303,8 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
         // find the neutral candidate
         // ---------------------------------------------------------------------------------
 
-        HNeutralCandFinder lambdafinder(cands2, 1.115683, vtx2, vtx1, 0.26, 0.26, 0.69, 0.26, 0.26, 0.7);
-        //HNeutralCandFinder lambdafinder(cands2, 1.115683, vtx2, vtx1, 0.5, 0.5, 1, 0.5, 0.5, 1);
+        KFitNeutralCandFinder lambdafinder(cands2, 1.115683, vtx2, vtx1, 0.26, 0.26, 0.69, 0.26, 0.26, 0.7);
+        //KFitNeutralCandFinder lambdafinder(cands2, 1.115683, vtx2, vtx1, 0.5, 0.5, 1, 0.5, 0.5, 1);
         lambdafinder.setVerbosity(0);
         lambdafinder.setNeutralMotherCand();
 

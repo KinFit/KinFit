@@ -1,11 +1,11 @@
 /**
- * HRootFitter.h
+ * KFitRootAnalyzer.h
  *
  *
  */
 
-#ifndef HROOTFITTER_H
-#define HROOTFITTER_H
+#ifndef KFITROOTANALYZER_H
+#define KFITROOTANALYZER_H
 
 // system includes
 #include <iostream>
@@ -19,12 +19,12 @@
 #include "TClonesArray.h"
 
 #include "KFitParticle.h"
-#include "hdecaybuilder.h"
+#include "KFitDecayBuilder.h"
 
 using std::cout;
 using std::endl;
 
-class HRootFitter
+class KFitRootAnalyzer
 {
 private:
     //TString fInfileList, fOutprefix;
@@ -48,8 +48,8 @@ private:
     // put to KFitParticle, here cands should be fully filled already
     
 public:
-    HRootFitter(TString inFileName, TString outFileName, Int_t nEvents=-1);
-    ~HRootFitter(){};
+    KFitRootAnalyzer(TString inFileName, TString outFileName, Int_t nEvents=-1);
+    ~KFitRootAnalyzer(){};
 
     //User functions
     void doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), Double_t mm=0.);
@@ -69,4 +69,4 @@ public:
     void finish(); //write output
 };
 
-#endif /* HROOTFITTER_H */
+#endif /* KFITROOTANALYZER_H */

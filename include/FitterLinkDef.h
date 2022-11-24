@@ -8,7 +8,7 @@
 
 #pragma link C++ class HKinFitter;
 #pragma link C++ class KFitParticle;
-#pragma link C++ class HNeutralCandFinder;
-#pragma link C++ class HVertexFinder;
+#pragma link C++ class KFitNeutralCandFinder;
+#pragma link C++ class KFitVertexFinder;
 
 #endif

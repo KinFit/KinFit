@@ -1,11 +1,11 @@
 /**
- * HNeutralCandFinder.h
+ * KFitNeutralCandFinder.h
  *
  *
  */
 
-#ifndef HNEUTRALCANDFINDER_H
-#define HNEUTRALCANDFINDER_H
+#ifndef KFITNEUTRALCANDFINDER_H
+#define KFITNEUTRALCANDFINDER_H
 
 // system includes
 #include <iostream>
@@ -14,13 +14,13 @@
 #include <cmath>
 // framework includes
 #include "KFitParticle.h"
-//#include "hvertexfinder.h"
+//#include "KFitVertexFinder.h"
 //#include "hparticletool.h"
 
 using std::cout;
 using std::endl;
 
-class HNeutralCandFinder
+class KFitNeutralCandFinder
 {
 private:
     std::vector<KFitParticle> fCands;
@@ -50,9 +50,9 @@ private:
     TMatrixD fCovarianceNeutralMother;
 
 public:
-    HNeutralCandFinder(const std::vector<KFitParticle> &cands, double neutralCandMass, TVector3 decayVertex, TVector3 primaryVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ);
-    HNeutralCandFinder(const std::vector<KFitParticle> &cands, TVector3 decayVertex, TVector3 primaryVertex);
-    ~HNeutralCandFinder(){};
+    KFitNeutralCandFinder(const std::vector<KFitParticle> &cands, double neutralCandMass, TVector3 decayVertex, TVector3 primaryVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ);
+    KFitNeutralCandFinder(const std::vector<KFitParticle> &cands, TVector3 decayVertex, TVector3 primaryVertex);
+    ~KFitNeutralCandFinder(){};
 
     void setVerbosity(Int_t val) { fVerbose = val; }
 
@@ -67,4 +67,4 @@ public:
     TMatrixD getCovarianceMatrixNeutralMother() { return fCovarianceNeutralMother; }
 };
 
-#endif /* HNEUTRALCANDFINDER_H */
+#endif /* KFITNEUTRALCANDFINDER_H */

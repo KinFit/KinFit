@@ -1,11 +1,11 @@
 /**
- * HDecayBuilder.h
+ * KFitDecayBuilder.h
  *
  *
  */
 
-#ifndef HDECAYBUILDER_H
-#define HDECAYBUILDER_H
+#ifndef KFITDECAYBUILDER_H
+#define KFITDECAYBUILDER_H
 
 // system includes
 #include <iostream>
@@ -16,7 +16,7 @@
 // framework includes
 #include "KFitParticle.h"
 #include "hkinfitter.h"
-//#include "hvertexfinder.h"
+//#include "KFitVertexFinder.h"
 //#include "hneutralcandfinder.h"
 
 //#include "TH1F.h"
@@ -30,7 +30,7 @@
 using std::cout;
 using std::endl;
 
-class HDecayBuilder
+class KFitDecayBuilder
 {
 private:
     // Working Particles
@@ -63,9 +63,9 @@ private:
     Int_t fVerbose;
 
 public:
-    HDecayBuilder(std::vector<std::vector<KFitParticle>> &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), Double_t mass = 0.);
-    HDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), Double_t mass = 0.);
-    ~HDecayBuilder(){};
+    KFitDecayBuilder(std::vector<std::vector<KFitParticle>> &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), Double_t mass = 0.);
+    KFitDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), Double_t mass = 0.);
+    ~KFitDecayBuilder(){};
 
     void setVerbosity(int val) { fVerbose = val; }
 
@@ -97,4 +97,4 @@ public:
     Double_t getProbability() { return fBestProb; }
 };
 
-#endif /* HDECAYBUILDER_H */
+#endif /* KFITDECAYBUILDER_H */

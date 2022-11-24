@@ -1,6 +1,6 @@
-#include "hvertexfinder.h"
+#include "KFitVertexFinder.h"
 
-HVertexFinder::HVertexFinder(std::vector<KFitParticle> &cands) : fVerbose(0), fCands(cands)
+KFitVertexFinder::KFitVertexFinder(std::vector<KFitParticle> &cands) : fVerbose(0), fCands(cands)
 {
     fM.ResizeTo(3, 3);
     fSys.ResizeTo(3, 3);
@@ -32,13 +32,13 @@ HVertexFinder::HVertexFinder(std::vector<KFitParticle> &cands) : fVerbose(0), fC
     reset();
 }
 
-void HVertexFinder::addLinesToVertex(const TVector3 &r, const TVector3 &alpha,
+void KFitVertexFinder::addLinesToVertex(const TVector3 &r, const TVector3 &alpha,
                              const Double_t w)
 {
 
     if (fVerbose > 0)
     {
-        std::cout << " ----------- HVertexFinder::addLinesToVertex() -----------" << std::endl;
+        std::cout << " ----------- KFitVertexFinder::addLinesToVertex() -----------" << std::endl;
         std::cout << "" << std::endl;
     }
 
@@ -65,11 +65,11 @@ void HVertexFinder::addLinesToVertex(const TVector3 &r, const TVector3 &alpha,
 
 }
 
-void HVertexFinder::findVertex(){
+void KFitVertexFinder::findVertex(){
 
     if (fVerbose > 0)
     {
-        std::cout << " ----------- HVertexFinder::findVertex() -----------" << std::endl;
+        std::cout << " ----------- KFitVertexFinder::findVertex() -----------" << std::endl;
         std::cout << "" << std::endl;
     }
 
@@ -101,7 +101,7 @@ void HVertexFinder::findVertex(){
 
 }
 
-void HVertexFinder::reset()
+void KFitVertexFinder::reset()
 {
 
     for (Int_t i = 0; i < 3; i++)
@@ -112,11 +112,11 @@ void HVertexFinder::reset()
     fB.SetXYZ(0.0, 0.0, 0.0);
 }
 
-// TVector3 HVertexFinder::findVertex(const std::vector<KFitParticle> &cands)
+// TVector3 KFitVertexFinder::findVertex(const std::vector<KFitParticle> &cands)
 // {
 //     if (fVerbose > 0)
 //     {
-//         std::cout << " ----------- HVertexFinder::findVertex() -----------" << std::endl;
+//         std::cout << " ----------- KFitVertexFinder::findVertex() -----------" << std::endl;
 //         std::cout << "" << std::endl;
 //     }
 
@@ -176,11 +176,11 @@ void HVertexFinder::reset()
 //     return fVertex;
 // }
 
-// std::vector<KFitParticle> HVertexFinder::UpdateTrackParameters(std::vector<KFitParticle> &cands, TVector3 &vertexPos)
+// std::vector<KFitParticle> KFitVertexFinder::UpdateTrackParameters(std::vector<KFitParticle> &cands, TVector3 &vertexPos)
 // {
 //     if (fVerbose > 0)
 //     {
-//         std::cout << " ----------- HVertexFinder::UpdateTrackParameters() -----------" << std::endl;
+//         std::cout << " ----------- KFitVertexFinder::UpdateTrackParameters() -----------" << std::endl;
 //         std::cout << "" << std::endl;
 //     }
 
@@ -304,11 +304,11 @@ void HVertexFinder::reset()
 //     return newCands;
 // }
 
-// TVector3 HVertexFinder::findPrimaryVertex(const std::vector<KFitParticle> &cands)
+// TVector3 KFitVertexFinder::findPrimaryVertex(const std::vector<KFitParticle> &cands)
 // {
 //     if (fVerbose > 0)
 //     {
-//         std::cout << " ----------- HVertexFinder::findPrimaryVertex() -----------" << std::endl;
+//         std::cout << " ----------- KFitVertexFinder::findPrimaryVertex() -----------" << std::endl;
 //         std::cout << "" << std::endl;
 //     }
 
