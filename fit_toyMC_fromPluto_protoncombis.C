@@ -14,7 +14,7 @@
 #include <map>
 #include <vector>
 
-#include "/home/jana/KinFit/include/hkinfitter.h"
+#include "/home/jana/KinFit/include/KinFitter.h"
 
 using namespace std;
 
@@ -232,7 +232,7 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
         cands2.push_back(proton2_fit);
         cands2.push_back(pion_fit);   
 
-        HKinFitter fitter(cands);
+        KinFitter fitter(cands);
         fitter.setVerbosity(0);
         fitter.setNumberOfIterations(10);
         //fitter.setLearningRate(0.5);
@@ -242,7 +242,7 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
         //fitter.add4Constraint(ini);
 
 
-        HKinFitter fitter2(cands2);
+        KinFitter fitter2(cands2);
         fitter2.setVerbosity(0);
         fitter2.setNumberOfIterations(10);
         //fitter.setLearningRate(0.5);

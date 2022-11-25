@@ -1,11 +1,11 @@
 /**
- * hkinfitter.h
+ * KinFitter.h
  *
  *
  */
 
-#ifndef HKINFITTER_H
-#define HKINFITTER_H
+#ifndef KINFITTER_H
+#define KINFITTER_H
 
 // system includes
 #include <iostream>
@@ -50,7 +50,7 @@ void Print(T const &matrix)
     cout << endl;
 }
 
-class HKinFitter : public TObject
+class KinFitter : public TObject
 {
 private:
     TMatrixD y, x, V, Vx, fPull;
@@ -76,8 +76,8 @@ private:
     Double_t fConvergenceCriterionChi2, fConvergenceCriterionD, fConvergenceCriterionAlpha;
 
 public:
-    HKinFitter(const std::vector<KFitParticle> &cands);
-    ~HKinFitter(){};
+    KinFitter(const std::vector<KFitParticle> &cands);
+    ~KinFitter(){};
 
     TMatrixD calcMissingMom(const TMatrixD &m_iter);
 
@@ -120,7 +120,7 @@ public:
 protected:
     void updateDaughters();
     void updateMother();
-    ClassDef(HKinFitter, 0)
+    ClassDef(KinFitter, 0)
 };
 
-#endif /* HKINFITTER_H */
+#endif /* KINFITTER_H */

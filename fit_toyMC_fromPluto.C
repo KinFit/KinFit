@@ -14,7 +14,7 @@
 #include <map>
 #include <vector>
 
-#include "/home/jana/KinFit/include/hkinfitter.h"
+#include "/home/jana/KinFit/include/KinFitter.h"
 
 using namespace std;
 
@@ -38,7 +38,7 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
     // define output file and some histograms
     // -----------------------------------------------------------------------
     // set ouput file
-    TFile* outfile = new TFile("testFit_toyMC_fromPluto_mass_wrongp.root", "recreate");
+    TFile* outfile = new TFile("testFit_toyMC_fromPluto_momfit.root", "recreate");
     TH1F* h01 = new TH1F("hLambdaMassPreFit", "", 100, 1.070, 1.250);
     h01->SetXTitle(" M_{p#pi^{-}} [GeV/c^{2}]");
     h01->SetYTitle(" events ");
@@ -212,22 +212,26 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
         std::vector<KFitParticle> cands;
         cands.clear();
         cands.push_back(proton1_fit);
-        //cands.push_back(kaon_fit);
+        cands.push_back(kaon_fit);
         //cands.push_back(proton2_fit);
         cands.push_back(pion_fit);
 
-        HKinFitter fitter(cands);
+        KinFitter fitter(cands);
         fitter.setVerbosity(0);
         fitter.setNumberOfIterations(10);
         //fitter.setLearningRate(0.5);
-        fitter.setConvergenceCriterion(0.01);
-        fitter.addMassConstraint(1.11568);
+        //fitter.setConvergenceCriteria(0.01, 1e5, 1e6);
+        //fitter.addMassConstraint(1.11568);
         //fitter.addVertexConstraint();
         //fitter.add4Constraint(ini);
+        fitter.addMomConstraint(ini, mp);
         if(fitter.fit()){
 
             KFitParticle fcand1 = fitter.getDaughter(0); // proton
             KFitParticle fcand2 = fitter.getDaughter(1); // pion
+
+            TLorentzVector daughter = fitter.getMissingDaughter();
+            cout<<daughter.Px()<<endl;
 
             h02->Fill(fitter.getChi2());
             h03->Fill(fitter.getProb());

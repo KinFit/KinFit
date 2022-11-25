@@ -15,7 +15,7 @@
 #include <map>
 #include <vector>
 
-#include "/home/jana/KinFit/include/hkinfitter.h"
+#include "/home/jana/KinFit/include/KinFitter.h"
 #include "/home/jana/KinFit/include/hvertexfinder.h"
 
 using namespace std;
@@ -268,7 +268,7 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
         hvertex2xyz->Fill(vtx2.X(), vtx2.Y(), vtx2.Z());
 
         /*
-        HKinFitter fitter(cands);
+        KinFitter fitter(cands);
         fitter.setVerbosity(0);
         fitter.setNumberOfIterations(10);
         //fitter.setLearningRate(0.5);

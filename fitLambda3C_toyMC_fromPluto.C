@@ -15,7 +15,7 @@
 #include <map>
 #include <vector>
 
-#include "/home/jana/KinFit/include/hkinfitter.h"
+#include "/home/jana/KinFit/include/KinFitter.h"
 #include "/home/jana/KinFit/include/KFitVertexFinder.h"
 #include "/home/jana/KinFit/include/KFitNeutralCandFinder.h"
 
@@ -323,7 +323,7 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
         // ---------------------------------------------------------------------------------
         // do 3C fit in decay vertex
         // ---------------------------------------------------------------------------------
-        HKinFitter fitter(cands2);
+        KinFitter fitter(cands2);
         fitter.setVerbosity(0);
         //fitter.setLearningRate(0.5);
         //fitter.setConvergenceCriteria(0.01, 1e6, 1e6);

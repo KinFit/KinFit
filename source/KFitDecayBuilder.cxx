@@ -158,7 +158,7 @@ void KFitDecayBuilder::createNeutralCandidate()
 
 Bool_t KFitDecayBuilder::doFit()
 {
-    HKinFitter Fitter(fFitCands);
+    KinFitter Fitter(fFitCands);
     if (fTask == "4C") Fitter.add4Constraint(fIniSys);
     else if (fTask == "Mass"){
         Fitter.addMassConstraint(fMass);
@@ -199,14 +199,14 @@ Bool_t KFitDecayBuilder::doFit()
 bool KFitDecayBuilder::do3cFit()
 {
     createNeutralCandidate();
-    HKinFitter Fitter(fFitCands, fMother);
+    KinFitter Fitter(fFitCands, fMother);
     Fitter.add3Constraint();
     Fitter.fit();
 }
 
 bool KFitDecayBuilder::doMissMomFit()
 {
-    HKinFitter Fitter(fFitCands, fIniSys, fMass);
+    KinFitter Fitter(fFitCands, fIniSys, fMass);
     Fitter.addMomConstraint();
     Fitter.fit();
 }

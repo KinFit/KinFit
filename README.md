@@ -24,7 +24,7 @@ Direkt use of the fitter tools in your own analysis:
     std::vector<KFitParticle> cands;
     cands.push_back(particle);
 
-3) Initialize the fitter and fit
+3) Initialize the KinFitter and fit
     KinFitter fitter(cands);
     fitter.addXXConstraint(arguments);
     fitter.fit()

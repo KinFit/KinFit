@@ -1,9 +1,9 @@
-#include "hkinfitter.h"
+#include "KinFitter.h"
 
 const size_t cov_dim = 5;
 
-// general HKinFitter constructor
-HKinFitter::HKinFitter(const std::vector<KFitParticle> &cands) : fCands(cands),
+// general KinFitter constructor
+KinFitter::KinFitter(const std::vector<KFitParticle> &cands) : fCands(cands),
                                                                fVerbose(0),
                                                                fLearningRate(1),
                                                                fNumIterations(10)
@@ -60,7 +60,7 @@ HKinFitter::HKinFitter(const std::vector<KFitParticle> &cands) : fCands(cands),
     }
 }
 
-void HKinFitter::addMassConstraint(Double_t mass)
+void KinFitter::addMassConstraint(Double_t mass)
 {
     fMass = mass;
     if (!fMassConstraint)
@@ -68,7 +68,7 @@ void HKinFitter::addMassConstraint(Double_t mass)
     fMassConstraint = true;
 }
 
-void HKinFitter::addMMConstraint(Double_t mm, TLorentzVector init)
+void KinFitter::addMMConstraint(Double_t mm, TLorentzVector init)
 {
     fMass = mm;
     fInit = init;
@@ -77,7 +77,7 @@ void HKinFitter::addMMConstraint(Double_t mm, TLorentzVector init)
     fMMConstraint = true;
 }
 
-void HKinFitter::addMassVtxConstraint(Double_t mass)
+void KinFitter::addMassVtxConstraint(Double_t mass)
 {
     if (!fMassVtxConstraint)
         fNdf += 2;
@@ -85,7 +85,7 @@ void HKinFitter::addMassVtxConstraint(Double_t mass)
     fMassVtxConstraint = true;
 }
 
-void HKinFitter::add4Constraint(TLorentzVector lv)
+void KinFitter::add4Constraint(TLorentzVector lv)
 {
     fInit =  lv;
 
@@ -94,7 +94,7 @@ void HKinFitter::add4Constraint(TLorentzVector lv)
     f4Constraint = true;
 }
 
-void HKinFitter::add3Constraint(KFitParticle mother)
+void KinFitter::add3Constraint(KFitParticle mother)
 {
     fyDim = (fN + 1) * cov_dim - 1; // Dimension of full covariance matrix (number of measured variables x cov_dim). Mother momentum is not measured
 
@@ -159,7 +159,7 @@ void HKinFitter::add3Constraint(KFitParticle mother)
     f3Constraint = true;
 }
 
-void HKinFitter::addVertexConstraint()
+void KinFitter::addVertexConstraint()
 {
     if (!fVtxConstraint)
         fNdf += 1;
@@ -167,7 +167,7 @@ void HKinFitter::addVertexConstraint()
 }
 
 //For fit with missing particle
-void HKinFitter::addMomConstraint(TLorentzVector lv, Double_t mass)
+void KinFitter::addMomConstraint(TLorentzVector lv, Double_t mass)
 {
     fInit = lv;
     fMass = mass;
@@ -185,7 +185,7 @@ void HKinFitter::addMomConstraint(TLorentzVector lv, Double_t mass)
     fMomConstraint = true;
 }
 
-TMatrixD HKinFitter::calcMissingMom(const TMatrixD &m_iter)
+TMatrixD KinFitter::calcMissingMom(const TMatrixD &m_iter)
 {
     TMatrix xi(3, 1);
 
@@ -204,7 +204,7 @@ TMatrixD HKinFitter::calcMissingMom(const TMatrixD &m_iter)
 }
 
 // Constraint equations
-TMatrixD HKinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
+TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 {
     TMatrixD d;
 
@@ -400,7 +400,7 @@ TMatrixD HKinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 }
 
 // Jacobian (derivative of constraint equations with respect to measured variables)
-TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
+TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 {
     TMatrixD H;
 
@@ -934,7 +934,7 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 }
 
 // Jacobian (derivative of constraint equations with respect to unmeasured variables)
-TMatrixD HKinFitter::Fxi_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
+TMatrixD KinFitter::Fxi_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 {
     TMatrixD H;
 
@@ -967,11 +967,11 @@ TMatrixD HKinFitter::Fxi_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
     return H;
 }
 
-Bool_t HKinFitter::fit()
+Bool_t KinFitter::fit()
 {
     if (fVerbose > 0)
     {
-        std::cout << " ----------- HKinFitter::fit() -----------" << std::endl;
+        std::cout << " ----------- KinFitter::fit() -----------" << std::endl;
         std::cout << "Vertex constraint set: " << fVtxConstraint << std::endl;
         std::cout << "3C set: " << f3Constraint << std::endl;
         std::cout << "4C set: " << f4Constraint << std::endl;
@@ -1219,22 +1219,22 @@ Bool_t HKinFitter::fit()
     else return fConverged; // for number of iterations equal to 1
 }
 
-KFitParticle HKinFitter::getDaughter(Int_t val)
+KFitParticle KinFitter::getDaughter(Int_t val)
 {
     return fCands[val];
 }
 
-KFitParticle HKinFitter::getMother()
+KFitParticle KinFitter::getMother()
 {
     return fMother;
 }
 
-TLorentzVector HKinFitter::getMissingDaughter()
+TLorentzVector KinFitter::getMissingDaughter()
 {
     return fMissDaughter;
 }
 
-void HKinFitter::updateDaughters()
+void KinFitter::updateDaughters()
 {
     if (fVerbose > 1)
     {
@@ -1274,7 +1274,7 @@ void HKinFitter::updateDaughters()
     }
 }
 
-void HKinFitter::updateMother()
+void KinFitter::updateMother()
 {
     KFitParticle &mother = fMother;
     Double_t Px = (1. / x(0, 0)) *
@@ -1303,7 +1303,7 @@ void HKinFitter::updateMother()
     // ---------------------------------------------------------------------------
 }
 
-void HKinFitter::update()
+void KinFitter::update()
 {
     for (Int_t val = 0; val < fN; ++val)
     {
@@ -1313,11 +1313,11 @@ void HKinFitter::update()
 }
 
 
-void HKinFitter::setConvergenceCriteria(Double_t val1, Double_t val2, Double_t val3)
+void KinFitter::setConvergenceCriteria(Double_t val1, Double_t val2, Double_t val3)
 { 
     fConvergenceCriterionChi2 = val1;
     fConvergenceCriterionD = val2; 
     fConvergenceCriterionAlpha = val3; 
 }
 
-ClassImp(HKinFitter)
+ClassImp(KinFitter)

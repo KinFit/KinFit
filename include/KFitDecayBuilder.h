@@ -15,7 +15,7 @@
 
 // framework includes
 #include "KFitParticle.h"
-#include "hkinfitter.h"
+#include "KinFitter.h"
 //#include "KFitVertexFinder.h"
 //#include "hneutralcandfinder.h"
 
