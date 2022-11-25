@@ -4,35 +4,35 @@ Installation:
 
 1) Clone the repository
     git clone https://github.com/KinFit/KinFit.git
-2) Build the library using cmake
-    mkdir build
-    cd build
+2) Build the library using cmake   
+    mkdir build   
+    cd build   
     cmake ..
-    make
-3) Add library to rootlogon.C
+    make   
+3) Add library to rootlogon.C   
     gSystem->Load("pathtobuild/libKinFit.so")
 
 
 
 Direkt use of the fitter tools in your own analysis:
 
-1) Create KFitParticles from your particle candidates
-    KFitParticle particle(TLorentzVector lv, Double_t R, Double_t Z);
-    FillData(particle, particle_covariance)
+1) Create KFitParticles from your particle candidates   
+    KFitParticle particle(TLorentzVector lv, Double_t R, Double_t Z);   
+    FillData(particle, particle_covariance)   
 
-2) Create a vector of particles which shall be fitted
-    std::vector<KFitParticle> cands;
-    cands.push_back(particle);
+2) Create a vector of particles which shall be fitted   
+    std::vector<KFitParticle> cands;   
+    cands.push_back(particle);   
 
-3) Initialize the KinFitter and fit
-    KinFitter fitter(cands);
-    fitter.addXXConstraint(arguments);
+3) Initialize the KinFitter and fit   
+    KinFitter fitter(cands);   
+    fitter.addXXConstraint(arguments);   
     fitter.fit()
 
-4) Get the fit result
+4) Get the fit result   
     KFitParticle fcand = fitter.getDaughter(0);
 
-The procedure is illustrated in the example macro fit_toyMC.C.
+The procedure is illustrated in the example macro fit_toyMC.C.   
 A more advanced example including the construction of a neutral weakly decaying particle is given in the macro fitLambda3C_toyMC_fromPluto.C.
 
 
@@ -50,7 +50,7 @@ Usage:
 
 2) HRootAnalyzer object is created. User adds fitting tasks to it, defines PIDs of particles to be fitted. 
 
-3)HRootAnalyzer creates the output tree. Event loop in wich particles are selected according to their PID. A DecayBuilder object is created if the minimum of necessary particles for this task is found.
+3) HRootAnalyzer creates the output tree. Event loop in wich particles are selected according to their PID. A DecayBuilder object is created if the minimum of necessary particles for this task is found.
 
 4) Decaybuilder performs combinatorics, creates a Fitter object, adds the constraint and calls the fitter for each combination
 
