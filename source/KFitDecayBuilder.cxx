@@ -29,7 +29,7 @@ KFitDecayBuilder::KFitDecayBuilder(std::vector<std::vector<KFitParticle>> &cands
 
 KFitDecayBuilder::KFitDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVector lv, KFitParticle mother, Double_t mass) : fTask(task),
                                                                                                                             fPids(pids),
-                                                                                                                            fProb(0.01),
+                                                                                                                            fProb(0.00),
                                                                                                                             fVerbose(0)
 
 {
@@ -173,8 +173,8 @@ Bool_t KFitDecayBuilder::doFit()
     } 
     else cout << "Task not available" << endl;
 
-    Fitter.setNumberOfIterations(10);
-    Fitter.setConvergenceCriteria(0.01, 0.01, 0.01);
+    //Fitter.setNumberOfIterations(10);
+    //Fitter.setConvergenceCriteria(0.01, 0.01, 0.01);
     //Fitter.setVerbosity(2);
 
     if (Fitter.fit() && Fitter.getProb() > fProb)

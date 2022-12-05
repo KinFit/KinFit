@@ -5,6 +5,8 @@ KFitParticle::KFitParticle(TLorentzVector *cand, Double_t R, Double_t Z)
     : TLorentzVector(*cand), cand(cand), fMomentum(cand->P()), fTheta(cand->Theta()), fPhi(cand->Phi()), fR(R), fZ(Z)
 {
     fPid = -1;
+    fTrackId = -1;
+    fCov.ResizeTo(5, 5);
 }
 
 KFitParticle::KFitParticle(TLorentzVector *cand, Double_t X, Double_t Y, Double_t Z)
@@ -50,6 +52,7 @@ KFitParticle::KFitParticle(TLorentzVector *cand, Double_t X, Double_t Y, Double_
     //fZ = POCA.Z();
 
     fPid = -1;
+    fTrackId = -1;
 }
 
 KFitParticle::KFitParticle()
@@ -59,6 +62,8 @@ KFitParticle::KFitParticle()
     fR = 0;
     fZ = 0;
     fPid = -1;
+    fTrackId = -1;
+    fCov.ResizeTo(5, 5);
 }
 
 void KFitParticle::setCovariance(const TMatrixD &cov)

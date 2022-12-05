@@ -12,7 +12,7 @@
 
 using namespace std;
 
-Int_t analysis_user(TString infileList="input.root", TString outfile = "fitted.root", Int_t nEvents=1000){
+Int_t analysis_user(TString infileList="input.root", TString outfile = "fitted.root", Int_t nEvents=10000){
 
     KFitRootAnalyzer RootAnalyzer(infileList, outfile, nEvents);
     std::vector<int> pids;

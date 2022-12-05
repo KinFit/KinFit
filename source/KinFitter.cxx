@@ -6,7 +6,7 @@ const size_t cov_dim = 5;
 KinFitter::KinFitter(const std::vector<KFitParticle> &cands) : fCands(cands),
                                                                fVerbose(0),
                                                                fLearningRate(1),
-                                                               fNumIterations(10)
+                                                               fNumIterations(20)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = fCands.size();

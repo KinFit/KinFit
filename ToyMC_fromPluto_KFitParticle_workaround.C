@@ -13,7 +13,7 @@ TVector3 calcPoca(TVector3 vertex, TVector3 mom){
   return result;
 }
 
-void FillData(KFitParticle **outcand, Double_t mom, Double_t tht, Double_t phi, Double_t R, Double_t Z, Double_t mass, Int_t pid)
+void FillData(KFitParticle **outcand, Double_t mom, Double_t tht, Double_t phi, Double_t R, Double_t Z, Double_t mass, Int_t pid, Int_t id)
 {
     double deg2rad = TMath::DegToRad();
 
@@ -27,6 +27,7 @@ void FillData(KFitParticle **outcand, Double_t mom, Double_t tht, Double_t phi, 
     (*outcand)->setR(R);
     (*outcand)->setZ(Z);
     (*outcand)->setPid(pid);
+    (*outcand)->setTrackId(id);
 
     TMatrixD cov(5, 5);
     if(mom>0) cov(0, 0) = std::pow(0.025*(1/mom), 2);
@@ -135,10 +136,10 @@ void ToyMC_fromPluto_KFitParticle_workaround(TString inFile, Int_t nEvents = 500
       KFitParticle *pi_fit = new (p_arrayRef[2]) KFitParticle();
       KFitParticle *p2_fit = new (p_arrayRef[3]) KFitParticle();
 
-      FillData(&p1_fit, p1CandRecoP, p1CandRecoTheta, p1CandRecoPhi, p1CandRecoR, p1CandRecoZ, 0.938272, 14);
-      FillData(&K_fit, KCandRecoP, KCandRecoTheta, KCandRecoPhi, KCandRecoR, KCandRecoZ, 0.493677, 11);
-      FillData(&pi_fit, piCandRecoP, piCandRecoTheta, piCandRecoPhi, piCandRecoR, piCandRecoZ, 0.13957, 9);
-      FillData(&p2_fit, p2CandRecoP, p2CandRecoTheta, p2CandRecoPhi, p2CandRecoR, p2CandRecoZ, 0.938272, 14);
+      FillData(&p1_fit, p1CandRecoP, p1CandRecoTheta, p1CandRecoPhi, p1CandRecoR, p1CandRecoZ, 0.938272, 14, 1);
+      FillData(&K_fit, KCandRecoP, KCandRecoTheta, KCandRecoPhi, KCandRecoR, KCandRecoZ, 0.493677, 11, 2);
+      FillData(&pi_fit, piCandRecoP, piCandRecoTheta, piCandRecoPhi, piCandRecoR, piCandRecoZ, 0.13957, 9, 3);
+      FillData(&p2_fit, p2CandRecoP, p2CandRecoTheta, p2CandRecoPhi, p2CandRecoR, p2CandRecoZ, 0.938272, 14, 4);
 
       // store in the tree
       // arranged as Proton MC values (p, theta, phi), Pion MC values (p, theta, phi)

@@ -18,7 +18,7 @@ class KFitParticle : public TLorentzVector
 private:
     TLorentzVector *cand;
     Double_t fMomentum, fTheta, fPhi, fR, fZ;
-    Int_t fPid;
+    Int_t fPid, fTrackId;
     TMatrixD fCov;
 
 public:
@@ -33,6 +33,7 @@ public:
     void setZ(Double_t val) { fZ = val; }
     void setCovariance(const TMatrixD &cov);
     void setPid(Int_t val) { fPid = val; }
+    void setTrackId(Int_t val) { fTrackId = val; }
 
     Double_t getMomentum() const { return fMomentum; }
     Double_t getTheta() const { return fTheta; }
@@ -41,6 +42,7 @@ public:
     Double_t getZ() const { return fZ; }
     TMatrixD getCovariance() const { return fCov; }
     Int_t getPid() const { return fPid; }
+    Int_t getTrackId() const { return fTrackId; }
 
     void reset();
     void update();

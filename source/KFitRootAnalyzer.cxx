@@ -244,6 +244,7 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<Int_t> pids, Doubl
             cout << "fill cand" << endl;
             KFitParticle *fitted_cand = new (fit_arrayRef[ii]) KFitParticle(&result[k], result[k].getR(), result[k].getZ());
             fitted_cand->setPid(result[k].getPid());
+            fitted_cand->setTrackId(result[k].getTrackId());
             fitted_cand->setCovariance(result[k].getCovariance());
             cout<<"fitted momentum: "<< result[k].getMomentum() << endl;
             //fitted_cand = (KFitParticle*)result[k].Clone();
