@@ -458,7 +458,7 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                       std::cos(m_iter(6, 0)) +
                   m_iter(3, 0) * std::cos(m_iter(2, 0) + pi2) *
                       std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) *
-                      std::sin(m_iter(2, 0)) -
+                      std::sin(m_iter(1, 0)) -
                   m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
                       std::cos(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                       std::cos(m_iter(6, 0)) -
@@ -537,8 +537,8 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                   m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
                       std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                       std::cos(m_iter(6, 0)) +
-                  (m_iter(9, 0) - m_iter(4, 0)) *
-                      (std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                  (m_iter(4, 0) - m_iter(9, 0)) *
+                      (- std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                            std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) -
                        std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
                            std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)));
@@ -562,14 +562,14 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                       std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
                       std::cos(m_iter(6, 0)) +
                   m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
-                      std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
+                      std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) *
                       std::cos(m_iter(1, 0)) -
                   m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
                       std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
                       std::cos(m_iter(1, 0)) +
                   (m_iter(4, 0) - m_iter(9, 0)) *
                       (std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
-                           std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) -
+                           std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) +
                        std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                            std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)));
 
@@ -672,7 +672,7 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                       std::cos(m_iter(6, 0)) +
                   m_iter(3, 0) * std::cos(m_iter(2, 0) + pi2) *
                       std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) *
-                      std::sin(m_iter(2, 0)) -
+                      std::sin(m_iter(1, 0)) -          //(2,0) changed to (1,0)
                   m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
                       std::cos(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                       std::cos(m_iter(6, 0)) -
@@ -751,8 +751,8 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                   m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
                       std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                       std::cos(m_iter(6, 0)) +
-                  (m_iter(9, 0) - m_iter(4, 0)) *
-                      (std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                  (m_iter(4, 0) - m_iter(9, 0)) *   //change this to Z_1-Z_2
+                      (- std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                            std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) -
                        std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
                            std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)));
@@ -776,14 +776,14 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                       std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
                       std::cos(m_iter(6, 0)) +
                   m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
-                      std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
+                      std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) * //change cos(m_iter(7,0)) to sin
                       std::cos(m_iter(1, 0)) -
                   m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
                       std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
                       std::cos(m_iter(1, 0)) +
                   (m_iter(4, 0) - m_iter(9, 0)) *
                       (std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
-                           std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) -
+                           std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) + //change - to +
                        std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                            std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)));
 

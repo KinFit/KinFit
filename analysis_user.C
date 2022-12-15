@@ -1,16 +1,16 @@
-#include "TLorentzVector.h"
-
+//#include "TLorentzVector.h"
+/*
 #include <vector>
 #include <algorithm>
 #include <map>
 #include <iostream>
 #include <iomanip>
 #include <math.h>
-
+*/
 
 #include "KFitRootAnalyzer.h"
 
-using namespace std;
+//using namespace std;
 
 Int_t analysis_user(TString infileList="input.root", TString outfile = "fitted.root", Int_t nEvents=10000){
 
@@ -25,9 +25,9 @@ Int_t analysis_user(TString infileList="input.root", TString outfile = "fitted.r
 
     //RootFitter.addFitterTask("4c", pids, ppSystem);
     RootAnalyzer.doFitterTask("Mass", pids, mass);
-    cout<<"fitter task performed"<<endl;
+    //cout<<"fitter task performed"<<endl;
     //RootFitter.finish();
-    cout<<"finished"<<endl;
+    //cout<<"finished"<<endl;
     
     return 0;
 }

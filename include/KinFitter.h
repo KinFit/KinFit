@@ -120,7 +120,7 @@ public:
 protected:
     void updateDaughters();
     void updateMother();
-    ClassDef(KinFitter, 0)
+    ClassDef(KinFitter, 1)
 };
 
 #endif /* KINFITTER_H */

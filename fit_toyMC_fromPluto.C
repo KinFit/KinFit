@@ -38,7 +38,7 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
     // define output file and some histograms
     // -----------------------------------------------------------------------
     // set ouput file
-    TFile* outfile = new TFile("testFit_toyMC_fromPluto_massvtxfit.root", "recreate");
+    TFile* outfile = new TFile("testFit_toyMC_fromPluto_vtxfit.root", "recreate");
     TH1F* h01 = new TH1F("hLambdaMassPreFit", "", 100, 1.070, 1.250);
     h01->SetXTitle(" M_{p#pi^{-}} [GeV/c^{2}]");
     h01->SetYTitle(" events ");
@@ -100,7 +100,7 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
     TH1F *h073 = (TH1F*)h07->Clone("hTotMomPostFit_converged");
     h073 -> SetLineColor(kBlue);
     */
-    TH1F* h08 = new TH1F("hNIterations", "", 10, 0, 10);
+    TH1F* h08 = new TH1F("hNIterations", "", 20, 0, 20);
     h08->SetXTitle(" Iteration");
     h08->SetYTitle(" events ");
     
@@ -211,19 +211,19 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
         // ---------------------------------------------------------------------------------
         std::vector<KFitParticle> cands;
         cands.clear();
-        //cands.push_back(proton1_fit);
-        //cands.push_back(kaon_fit);
-        cands.push_back(proton2_fit);
-        cands.push_back(pion_fit);
+        cands.push_back(proton1_fit);
+        cands.push_back(kaon_fit);
+        //cands.push_back(proton2_fit);
+        //cands.push_back(pion_fit);
 
         KinFitter fitter(cands);
         fitter.setVerbosity(0);
         fitter.setNumberOfIterations(20);
         //fitter.setLearningRate(1);
-        //fitter.setConvergenceCriteria(0.01, 1e5, 1e6);
+        fitter.setConvergenceCriteria(0.01, 1e5, 1e6);
         //fitter.addMassConstraint(1.11568);
-        //fitter.addVertexConstraint();
-        fitter.addMassVtxConstraint(1.11568);
+        fitter.addVertexConstraint();
+        //fitter.addMassVtxConstraint(1.11568);
         //fitter.add4Constraint(ini);
         //fitter.addMomConstraint(ini, mp);
         if(fitter.fit()){

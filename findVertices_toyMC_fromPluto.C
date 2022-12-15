@@ -16,7 +16,7 @@
 #include <vector>
 
 #include "/home/jana/KinFit/include/KinFitter.h"
-#include "/home/jana/KinFit/include/hvertexfinder.h"
+#include "/home/jana/KinFit/include/KFitVertexFinder.h"
 
 using namespace std;
 
@@ -40,7 +40,7 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
     // define output file and some histograms
     // -----------------------------------------------------------------------
     // set ouput file
-    TFile* outfile = new TFile("testVertexFinding_toyMC_fromPluto.root", "recreate");
+    TFile* outfile = new TFile("testVertexFinding_toyMC_fromPluto_vtxfit.root", "recreate");
 
     TH3F* hvertex1xyz = new TH3F("hvertex1xyz", "", 100, -2, 2, 100, -2, 2, 100, -5, 5);
     hvertex1xyz->SetXTitle(" Vx ");
@@ -50,8 +50,11 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
     hvertex2xyz->SetXTitle(" Vx ");
     hvertex2xyz->SetYTitle(" Vy ");
     hvertex2xyz->SetYTitle(" Vz ");
+    TH3F* hvertex1xyz_fit = new TH3F("hvertex1xyz_fit", "", 100, -2, 2, 100, -2, 2, 100, -5, 5);
+    hvertex1xyz_fit->SetXTitle(" Vx ");
+    hvertex1xyz_fit->SetYTitle(" Vy ");
+    hvertex1xyz_fit->SetYTitle(" Vz ");
 
-    /*
     TH1F* h01 = new TH1F("hLambdaMassPreFit", "", 100, 1.070, 1.250);
     h01->SetXTitle(" M_{p#pi^{-}} [GeV/c^{2}]");
     h01->SetYTitle(" events ");
@@ -96,12 +99,14 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
     h053 -> SetLineColor(kBlue);
     TH1F *h054 = (TH1F*)h05->Clone("hPull_tht");
     TH1F *h055 = (TH1F*)h05->Clone("hPull_phi");
-    TH1F *h056 = (TH1F*)h05->Clone("hPull_p_pi");
-    TH1F *h057 = (TH1F*)h05->Clone("hPull_tht_pi");
-    TH1F *h058 = (TH1F*)h05->Clone("hPull_phi_pi");
-*/
+    TH1F *h056 = (TH1F*)h05->Clone("hPull_R");
+    TH1F *h057 = (TH1F*)h05->Clone("hPull_Z");
+    TH1F *h058 = (TH1F*)h05->Clone("hPull_p_pi");
+    TH1F *h059 = (TH1F*)h05->Clone("hPull_tht_pi");
+    TH1F *h0510 = (TH1F*)h05->Clone("hPull_phi_pi");
+    TH1F *h0511 = (TH1F*)h05->Clone("hPull_tht_R");
+    TH1F *h0512 = (TH1F*)h05->Clone("hPull_phi_Z");
 
-    /*
     TH1F* h06 = new TH1F("hTotMomPreFit", "", 100, 3800, 4800);
     h06->SetXTitle(" p [MeV/c]");
     h06->SetYTitle(" events ");
@@ -114,10 +119,10 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
     h072 -> SetLineColor(kGreen);
     TH1F *h073 = (TH1F*)h07->Clone("hTotMomPostFit_converged");
     h073 -> SetLineColor(kBlue);
-    TH1F* h08 = new TH1F("hNIterations", "", 10, 0, 10);
+    TH1F* h08 = new TH1F("hNIterations", "", 20, 0, 20);
     h08->SetXTitle(" Iteration");
     h08->SetYTitle(" events ");
-    */
+
     
     
     // -----------------------------------------------------------------------
@@ -250,7 +255,7 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
         // ---------------------------------------------------------------------------------
         // begin kinfit here
         // ---------------------------------------------------------------------------------
-        std::vector<KFitParticle> cands1, cands2;
+        std::vector<KFitParticle> cands1, cands2, cands_fit;
         cands1.clear();
         cands1.push_back(proton1_fit);
         cands1.push_back(kaon_fit);
@@ -258,8 +263,8 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
         cands2.push_back(proton2_fit);
         cands2.push_back(pion_fit);
 
-        HVertexFinder vtx1finder(cands1);
-        HVertexFinder vtx2finder(cands2);
+        KFitVertexFinder vtx1finder(cands1);
+        KFitVertexFinder vtx2finder(cands2);
 
         TVector3 vtx1 = vtx1finder.getVertex();
         TVector3 vtx2 = vtx2finder.getVertex();
@@ -267,14 +272,15 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
         hvertex1xyz->Fill(vtx1.X(), vtx1.Y(), vtx1.Z());
         hvertex2xyz->Fill(vtx2.X(), vtx2.Y(), vtx2.Z());
 
-        /*
-        KinFitter fitter(cands);
-        fitter.setVerbosity(0);
-        fitter.setNumberOfIterations(10);
+        
+        KinFitter fitter(cands1);
+        //fitter.setVerbosity(0);
+        //fitter.setNumberOfIterations(10);
         //fitter.setLearningRate(0.5);
-        fitter.setConvergenceCriterion(0.01);
-        fitter.addMassConstraint(1.11568);
-        //fitter.addVertexConstraint();
+        //fitter.setConvergenceCriterion(0.01);
+        //fitter.addMassConstraint(1.11568);
+        //fitter.addMassVtxConstraint(1.11568);
+        fitter.addVertexConstraint();
         //fitter.add4Constraint(ini);
         if(fitter.fit()){
 
@@ -283,31 +289,40 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
 
             h02->Fill(fitter.getChi2());
             h03->Fill(fitter.getProb());
-            TLorentzVector lambda_fit = fcand1 + fcand2;
-            h04->Fill(lambda_fit.M());
             // get Pull example (1/P for the fitted proton)
             h05->Fill(fitter.getPull(0));
             h054->Fill(fitter.getPull(1));
             h055->Fill(fitter.getPull(2));
-            h056->Fill(fitter.getPull(5));
-            h057->Fill(fitter.getPull(6));
-            h058->Fill(fitter.getPull(7));
-            h09->Fill(lambda_fit.P());
+            h056->Fill(fitter.getPull(3));
+            h057->Fill(fitter.getPull(4));
+            h058->Fill(fitter.getPull(5));
+            h059->Fill(fitter.getPull(6));
+            h0510->Fill(fitter.getPull(7));
+            h0511->Fill(fitter.getPull(8));
+            h0512->Fill(fitter.getPull(9));
             
             if(fitter.getProb()>0.01){
                 h022->Fill(fitter.getChi2());
-                h042->Fill(lambda_fit.M());
                // h072->Fill(all_fit.P());
 
                 // get Pull example (1/P for the fitted proton)
                 h052->Fill(fitter.getPull(0));
-                h092->Fill(lambda_fit.P());
+
+                cands_fit.clear();
+                cands_fit.push_back(fcand1);
+                cands_fit.push_back(fcand2);
+
+                KFitVertexFinder vtx1finder_fit(cands_fit);
+
+                TVector3 vtx1_fit = vtx1finder_fit.getVertex();
+
+                hvertex1xyz_fit->Fill(vtx1_fit.X(), vtx1_fit.Y(), vtx1_fit.Z());
             }
 
             h08->Fill(fitter.getIteration());
 
         }
-        */
+        
     }
 
     // write histograms to the output file
@@ -315,7 +330,8 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
 
     hvertex1xyz->Write();
     hvertex2xyz->Write();
-/*
+    hvertex1xyz_fit->Write();
+
     h01->Write();
     h012->Write();
     h02->Write();
@@ -333,8 +349,11 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
     h056->Write();
     h057->Write();
     h058->Write();
-    */
-    /*
+    h059->Write();
+    h0510->Write();
+    h0511->Write();
+    h0512->Write();
+
     h06->Write();
     h07->Write();
     h072->Write();
@@ -342,7 +361,7 @@ Int_t findVertices_toyMC_fromPluto(TString infile, Int_t nEvents)
     h08->Write();
     h09->Write();
     h092->Write();
-    */
+    
     outfile->Close();
 
     return 0;
