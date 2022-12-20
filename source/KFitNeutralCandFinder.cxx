@@ -132,7 +132,7 @@ void KFitNeutralCandFinder::setNeutralMotherCand()
 
     Double_t dtheta_dx = x_vertex * z_vertex / (r * r * r * std::sqrt(abs(1 - z_vertex / (r * r))));
     Double_t dtheta_dy = y_vertex * z_vertex / (r * r * r * std::sqrt(abs(1 - z_vertex / (r * r))));
-    Double_t dtheta_dz = (1 / r - z_vertex * z_vertex / (r * r * r)) / std::sqrt(1 - z_vertex * z_vertex / (r * r));
+    Double_t dtheta_dz = (1 / r - z_vertex * z_vertex / (r * r * r)) / std::sqrt(abs(1 - z_vertex * z_vertex / (r * r)));
 
     // Double_t sigma_theta =std::sqrt(dtheta_dx * dtheta_dx * sigma_x * sigma_x + dtheta_dy * dtheta_dy * sigma_y * sigma_y + dtheta_dz * dtheta_dz * sigma_z * sigma_z);
 
