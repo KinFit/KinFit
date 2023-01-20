@@ -50,8 +50,8 @@ private:
     TMatrixD fCovarianceNeutralMother;
 
 public:
-    KFitNeutralCandFinder(const std::vector<KFitParticle> &cands, double neutralCandMass, TVector3 decayVertex, TVector3 primaryVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ);
-    KFitNeutralCandFinder(const std::vector<KFitParticle> &cands, TVector3 decayVertex, TVector3 primaryVertex);
+    KFitNeutralCandFinder(const std::vector<KFitParticle> &cands, double neutralCandMass, TVector3 primaryVertex, TVector3 decayVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ);
+    KFitNeutralCandFinder(const std::vector<KFitParticle> &cands, TVector3 primaryVertex, TVector3 decayVertex);
     ~KFitNeutralCandFinder(){};
 
     void setVerbosity(Int_t val) { fVerbose = val; }
