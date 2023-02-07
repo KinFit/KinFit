@@ -16,7 +16,7 @@ KFitNeutralCandFinder::KFitNeutralCandFinder(const std::vector<KFitParticle> &ca
     }
 }
 
-void KFitNeutralCandFinder::setNeutralMotherCand()
+void KFitNeutralCandFinder::calculateNeutralMotherCand()
 {
     Double_t param_p1, param_p2;
 
@@ -39,7 +39,7 @@ void KFitNeutralCandFinder::setNeutralMotherCand()
 
     if (fVerbose > 0)
     {
-        std::cout << " ----------- KFitNeutralCandFinder::setNeutralMotherCand() -----------" << std::endl;
+        std::cout << " ----------- KFitNeutralCandFinder::calculateNeutralMotherCand() -----------" << std::endl;
         std::cout << "" << std::endl;
     }
 
@@ -110,7 +110,7 @@ void KFitNeutralCandFinder::setNeutralMotherCand()
 
     if (fVerbose > 0)
     {
-        std::cout << "setNeutralMotherCandidate, fNeutralMotherCandidate: theta= " << fNeutralMotherCandidate.Theta() << " and phi = " << fNeutralMotherCandidate.Phi() << std::endl;
+        std::cout << "calculateNeutralMotherCandidate, fNeutralMotherCandidate: theta= " << fNeutralMotherCandidate.Theta() << " and phi = " << fNeutralMotherCandidate.Phi() << std::endl;
     }
 
     Double_t x_vertex = vecPrimToDecayVertex.X();
