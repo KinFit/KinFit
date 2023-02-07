@@ -55,12 +55,8 @@ public:
     ~KFitNeutralCandFinder(){};
 
     void setVerbosity(Int_t val) { fVerbose = val; }
-
-    // The first function is for creating a neutral mother candidate if only information of the decay vertex is available
-    // The second function is for creating the neutral candidate if information about the primary vertex is also available
-    //void setNeutralMotherCand(Double_t valMomentum, Double_t valTheta, Double_t valPhi, Double_t valR, Double_t ValZ, TVector3 decayVertex);
-    void setNeutralMotherCand();
-    //void setMassNutralCand(Double_t val) { fNeutralCandMass = val; }
+    
+    void calculateNeutralMotherCand();
 
     KFitParticle getNeutralMotherCandidate() { return fNeutralMotherCandidate; }
 
