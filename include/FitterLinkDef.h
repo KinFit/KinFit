@@ -6,9 +6,11 @@
 #pragma link off all class;
 #pragma link off all typedef;
 
-#pragma link C++ class HKinFitter;
-#pragma link C++ class HRefitCand;
-#pragma link C++ class HNeutralCandFinder;
-#pragma link C++ class HVertexFinder;
+#pragma link C++ class KinFitter;
+#pragma link C++ class KFitParticle;
+#pragma link C++ class KFitNeutralCandFinder;
+#pragma link C++ class KFitVertexFinder;
+#pragma link C++ class KFitDecayBuilder;
+#pragma link C++ class KFitRootAnalyzer;
 
 #endif

@@ -41,8 +41,8 @@ Set(INCLUDE_DIRECTORIES
 
 Include_Directories(${INCLUDE_DIRECTORIES})
 
-FILE(GLOB SRCFILES source/hkinfitter.cxx source/hrefitcand.cxx source/hrootfitter.cxx source/hdecaybuilder.cxx source/hneutralcandfinder.cxx source/hvertexfinder.cxx) ## source/hvertextools.cxx)
-FILE(GLOB HFILES include/hkinfitter.h include/hrefitcand.h include/hrootfitter.h include/hdecaybuilder.h include/hneutralcandfinder.h include/hvertexfinder.h) ## include/hvertextools.h)
+FILE(GLOB SRCFILES source/KinFitter.cxx source/KFitParticle.cxx source/KFitRootAnalyzer.cxx source/KFitDecayBuilder.cxx source/KFitNeutralCandFinder.cxx source/KFitVertexFinder.cxx)
+FILE(GLOB HFILES include/KinFitter.h include/KFitParticle.h include/KFitRootAnalyzer.h include/KFitDecayBuilder.h include/KFitNeutralCandFinder.h include/KFitVertexFinder.h)
 
 message (STATUS "${BoldGreen}ROOT${ColourReset} at " ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -52,4 +52,4 @@ include(${ROOT_USE_FILE})
 ROOT_GENERATE_DICTIONARY(KinFitDict ${HFILES} LINKDEF include/FitterLinkDef.h)
 add_library(KinFit SHARED ${SRCFILES} KinFitDict.cxx)
 target_link_libraries(KinFit ${ROOT_LIBRARIES})
-set_target_properties(KinFit PROPERTIES CXX_STANDARD 17)
+set_target_properties(KinFit PROPERTIES CXX_STANDARD 14)

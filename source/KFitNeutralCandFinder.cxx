@@ -1,30 +1,30 @@
-#include "hneutralcandfinder.h"
+#include "KFitNeutralCandFinder.h"
 
-HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands, TVector3 decayVertex, TVector3 primaryVertex) : fCands(cands), fVerbose(0), fMomentumAfterDecay(-1.), fDecayVertex(decayVertex), fPrimaryVertex(primaryVertex), fNeutralCandMass(1115.683), fPrimVtxResX(1.78590), fPrimVtxResY(1.75516), fPrimVtxResZ(3.00431), fDecVtxResX(5.75369), fDecVtxResY(5.57198), fDecVtxResZ(10.2602)
+KFitNeutralCandFinder::KFitNeutralCandFinder(const std::vector<KFitParticle> &cands, TVector3 primaryVertex, TVector3 decayVertex) : fCands(cands), fVerbose(0), fMomentumAfterDecay(-1.), fPrimaryVertex(primaryVertex), fDecayVertex(decayVertex), fNeutralCandMass(1115.683), fPrimVtxResX(1.78590), fPrimVtxResY(1.75516), fPrimVtxResZ(3.00431), fDecVtxResX(5.75369), fDecVtxResY(5.57198), fDecVtxResZ(10.2602)
 {
     if (fVerbose > 0)
     {
-        std::cout << "--------------- HNeutralCandFinder -----------------" << std::endl;
+        std::cout << "--------------- KFitNeutralCandFinder -----------------" << std::endl;
     }
 }
 
-HNeutralCandFinder::HNeutralCandFinder(const std::vector<HRefitCand> &cands, double neutralCandMass, TVector3 decayVertex, TVector3 primaryVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ) : fCands(cands), fVerbose(0), fMomentumAfterDecay(-1.), fDecayVertex(decayVertex), fPrimaryVertex(primaryVertex), fNeutralCandMass(neutralCandMass), fPrimVtxResX(primVtxResX), fPrimVtxResY(primVtxResY), fPrimVtxResZ(primVtxResZ), fDecVtxResX(decVtxResX), fDecVtxResY(decVtxResY), fDecVtxResZ(decVtxResZ)
+KFitNeutralCandFinder::KFitNeutralCandFinder(const std::vector<KFitParticle> &cands, double neutralCandMass, TVector3 primaryVertex, TVector3 decayVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ) : fCands(cands), fVerbose(0), fMomentumAfterDecay(-1.), fPrimaryVertex(primaryVertex), fDecayVertex(decayVertex), fNeutralCandMass(neutralCandMass), fPrimVtxResX(primVtxResX), fPrimVtxResY(primVtxResY), fPrimVtxResZ(primVtxResZ), fDecVtxResX(decVtxResX), fDecVtxResY(decVtxResY), fDecVtxResZ(decVtxResZ)
 {
     if (fVerbose > 0)
     {
-        std::cout << "--------------- HNeutralCandFinder -----------------" << std::endl;
+        std::cout << "--------------- KFitNeutralCandFinder -----------------" << std::endl;
     }
 }
 
-void HNeutralCandFinder::setNeutralMotherCand()
+void KFitNeutralCandFinder::calculateNeutralMotherCand()
 {
     Double_t param_p1, param_p2;
 
-    HRefitCand cand1 = fCands[0];
+    KFitParticle cand1 = fCands[0];
 
     param_p1 = cand1.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
 
-    HRefitCand cand2 = fCands[1];
+    KFitParticle cand2 = fCands[1];
 
     param_p2 = cand2.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
 
@@ -39,7 +39,7 @@ void HNeutralCandFinder::setNeutralMotherCand()
 
     if (fVerbose > 0)
     {
-        std::cout << " ----------- HNeutralCandFinder::setNeutralMotherCand() -----------" << std::endl;
+        std::cout << " ----------- KFitNeutralCandFinder::calculateNeutralMotherCand() -----------" << std::endl;
         std::cout << "" << std::endl;
     }
 
@@ -110,7 +110,7 @@ void HNeutralCandFinder::setNeutralMotherCand()
 
     if (fVerbose > 0)
     {
-        std::cout << "setNeutralMotherCandidate, fNeutralMotherCandidate: theta= " << fNeutralMotherCandidate.Theta() << " and phi = " << fNeutralMotherCandidate.Phi() << std::endl;
+        std::cout << "calculateNeutralMotherCandidate, fNeutralMotherCandidate: theta= " << fNeutralMotherCandidate.Theta() << " and phi = " << fNeutralMotherCandidate.Phi() << std::endl;
     }
 
     Double_t x_vertex = vecPrimToDecayVertex.X();
@@ -130,9 +130,9 @@ void HNeutralCandFinder::setNeutralMotherCand()
     Double_t dr_dy = y_vertex / r;
     Double_t dr_dz = z_vertex / r;
 
-    Double_t dtheta_dx = x_vertex * z_vertex / (r * r * r * std::sqrt(1 - z_vertex / (r * r)));
-    Double_t dtheta_dy = y_vertex * z_vertex / (r * r * r * std::sqrt(1 - z_vertex / (r * r)));
-    Double_t dtheta_dz = (1 / r - z_vertex * z_vertex / (r * r * r)) / std::sqrt(1 - z_vertex * z_vertex / (r * r));
+    Double_t dtheta_dx = x_vertex * z_vertex / (r * r * r * std::sqrt(abs(1 - z_vertex / (r * r))));
+    Double_t dtheta_dy = y_vertex * z_vertex / (r * r * r * std::sqrt(abs(1 - z_vertex / (r * r))));
+    Double_t dtheta_dz = (1 / r - z_vertex * z_vertex / (r * r * r)) / std::sqrt(abs(1 - z_vertex * z_vertex / (r * r)));
 
     // Double_t sigma_theta =std::sqrt(dtheta_dx * dtheta_dx * sigma_x * sigma_x + dtheta_dy * dtheta_dy * sigma_y * sigma_y + dtheta_dz * dtheta_dz * sigma_z * sigma_z);
 

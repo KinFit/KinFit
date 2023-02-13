@@ -1,12 +1,12 @@
-#include "hkinfitter.h"
+#include "KinFitter.h"
 
 const size_t cov_dim = 5;
 
-// general HKinFitter constructor
-HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
+// general KinFitter constructor
+KinFitter::KinFitter(const std::vector<KFitParticle> &cands) : fCands(cands),
                                                                fVerbose(0),
                                                                fLearningRate(1),
-                                                               fNumIterations(10)
+                                                               fNumIterations(20)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = fCands.size();
@@ -42,7 +42,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
     // and the covariance
     for (Int_t ix = 0; ix < fN; ix++)
     {
-        HRefitCand cand = fCands[ix];
+        KFitParticle cand = fCands[ix];
         y(0 + ix * cov_dim, 0) = 1. / cand.P();
         y(1 + ix * cov_dim, 0) = cand.Theta();
         y(2 + ix * cov_dim, 0) = cand.Phi();
@@ -60,7 +60,7 @@ HKinFitter::HKinFitter(const std::vector<HRefitCand> &cands) : fCands(cands),
     }
 }
 
-void HKinFitter::addMassConstraint(Double_t mass)
+void KinFitter::addMassConstraint(Double_t mass)
 {
     fMass = mass;
     if (!fMassConstraint)
@@ -68,7 +68,7 @@ void HKinFitter::addMassConstraint(Double_t mass)
     fMassConstraint = true;
 }
 
-void HKinFitter::addMMConstraint(Double_t mm, TLorentzVector init)
+void KinFitter::addMMConstraint(Double_t mm, TLorentzVector init)
 {
     fMass = mm;
     fInit = init;
@@ -77,7 +77,7 @@ void HKinFitter::addMMConstraint(Double_t mm, TLorentzVector init)
     fMMConstraint = true;
 }
 
-void HKinFitter::addMassVtxConstraint(Double_t mass)
+void KinFitter::addMassVtxConstraint(Double_t mass)
 {
     if (!fMassVtxConstraint)
         fNdf += 2;
@@ -85,7 +85,7 @@ void HKinFitter::addMassVtxConstraint(Double_t mass)
     fMassVtxConstraint = true;
 }
 
-void HKinFitter::add4Constraint(TLorentzVector lv)
+void KinFitter::add4Constraint(TLorentzVector lv)
 {
     fInit =  lv;
 
@@ -94,7 +94,7 @@ void HKinFitter::add4Constraint(TLorentzVector lv)
     f4Constraint = true;
 }
 
-void HKinFitter::add3Constraint(HRefitCand mother)
+void KinFitter::add3Constraint(KFitParticle mother)
 {
     fyDim = (fN + 1) * cov_dim - 1; // Dimension of full covariance matrix (number of measured variables x cov_dim). Mother momentum is not measured
 
@@ -109,7 +109,7 @@ void HKinFitter::add3Constraint(HRefitCand mother)
     // set y to measurements and the covariance, set mass
     for (Int_t ix = 0; ix < fN; ix++) // for daughters
     {
-        HRefitCand cand = fCands[ix];
+        KFitParticle cand = fCands[ix];
 
         y(0 + ix * cov_dim, 0) = 1. / cand.P();
         y(1 + ix * cov_dim, 0) = cand.Theta();
@@ -159,7 +159,7 @@ void HKinFitter::add3Constraint(HRefitCand mother)
     f3Constraint = true;
 }
 
-void HKinFitter::addVertexConstraint()
+void KinFitter::addVertexConstraint()
 {
     if (!fVtxConstraint)
         fNdf += 1;
@@ -167,7 +167,7 @@ void HKinFitter::addVertexConstraint()
 }
 
 //For fit with missing particle
-void HKinFitter::addMomConstraint(TLorentzVector lv, Double_t mass)
+void KinFitter::addMomConstraint(TLorentzVector lv, Double_t mass)
 {
     fInit = lv;
     fMass = mass;
@@ -185,7 +185,7 @@ void HKinFitter::addMomConstraint(TLorentzVector lv, Double_t mass)
     fMomConstraint = true;
 }
 
-TMatrixD HKinFitter::calcMissingMom(const TMatrixD &m_iter)
+TMatrixD KinFitter::calcMissingMom(const TMatrixD &m_iter)
 {
     TMatrix xi(3, 1);
 
@@ -204,7 +204,7 @@ TMatrixD HKinFitter::calcMissingMom(const TMatrixD &m_iter)
 }
 
 // Constraint equations
-TMatrixD HKinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
+TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 {
     TMatrixD d;
 
@@ -400,7 +400,7 @@ TMatrixD HKinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 }
 
 // Jacobian (derivative of constraint equations with respect to measured variables)
-TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
+TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 {
     TMatrixD H;
 
@@ -458,7 +458,7 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                       std::cos(m_iter(6, 0)) +
                   m_iter(3, 0) * std::cos(m_iter(2, 0) + pi2) *
                       std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) *
-                      std::sin(m_iter(2, 0)) -
+                      std::sin(m_iter(1, 0)) -
                   m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
                       std::cos(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                       std::cos(m_iter(6, 0)) -
@@ -537,8 +537,8 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                   m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
                       std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                       std::cos(m_iter(6, 0)) +
-                  (m_iter(9, 0) - m_iter(4, 0)) *
-                      (std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                  (m_iter(4, 0) - m_iter(9, 0)) *
+                      (- std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                            std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) -
                        std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
                            std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)));
@@ -562,14 +562,14 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                       std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
                       std::cos(m_iter(6, 0)) +
                   m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
-                      std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
+                      std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) *
                       std::cos(m_iter(1, 0)) -
                   m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
                       std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
                       std::cos(m_iter(1, 0)) +
                   (m_iter(4, 0) - m_iter(9, 0)) *
                       (std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
-                           std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) -
+                           std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) +
                        std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                            std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)));
 
@@ -672,7 +672,7 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                       std::cos(m_iter(6, 0)) +
                   m_iter(3, 0) * std::cos(m_iter(2, 0) + pi2) *
                       std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) *
-                      std::sin(m_iter(2, 0)) -
+                      std::sin(m_iter(1, 0)) -          //(2,0) changed to (1,0)
                   m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
                       std::cos(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                       std::cos(m_iter(6, 0)) -
@@ -751,8 +751,8 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                   m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
                       std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                       std::cos(m_iter(6, 0)) +
-                  (m_iter(9, 0) - m_iter(4, 0)) *
-                      (std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
+                  (m_iter(4, 0) - m_iter(9, 0)) *   //change this to Z_1-Z_2
+                      (- std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                            std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) -
                        std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
                            std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)));
@@ -776,14 +776,14 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                       std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
                       std::cos(m_iter(6, 0)) +
                   m_iter(8, 0) * std::sin(m_iter(7, 0) + pi2) *
-                      std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
+                      std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)) * //change cos(m_iter(7,0)) to sin
                       std::cos(m_iter(1, 0)) -
                   m_iter(8, 0) * std::cos(m_iter(7, 0) + pi2) *
                       std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) *
                       std::cos(m_iter(1, 0)) +
                   (m_iter(4, 0) - m_iter(9, 0)) *
                       (std::sin(m_iter(1, 0)) * std::cos(m_iter(2, 0)) *
-                           std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) -
+                           std::sin(m_iter(6, 0)) * std::cos(m_iter(7, 0)) + //change - to +
                        std::sin(m_iter(1, 0)) * std::sin(m_iter(2, 0)) *
                            std::sin(m_iter(6, 0)) * std::sin(m_iter(7, 0)));
 
@@ -934,7 +934,7 @@ TMatrixD HKinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 }
 
 // Jacobian (derivative of constraint equations with respect to unmeasured variables)
-TMatrixD HKinFitter::Fxi_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
+TMatrixD KinFitter::Fxi_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 {
     TMatrixD H;
 
@@ -967,11 +967,11 @@ TMatrixD HKinFitter::Fxi_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
     return H;
 }
 
-Bool_t HKinFitter::fit()
+Bool_t KinFitter::fit()
 {
     if (fVerbose > 0)
     {
-        std::cout << " ----------- HKinFitter::fit() -----------" << std::endl;
+        std::cout << " ----------- KinFitter::fit() -----------" << std::endl;
         std::cout << "Vertex constraint set: " << fVtxConstraint << std::endl;
         std::cout << "3C set: " << f3Constraint << std::endl;
         std::cout << "4C set: " << f4Constraint << std::endl;
@@ -1119,7 +1119,7 @@ Bool_t HKinFitter::fit()
         fDNorm = 0;
         fAlphaNorm = 0;
         TMatrixD delta_alpha_it = alpha-neu_alpha;
-        for (Int_t i=0; i<d.GetNrows(); i++) fDNorm += pow(d(1,0),2);
+        for (Int_t i=0; i<d.GetNrows(); i++) fDNorm += pow(d(i,0),2);
         fDNorm = sqrt(fDNorm);
         for (Int_t i=0; i<delta_alpha.GetNrows(); i++) fAlphaNorm  += pow(delta_alpha_it(i,0),2);
         if (f3Constraint || fMomConstraint){
@@ -1219,22 +1219,22 @@ Bool_t HKinFitter::fit()
     else return fConverged; // for number of iterations equal to 1
 }
 
-HRefitCand HKinFitter::getDaughter(Int_t val)
+KFitParticle KinFitter::getDaughter(Int_t val)
 {
     return fCands[val];
 }
 
-HRefitCand HKinFitter::getMother()
+KFitParticle KinFitter::getMother()
 {
     return fMother;
 }
 
-TLorentzVector HKinFitter::getMissingDaughter()
+TLorentzVector KinFitter::getMissingDaughter()
 {
     return fMissDaughter;
 }
 
-void HKinFitter::updateDaughters()
+void KinFitter::updateDaughters()
 {
     if (fVerbose > 1)
     {
@@ -1242,7 +1242,7 @@ void HKinFitter::updateDaughters()
     }
     for (Int_t val = 0; val < fN; ++val)
     {
-        HRefitCand &cand = fCands[val];
+        KFitParticle &cand = fCands[val];
         Double_t Px = (1. / y(0 + val * cov_dim, 0)) *
                       std::sin(y(1 + val * cov_dim, 0)) *
                       std::cos(y(2 + val * cov_dim, 0));
@@ -1274,9 +1274,9 @@ void HKinFitter::updateDaughters()
     }
 }
 
-void HKinFitter::updateMother()
+void KinFitter::updateMother()
 {
-    HRefitCand &mother = fMother;
+    KFitParticle &mother = fMother;
     Double_t Px = (1. / x(0, 0)) *
                   std::sin(y(0 + fN * cov_dim, 0)) *
                   std::cos(y(1 + fN * cov_dim, 0));
@@ -1303,21 +1303,21 @@ void HKinFitter::updateMother()
     // ---------------------------------------------------------------------------
 }
 
-void HKinFitter::update()
+void KinFitter::update()
 {
     for (Int_t val = 0; val < fN; ++val)
     {
-        HRefitCand &cand = fCands[val];
+        KFitParticle &cand = fCands[val];
         cand.update();
     }
 }
 
 
-void HKinFitter::setConvergenceCriteria(Double_t val1, Double_t val2, Double_t val3)
+void KinFitter::setConvergenceCriteria(Double_t val1, Double_t val2, Double_t val3)
 { 
     fConvergenceCriterionChi2 = val1;
     fConvergenceCriterionD = val2; 
     fConvergenceCriterionAlpha = val3; 
 }
 
-ClassImp(HKinFitter)
+ClassImp(KinFitter)

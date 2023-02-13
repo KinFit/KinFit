@@ -1,11 +1,11 @@
 /**
- * hkinfitter.h
+ * KinFitter.h
  *
  *
  */
 
-#ifndef HKINFITTER_H
-#define HKINFITTER_H
+#ifndef KINFITTER_H
+#define KINFITTER_H
 
 // system includes
 #include <iostream>
@@ -17,7 +17,7 @@
 #include "TObject.h"
 
 // framework includes
-#include "hrefitcand.h"
+#include "KFitParticle.h"
 
 using std::cout;
 using std::endl;
@@ -50,7 +50,7 @@ void Print(T const &matrix)
     cout << endl;
 }
 
-class HKinFitter : public TObject
+class KinFitter : public TObject
 {
 private:
     TMatrixD y, x, V, Vx, fPull;
@@ -58,8 +58,8 @@ private:
     Bool_t fConverged;
     Double_t fDNorm, fAlphaNorm;
     Int_t fIteration, fN, fyDim;
-    std::vector<HRefitCand> fCands;
-    HRefitCand fMother;
+    std::vector<KFitParticle> fCands;
+    KFitParticle fMother;
     TLorentzVector fMissDaughter;
 
     // data members for constraints
@@ -76,8 +76,8 @@ private:
     Double_t fConvergenceCriterionChi2, fConvergenceCriterionD, fConvergenceCriterionAlpha;
 
 public:
-    HKinFitter(const std::vector<HRefitCand> &cands);
-    ~HKinFitter(){};
+    KinFitter(const std::vector<KFitParticle> &cands);
+    ~KinFitter(){};
 
     TMatrixD calcMissingMom(const TMatrixD &m_iter);
 
@@ -85,7 +85,7 @@ public:
     TMatrixD Feta_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
     TMatrixD Fxi_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
 
-    void add3Constraint(HRefitCand mother);
+    void add3Constraint(KFitParticle mother);
     void add4Constraint(TLorentzVector lv);
     void addVertexConstraint();
     void addMomConstraint(TLorentzVector lv, Double_t mass);
@@ -110,9 +110,9 @@ public:
 
     void setVerbosity(Int_t val) { fVerbose = val; }
 
-    HRefitCand getDaughter(Int_t val);
-    void getDaughters(std::vector<HRefitCand> &daughters) { daughters = fCands; }
-    HRefitCand getMother();
+    KFitParticle getDaughter(Int_t val);
+    void getDaughters(std::vector<KFitParticle> &daughters) { daughters = fCands; }
+    KFitParticle getMother();
     TLorentzVector getMissingDaughter();
 
     void update();
@@ -120,7 +120,7 @@ public:
 protected:
     void updateDaughters();
     void updateMother();
-    ClassDef(HKinFitter, 0)
+    ClassDef(KinFitter, 1)
 };
 
-#endif /* HKINFITTER_H */
+#endif /* KINFITTER_H */

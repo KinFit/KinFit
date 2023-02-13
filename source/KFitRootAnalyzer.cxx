@@ -1,6 +1,6 @@
-#include "hrootfitter.h"
+#include "KFitRootAnalyzer.h"
 
-HRootFitter::HRootFitter(TString inFileName, TString outFileName, Int_t nEvents) : fEvents(nEvents),
+KFitRootAnalyzer::KFitRootAnalyzer(TString inFileName, TString outFileName, Int_t nEvents) : fEvents(nEvents),
                                                                                     fVerbose(0)
 {
     finFile = new TFile(inFileName, "READ");
@@ -13,20 +13,20 @@ HRootFitter::HRootFitter(TString inFileName, TString outFileName, Int_t nEvents)
 }
 
 // Select and sort particles according to their PID
-void HRootFitter::selectCandidates()
+void KFitRootAnalyzer::selectCandidates()
 {
     Int_t ntracks = fCands_in->GetEntries();
 
     fCandsFit.clear();
-    std::vector<HRefitCand > tempVec;
-    //HRefitCand *cand = new HRefitCand();
+    std::vector<KFitParticle > tempVec;
+    //KFitParticle *cand = new KFitParticle();
 
     for (size_t it = 0; it < fPids.size(); it++)
     {
         tempVec.clear();
         for (Int_t j = 0; j < ntracks; j++)
         {
-            HRefitCand *cand = (HRefitCand *)fCands_in->At(j);
+            KFitParticle *cand = (KFitParticle *)fCands_in->At(j);
 
             if (cand->getPid() == fPids[it])
             {
@@ -39,7 +39,7 @@ void HRootFitter::selectCandidates()
 }
 
 /*
-void HRootFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector())
+void KFitRootAnalyzer::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector())
 {
 
     // fCandsFit.Clear();
@@ -53,22 +53,22 @@ void HRootFitter::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzV
 }
 */
 
-void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, HRefitCand mother, Double_t mm)
+void KFitRootAnalyzer::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, KFitParticle mother, Double_t mm)
 {
     cout << "Task added: " << task << endl;
 
     // Read input tree
-    //TClonesArray *input_cands = new TClonesArray("HRefitCand");
+    //TClonesArray *input_cands = new TClonesArray("KFitParticle");
     Int_t Event;
     //add error when branch not existing
-    fTree->SetBranchAddress("HRefitCand", &fCands_in);
+    fTree->SetBranchAddress("KFitParticle", &fCands_in);
     
     // Create output tree
     //fTree_out = fTree->CopyTree();
     fTree_out->SetName("data_fitted");
     //fTree_out->BuildIndex("Event");
     TString out_branchname = "cands_fitted";
-    TClonesArray *fitted_cands = new TClonesArray("HRefitCand");
+    TClonesArray *fitted_cands = new TClonesArray("KFitParticle");
     TClonesArray &fit_arrayRef = *fitted_cands;
     Double_t Chi2, Prob;
     //TClonesArray &fit_arrayRef = *fit_array;
@@ -113,12 +113,12 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
 
         // initialize DecayBuilder
         cout << "ini Decay Builder" << endl;
-        HDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
+        KFitDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
         cout << "build decay1" << endl;
         cout << "build decay2" << endl;
         builder.buildDecay();
         cout << "make result" << endl;
-        std::vector<HRefitCand> result;
+        std::vector<KFitParticle> result;
         if(result.size()>0) result.clear();
         cout << "get result" << endl;
         cout << "get result" << endl;
@@ -138,7 +138,7 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
         for (Int_t k = 0; k < result.size(); k++)
         {
             cout << "fill cand" << endl;
-            HRefitCand *fitted_cand = new (fit_arrayRef[ii]) HRefitCand();
+            KFitParticle *fitted_cand = new (fit_arrayRef[ii]) KFitParticle();
             fitted_cand = &result[k];
 
             ii++;
@@ -148,27 +148,27 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVe
     } // end of event loop
 }
 
-void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t mm, TLorentzVector lv, HRefitCand mother)
+void KFitRootAnalyzer::doFitterTask(TString task, std::vector<Int_t> pids, Double_t mm, TLorentzVector lv, KFitParticle mother)
 {
     cout << "Task added: " << task << endl;
 
     // Read input tree
-    //TClonesArray *input_cands = new TClonesArray("HRefitCand");
+    //TClonesArray *input_cands = new TClonesArray("KFitParticle");
     Int_t Event;
-    fTree->SetBranchAddress("HRefitCand", &fCands_in);
+    fTree->SetBranchAddress("KFitParticle", &fCands_in);
     
     // Create output tree
     //fTree_out = fTree->CopyTree();
     fTree_out->SetName("data_fitted");
     //fTree_out->BuildIndex("Event");
     TString out_branchname = "cands_fitted";
-    TClonesArray *fitted_cands = new TClonesArray("HRefitCand");
+    TClonesArray *fitted_cands = new TClonesArray("KFitParticle");
     TClonesArray &fit_arrayRef = *fitted_cands;
     Double_t Chi2, Prob;
     //TClonesArray &fit_arrayRef = *fit_array;
 
     fTree_out->Branch("Event", &Event, "Event/I");
-    fTree_out->Branch("HRefitCand", "TClonesArray", &fitted_cands);
+    fTree_out->Branch("KFitParticle", "TClonesArray", &fitted_cands);
     fTree_out->Branch("Chi2", &Chi2, "Chi2/D");
     fTree_out->Branch("Prob", &Prob, "Prob/D");
 
@@ -184,7 +184,7 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
 
     cout<<"entries: "<<entries<<endl;
 
-    HDecayBuilder builder(task, fPids, lv, mother, mm);
+    KFitDecayBuilder builder(task, fPids, lv, mother, mm);
 
     // start of the event loop
     for (Int_t i = 1; i < entries; i++)
@@ -212,7 +212,7 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
 
         // initialize DecayBuilder
         cout << "ini Decay Builder" << endl;
-        //HDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
+        //KFitDecayBuilder builder(fCandsFit, task, fPids, lv, mother, mm);
         builder.setInputCands(fCandsFit);
         builder.countCombis();
         cout << "build decay1" << endl;
@@ -221,7 +221,7 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
         builder.buildDecay();
 
         cout << "make result" << endl;
-        std::vector<HRefitCand> result;
+        std::vector<KFitParticle> result;
         if(result.size()>0) result.clear();
         cout << "get result" << endl;
         cout << "get result" << endl;
@@ -242,11 +242,12 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
         for (Int_t k = 0; k < result.size(); k++)
         {
             cout << "fill cand" << endl;
-            HRefitCand *fitted_cand = new (fit_arrayRef[ii]) HRefitCand(&result[k], result[k].getR(), result[k].getZ());
+            KFitParticle *fitted_cand = new (fit_arrayRef[ii]) KFitParticle(&result[k], result[k].getR(), result[k].getZ());
             fitted_cand->setPid(result[k].getPid());
+            fitted_cand->setTrackId(result[k].getTrackId());
             fitted_cand->setCovariance(result[k].getCovariance());
             cout<<"fitted momentum: "<< result[k].getMomentum() << endl;
-            //fitted_cand = (HRefitCand*)result[k].Clone();
+            //fitted_cand = (KFitParticle*)result[k].Clone();
             //result[k].Delete();
             cout<<"fitted momentum cand: "<< fitted_cand->getMomentum() << endl;
             //fitted_cand->setMomentum(result[k].getMomentum());
@@ -279,7 +280,7 @@ void HRootFitter::doFitterTask(TString task, std::vector<Int_t> pids, Double_t m
 }
 
 // Close everything
-void HRootFitter::finish()
+void KFitRootAnalyzer::finish()
 {
     foutFile->cd();
     fTree_out->Write();
@@ -290,13 +291,13 @@ void HRootFitter::finish()
 }
 
 /*
-// Function to fill HRefitCand -- not needed here if input is already HRefitCand
-void HRootFitter::FillData(HParticleCandSim *cand, HRefitCand &outcand, double arr[5], double mass)
+// Function to fill KFitParticle -- not needed here if input is already KFitParticle
+void KFitRootAnalyzer::FillData(HParticleCandSim *cand, KFitParticle &outcand, double arr[5], double mass)
 {
 
     if (fVerbose > 0)
     {
-        std::cout << " ----------- HRootFitter::FillData() -----------" << std::endl;
+        std::cout << " ----------- KFitRootAnalyzer::FillData() -----------" << std::endl;
         std::cout << "" << std::endl;
     }
 

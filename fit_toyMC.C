@@ -13,11 +13,11 @@
 #include <map>
 #include <vector>
 
-#include "/home/jana/KinFit/include/hkinfitter.h"
+#include "/home/jana/KinFit/include/KinFitter.h"
 
 using namespace std;
 
-void FillData(HRefitCand& outcand, double arr[])
+void FillData(KFitParticle& outcand, double arr[])
 {
     double deg2rad = TMath::DegToRad();
 
@@ -152,20 +152,20 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
         h01->Fill(lambda.M());
         h012->Fill(lambda.P());
 
-        HRefitCand proton_fit(proton,0,0);
+        KFitParticle proton_fit(proton,0,0);
         FillData(proton_fit, proton_errors);
-        HRefitCand pion_fit(pion,0,0);
+        KFitParticle pion_fit(pion,0,0);
         FillData(pion_fit, pion_errors);
 
         // ---------------------------------------------------------------------------------
         // begin kinfit here
         // ---------------------------------------------------------------------------------
-        std::vector<HRefitCand> cands;
+        std::vector<KFitParticle> cands;
         cands.clear();
         cands.push_back(proton_fit);
         cands.push_back(pion_fit);
 
-        HKinFitter fitter(cands);
+        KinFitter fitter(cands);
         fitter.setVerbosity(0);
         fitter.setNumberOfIterations(10);
         //fitter.setLearningRate(0.5);
@@ -174,8 +174,8 @@ Int_t fit_toyMC(TString infile, Int_t nEvents)
         //fitter.add4Constraint(ini);
         if(fitter.fit()){
 
-            HRefitCand fcand1 = fitter.getDaughter(0); // proton
-            HRefitCand fcand2 = fitter.getDaughter(1); // pion
+            KFitParticle fcand1 = fitter.getDaughter(0); // proton
+            KFitParticle fcand2 = fitter.getDaughter(1); // pion
 
             h02->Fill(fitter.getChi2());
             h03->Fill(fitter.getProb());

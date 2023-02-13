@@ -1,4 +1,4 @@
-//#include "hrefitcand.h"
+//#include "KFitParticle.h"
 
 TVector3 calcPoca(TVector3 vertex, TVector3 mom){
   Float_t px, py, pz;
@@ -13,7 +13,7 @@ TVector3 calcPoca(TVector3 vertex, TVector3 mom){
   return result;
 }
 
-void FillData(HRefitCand **outcand, Double_t mom, Double_t tht, Double_t phi, Double_t R, Double_t Z, Double_t mass, Int_t pid)
+void FillData(KFitParticle **outcand, Double_t mom, Double_t tht, Double_t phi, Double_t R, Double_t Z, Double_t mass, Int_t pid, Int_t id)
 {
     double deg2rad = TMath::DegToRad();
 
@@ -27,6 +27,7 @@ void FillData(HRefitCand **outcand, Double_t mom, Double_t tht, Double_t phi, Do
     (*outcand)->setR(R);
     (*outcand)->setZ(Z);
     (*outcand)->setPid(pid);
+    (*outcand)->setTrackId(id);
 
     TMatrixD cov(5, 5);
     if(mom>0) cov(0, 0) = std::pow(0.025*(1/mom), 2);
@@ -39,7 +40,7 @@ void FillData(HRefitCand **outcand, Double_t mom, Double_t tht, Double_t phi, Do
     
 }
 
-void ToyMC_fromPluto_HRefitCand_workaround(TString inFile, Int_t nEvents = 500000)
+void ToyMC_fromPluto_KFitParticle_workaround(TString inFile, Int_t nEvents = 500000)
 {
    
    Float_t p1CandTrueP, p1CandTrueTheta, p1CandTruePhi, p1CandTrueR, p1CandTrueZ, p1CandRecoP, p1CandRecoTheta, p1CandRecoPhi, p1CandRecoR, p1CandRecoZ,
@@ -95,7 +96,7 @@ void ToyMC_fromPluto_HRefitCand_workaround(TString inFile, Int_t nEvents = 50000
    TFile *outFile = new TFile("/home/jana/KinFit/input.root", "recreate");
     TTree *tree = new TTree("data", "input data for fitter");
 
-    TClonesArray *p_array = new TClonesArray("HRefitCand");
+    TClonesArray *p_array = new TClonesArray("KFitParticle");
     TClonesArray &p_arrayRef = *p_array;
     Int_t Event;
 
@@ -105,7 +106,7 @@ void ToyMC_fromPluto_HRefitCand_workaround(TString inFile, Int_t nEvents = 50000
                                                              "piCandTrueP:piCandTrueTheta:piCandTruePhi:piCandTrueR:piCandTrueZ:");
 
     tree->Branch("Event", &Event, "Event/I");
-    tree->Branch("HRefitCand", "TClonesArray", &p_array);
+    tree->Branch("KFitParticle", "TClonesArray", &p_array);
 
    // masses of the measured particles (p, K, p, pi-)
    //const Double_t masses[] = {0.938272, 0.493677, 0.938272, 0.13957};
@@ -130,15 +131,15 @@ void ToyMC_fromPluto_HRefitCand_workaround(TString inFile, Int_t nEvents = 50000
       
       t->GetEntry(i);
 
-      HRefitCand *p1_fit = new (p_arrayRef[0]) HRefitCand();
-      HRefitCand *K_fit = new (p_arrayRef[1]) HRefitCand();
-      HRefitCand *pi_fit = new (p_arrayRef[2]) HRefitCand();
-      HRefitCand *p2_fit = new (p_arrayRef[3]) HRefitCand();
+      KFitParticle *p1_fit = new (p_arrayRef[0]) KFitParticle();
+      KFitParticle *K_fit = new (p_arrayRef[1]) KFitParticle();
+      KFitParticle *pi_fit = new (p_arrayRef[2]) KFitParticle();
+      KFitParticle *p2_fit = new (p_arrayRef[3]) KFitParticle();
 
-      FillData(&p1_fit, p1CandRecoP, p1CandRecoTheta, p1CandRecoPhi, p1CandRecoR, p1CandRecoZ, 0.938272, 14);
-      FillData(&K_fit, KCandRecoP, KCandRecoTheta, KCandRecoPhi, KCandRecoR, KCandRecoZ, 0.493677, 11);
-      FillData(&pi_fit, piCandRecoP, piCandRecoTheta, piCandRecoPhi, piCandRecoR, piCandRecoZ, 0.13957, 9);
-      FillData(&p2_fit, p2CandRecoP, p2CandRecoTheta, p2CandRecoPhi, p2CandRecoR, p2CandRecoZ, 0.938272, 14);
+      FillData(&p1_fit, p1CandRecoP, p1CandRecoTheta, p1CandRecoPhi, p1CandRecoR, p1CandRecoZ, 0.938272, 14, 1);
+      FillData(&K_fit, KCandRecoP, KCandRecoTheta, KCandRecoPhi, KCandRecoR, KCandRecoZ, 0.493677, 11, 2);
+      FillData(&pi_fit, piCandRecoP, piCandRecoTheta, piCandRecoPhi, piCandRecoR, piCandRecoZ, 0.13957, 9, 3);
+      FillData(&p2_fit, p2CandRecoP, p2CandRecoTheta, p2CandRecoPhi, p2CandRecoR, p2CandRecoZ, 0.938272, 14, 4);
 
       // store in the tree
       // arranged as Proton MC values (p, theta, phi), Pion MC values (p, theta, phi)

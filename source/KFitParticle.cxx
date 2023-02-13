@@ -1,13 +1,15 @@
 // ROOT includes
-#include "hrefitcand.h"
+#include "KFitParticle.h"
 
-HRefitCand::HRefitCand(TLorentzVector *cand, Double_t R, Double_t Z)
+KFitParticle::KFitParticle(TLorentzVector *cand, Double_t R, Double_t Z)
     : TLorentzVector(*cand), cand(cand), fMomentum(cand->P()), fTheta(cand->Theta()), fPhi(cand->Phi()), fR(R), fZ(Z)
 {
     fPid = -1;
+    fTrackId = -1;
+    fCov.ResizeTo(5, 5);
 }
 
-HRefitCand::HRefitCand(TLorentzVector *cand, Double_t X, Double_t Y, Double_t Z)
+KFitParticle::KFitParticle(TLorentzVector *cand, Double_t X, Double_t Y, Double_t Z)
     : TLorentzVector(*cand), cand(cand), fMomentum(cand->P()), fTheta(cand->Theta()), fPhi(cand->Phi())
 {
     Double_t deg2rad = TMath::DegToRad();
@@ -50,18 +52,21 @@ HRefitCand::HRefitCand(TLorentzVector *cand, Double_t X, Double_t Y, Double_t Z)
     //fZ = POCA.Z();
 
     fPid = -1;
+    fTrackId = -1;
 }
 
-HRefitCand::HRefitCand()
+KFitParticle::KFitParticle()
     : TLorentzVector()
 {
     cand = new TLorentzVector();
     fR = 0;
     fZ = 0;
     fPid = -1;
+    fTrackId = -1;
+    fCov.ResizeTo(5, 5);
 }
 
-void HRefitCand::setCovariance(const TMatrixD &cov)
+void KFitParticle::setCovariance(const TMatrixD &cov)
 {
     // HADES default track parametrization
     // 0 = 1/p
@@ -90,12 +95,12 @@ void HRefitCand::setCovariance(const TMatrixD &cov)
     }
 }
 
-void HRefitCand::reset()
+void KFitParticle::reset()
 {
     *(TLorentzVector *)this = *cand;
 }
 
-void HRefitCand::update()
+void KFitParticle::update()
 {
     *((TLorentzVector *)cand) = *this;
 }
