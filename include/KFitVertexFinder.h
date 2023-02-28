@@ -38,6 +38,12 @@ private:
     TVector3 fDir;
 
     TVector3 fBase;
+ 
+    void addLinesToVertex(const TVector3 &r, const TVector3 &alpha, const Double_t w = 1.0);
+
+    void findVertex();    
+    
+    void reset();
 
 protected:
     TMatrixD fSys; // LSM system inverse matrix
@@ -48,12 +54,6 @@ public:
     ~KFitVertexFinder(){};
 
     void setVerbosity(int val) { fVerbose = val; }
-
-    void addLinesToVertex(const TVector3 &r, const TVector3 &alpha, const Double_t w = 1.0);
-
-    void reset();
-
-    void findVertex();
 
     TVector3 getVertex() const { return fVertex; }
 };

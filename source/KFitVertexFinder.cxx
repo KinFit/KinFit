@@ -1,9 +1,12 @@
 #include "KFitVertexFinder.h"
 
 KFitVertexFinder::KFitVertexFinder(std::vector<KFitParticle> &cands) : fVerbose(0), fCands(cands)
-{
+{   
+    
     fM.ResizeTo(3, 3);
     fSys.ResizeTo(3, 3);
+    
+    reset();
 
     for (int i_cand = 0; i_cand < fCands.size(); i_cand++)
     {
@@ -24,12 +27,11 @@ KFitVertexFinder::KFitVertexFinder(std::vector<KFitParticle> &cands) : fVerbose(
         fBase.SetY(param_R * std::sin(param_phi + TMath::PiOver2()));
         fBase.SetZ(param_Z);
 
-        addLinesToVertex(fBase, fDir, 1); // Function for adding the lines to the vertex
+        addLinesToVertex(fBase, fDir, 1.0); // Function for adding the lines to the vertex
     }
 
     findVertex(); //Function for finding the vertex and giving the output
 
-    reset();
 }
 
 void KFitVertexFinder::addLinesToVertex(const TVector3 &r, const TVector3 &alpha,
@@ -75,7 +77,9 @@ void KFitVertexFinder::findVertex(){
 
     Double_t det = 0;
 
-    det = fSys.Determinant();
+    //det = fSys.Determinant();
+   
+    det=fSys(0,0)*fSys(1,1)*fSys(2,2) + fSys(0,1)*fSys(1,2)*fSys(0,2)+ fSys(0,1)*fSys(1,2)*fSys(0,2) - fSys(0,2)*fSys(1,1)*fSys(0,2)-fSys(0,1)*fSys(0,1)*fSys(2,2) - fSys(1,2)*fSys(1,2)*fSys(0,0);
 
     fM(0, 0) = fSys(1, 1) * fSys(2, 2) - fSys(1, 2) * fSys(1, 2);
     fM(0, 1) = fSys(1, 2) * fSys(0, 2) - fSys(0, 1) * fSys(2, 2);
@@ -90,15 +94,18 @@ void KFitVertexFinder::findVertex(){
     if (det == 0)
     {
         fVertex.SetXYZ(-1000., -1000., -1000.);
-        //return;
+        // return;
     }
-
-    fM *= (1. / det);
-
-    fVertex = fM * fB;
-
-    //return fVertex;
-
+    else
+    {
+        for (Int_t i = 0; i < 3; i++)
+        {
+            for (Int_t j = 0; j < 3; j++)
+                fM(i, j) = fM(i, j) / (det);
+        }
+        fVertex = fM * fB;
+    }
+    // return fVertex;
 }
 
 void KFitVertexFinder::reset()
