@@ -2,10 +2,10 @@
  * KFitNeutralCandFinder.h
  *
  *@updated 26.04.2023
- *@version 1.0 
+ *@version v1.0.0 
  *
  * Class to calculate the neutral candidate
- * from two decay products 
+ * from the decay products 
  * 
  */
 

@@ -1,3 +1,13 @@
+/**
+ * KFitParticle.h
+ *
+ *@updated 27.04.2023
+ *@version v1.0.0 
+ *
+ * Object containing track parameters
+ * as well as the covariance matrix
+ */
+
 #ifndef KFITPARTICLE_H
 #define KFITPARTICLE_H
 
@@ -7,18 +17,37 @@
 #include <TMatrixD.h>
 #include <TLorentzVector.h>
 
-// framework includes
-//#include "hparticletool.h"
-
 class KFitParticle : public TLorentzVector
 {
 
     ClassDef(KFitParticle, 1);
 
 private:
-    TLorentzVector *cand;
-    Double_t fMomentum, fTheta, fPhi, fR, fZ;
-    Int_t fPid, fTrackId;
+    TLorentzVector *cand; // TLorentzVector the KFitParticle
+    // inherits from
+    Double_t fMomentum; // Momentum [MeV]
+    Double_t fTheta; // Polar angle [rad]
+    Double_t fPhi; // Azimuthal angle [rad]
+    Double_t fR; // Closest distance to beamline [cm]
+    Double_t fZ; // Point along beamline where track is closest to it [cm]
+    Int_t fPid; // PID code for the particle spices
+    Int_t fTrackId; // Track id
+
+    /** Covariance matrix of the KFitParticle
+    /* Diagonal entries correspond to the covariances 
+    /* in the parameters in the following order
+    /* 
+    /* -----------------------------
+    /* | 1/p                       |
+    /* |     theta                 |
+    /* |            phi            |
+    /* |                   R       |
+    /* |                        Z  |
+    /* -----------------------------
+    /* 
+    /* Off diagonal elements corresponds to the
+    /* correlations between the parameters
+    */
     TMatrixD fCov;
 
 public:

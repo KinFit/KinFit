@@ -1,7 +1,10 @@
 /**
  * KFitVertexFinder.h
  *
+ *@updated 27.04.2023
+ *@version v1.0.0 
  *
+ * Class 
  */
 
 #ifndef KFITVERTEXFINDER_H
@@ -27,34 +30,42 @@ class KFitVertexFinder
 
 private:
     std::vector<KFitParticle> fCands;
-    // std::vector<int> fPids; // Index of a Pid in this vector correspond to that of the cand on the corresponding index in fCands.
-    // std::vector<double> fWeight;
 
     TVector3 fVertex;
     int fVerbose;
 
     TMatrixD fM; // Temporal matrix for calculations
 
-    TVector3 fDir;
+    TVector3 fDir; // Direction vector used for each track in the fitting
 
-    TVector3 fBase;
+    TVector3 fBase; // Base vector used for each track in the fitting
  
     void addLinesToVertex(const TVector3 &r, const TVector3 &alpha, const Double_t w = 1.0);
 
+    /** @brief Function that finds the vertex via matrix multiplications
+    */
     void findVertex();    
     
     void reset();
 
 protected:
     TMatrixD fSys; // LSM system inverse matrix
-    TVector3 fB;         // LSM independent term
+    TVector3 fB;   // LSM independent term
 
 public:
+    
+    /**  Constructor 
+    */
     KFitVertexFinder(std::vector<KFitParticle> &);
+
+    /** Default Destructor **/
     ~KFitVertexFinder(){};
 
     void setVerbosity(int val) { fVerbose = val; }
 
+    /** @brief Function that returns the vertex
+    * @return A Tvector3 with the vertex X, Y and Z positions
+    */
     TVector3 getVertex() const { return fVertex; }
 };
 
