@@ -18,7 +18,7 @@ KFitNeutralCandFinder::KFitNeutralCandFinder(const std::vector<KFitParticle> &ca
 
 void KFitNeutralCandFinder::calculateNeutralMotherCand()
 {
-    Double_t param_p1, param_p2;
+    double param_p1, param_p2;
 
     KFitParticle cand1 = fCands[0];
 
@@ -28,11 +28,23 @@ void KFitNeutralCandFinder::calculateNeutralMotherCand()
 
     param_p2 = cand2.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
 
-    Double_t energy_cand1, energy_cand2;
+    double energy_cand1, energy_cand2;
     energy_cand1 = std::sqrt(param_p1 * param_p1 + cand1.M() * cand1.M());
     energy_cand2 = std::sqrt(param_p2 * param_p2 + cand2.M() * cand2.M());
+    
+    // FOr one particle
+    //fMomentumBeforeDecay = std::sqrt(energy_cand1 * energy_cand1 + 2 * energy_cand1 * energy_cand2 + energy_cand2 * energy_cand2 - fNeutralCandMass * fNeutralCandMass);
+    
+    // For any number of particles
+    double fMomentumBeforeDecay = 0; 
+    
+    for(int i_cands=0; i_cands<fCands.size(); i_cands++){
 
-    fMomentumBeforeDecay = std::sqrt(energy_cand1 * energy_cand1 + 2 * energy_cand1 * energy_cand2 + energy_cand2 * energy_cand2 - fNeutralCandMass * fNeutralCandMass);
+        KFitParticle cand = fCands[i_cands];
+    
+        fMomentumBeforeDecay += cand.P();
+
+    }
 
     TVector3 primaryVertex = fPrimaryVertex;
     TVector3 decayVertex = fDecayVertex;
@@ -67,16 +79,16 @@ void KFitNeutralCandFinder::calculateNeutralMotherCand()
     geom_base_Z.SetY(0);
     geom_base_Z.SetZ(1);
 
-    Double_t a = geom_base_Z.Dot(geom_dir_Z);
-    Double_t b = geom_dir_Z.Dot(geom_dir_Z);
-    Double_t c = vtx_geom_base.Dot(geom_dir_Z);
-    Double_t d = (geom_base_Z.Dot(vtx_geom_dir)) * (vtx_geom_dir.Dot(geom_dir_Z)) / vtx_geom_dir.Dot(vtx_geom_dir);
-    Double_t e = (geom_dir_Z.Dot(vtx_geom_dir)) * (vtx_geom_dir.Dot(geom_dir_Z)) / vtx_geom_dir.Dot(vtx_geom_dir);
-    Double_t f = (vtx_geom_base.Dot(vtx_geom_dir)) * (vtx_geom_dir.Dot(geom_dir_Z)) / vtx_geom_dir.Dot(vtx_geom_dir);
+    double a = geom_base_Z.Dot(geom_dir_Z);
+    double b = geom_dir_Z.Dot(geom_dir_Z);
+    double c = vtx_geom_base.Dot(geom_dir_Z);
+    double d = (geom_base_Z.Dot(vtx_geom_dir)) * (vtx_geom_dir.Dot(geom_dir_Z)) / vtx_geom_dir.Dot(vtx_geom_dir);
+    double e = (geom_dir_Z.Dot(vtx_geom_dir)) * (vtx_geom_dir.Dot(geom_dir_Z)) / vtx_geom_dir.Dot(vtx_geom_dir);
+    double f = (vtx_geom_base.Dot(vtx_geom_dir)) * (vtx_geom_dir.Dot(geom_dir_Z)) / vtx_geom_dir.Dot(vtx_geom_dir);
 
-    Double_t u1 = (-a + c + d - f) / (b - e);
+    double u1 = (-a + c + d - f) / (b - e);
 
-    Double_t valZ = geom_base_Z.Z() + geom_dir_Z.Z() * u1;
+    double valZ = geom_base_Z.Z() + geom_dir_Z.Z() * u1;
 
     TVector3 cross = vtx_geom_dir.Cross(geom_dir_Z);
     TVector3 diff=vtx_geom_base-geom_base_Z;
@@ -88,7 +100,7 @@ void KFitNeutralCandFinder::calculateNeutralMotherCand()
         valR = -1 * valR;
     }
 
-    Double_t thetaPrimaryToSecondaryVertex, phiPrimaryToSecondaryVertex;
+    double thetaPrimaryToSecondaryVertex, phiPrimaryToSecondaryVertex;
 
     thetaPrimaryToSecondaryVertex = vecPrimToDecayVertex.Theta();
     phiPrimaryToSecondaryVertex = vecPrimToDecayVertex.Phi();
@@ -96,15 +108,25 @@ void KFitNeutralCandFinder::calculateNeutralMotherCand()
     fNeutralMotherCandidate.setR(valR);
     fNeutralMotherCandidate.setZ(valZ);
 
-    Double_t Px = (fMomentumBeforeDecay *
+    /*double Px = (fMomentumBeforeDecay *
                    std::sin(thetaPrimaryToSecondaryVertex) *
                    std::cos(phiPrimaryToSecondaryVertex));
-    Double_t Py = (fMomentumBeforeDecay *
+    double Py = (fMomentumBeforeDecay *
                    std::sin(thetaPrimaryToSecondaryVertex) *
                    std::sin(phiPrimaryToSecondaryVertex));
-    Double_t Pz =
+    double Pz =
         (fMomentumBeforeDecay * std::cos(thetaPrimaryToSecondaryVertex));
-    Double_t M = fNeutralCandMass;
+    double M = fNeutralCandMass;
+    */
+    double Px = (fMomentumBeforeDecay *
+                   std::sin(thetaPrimaryToSecondaryVertex) *
+                   std::cos(phiPrimaryToSecondaryVertex));
+    double Py = (fMomentumBeforeDecay *
+                   std::sin(thetaPrimaryToSecondaryVertex) *
+                   std::sin(phiPrimaryToSecondaryVertex));
+    double Pz =
+        (fMomentumBeforeDecay * std::cos(thetaPrimaryToSecondaryVertex));
+    double M = fNeutralCandMass;
 
     fNeutralMotherCandidate.SetXYZM(Px, Py, Pz, M);
 
@@ -113,44 +135,47 @@ void KFitNeutralCandFinder::calculateNeutralMotherCand()
         std::cout << "calculateNeutralMotherCandidate, fNeutralMotherCandidate: theta= " << fNeutralMotherCandidate.Theta() << " and phi = " << fNeutralMotherCandidate.Phi() << std::endl;
     }
 
-    Double_t x_vertex = vecPrimToDecayVertex.X();
-    Double_t y_vertex = vecPrimToDecayVertex.Y();
-    Double_t z_vertex = vecPrimToDecayVertex.Z();
+    double x_vertex = vecPrimToDecayVertex.X();
+    double y_vertex = vecPrimToDecayVertex.Y();
+    double z_vertex = vecPrimToDecayVertex.Z();
 
     double sigma_x = sqrt(fPrimVtxResX * fPrimVtxResX + fDecVtxResX * fDecVtxResX);
     double sigma_y = sqrt(fPrimVtxResY * fPrimVtxResY + fDecVtxResY * fDecVtxResY);
     double sigma_z = sqrt(fPrimVtxResZ * fPrimVtxResZ + fDecVtxResZ * fDecVtxResZ);
 
+    double sigma_xy = sqrt(fCorrPrimXY * fPrimVtxResX * fPrimVtxResY + fCorrDecXY * fDecVtxResX * fDecVtxResY);
+    double sigma_xz = sqrt(fCorrPrimXZ * fPrimVtxResX * fPrimVtxResZ + fCorrDecXZ * fDecVtxResX * fDecVtxResZ);
+    double sigma_yz = sqrt(fCorrPrimYZ * fPrimVtxResY * fPrimVtxResZ + fCorrDecYZ * fDecVtxResY * fDecVtxResZ);
     // Use coordinate transformation cartesian->polar to estimate error in theta and phi
 
     // Calculate the error in theta
-    Double_t r = std::sqrt(x_vertex * x_vertex + y_vertex * y_vertex + z_vertex * z_vertex);
+    double r = std::sqrt(x_vertex * x_vertex + y_vertex * y_vertex + z_vertex * z_vertex + sigma_xy*sigma_xy + sigma_xz*sigma_xz + sigma_yz*sigma_yz);
 
-    Double_t dr_dx = x_vertex / r;
-    Double_t dr_dy = y_vertex / r;
-    Double_t dr_dz = z_vertex / r;
+    double dr_dx = x_vertex / r;
+    double dr_dy = y_vertex / r;
+    double dr_dz = z_vertex / r;
 
-    Double_t dtheta_dx = x_vertex * z_vertex / (r * r * r * std::sqrt(abs(1 - z_vertex / (r * r))));
-    Double_t dtheta_dy = y_vertex * z_vertex / (r * r * r * std::sqrt(abs(1 - z_vertex / (r * r))));
-    Double_t dtheta_dz = (1 / r - z_vertex * z_vertex / (r * r * r)) / std::sqrt(abs(1 - z_vertex * z_vertex / (r * r)));
+    double dtheta_dx = x_vertex * z_vertex / (r * r * r * std::sqrt(abs(1 - z_vertex / (r * r))));
+    double dtheta_dy = y_vertex * z_vertex / (r * r * r * std::sqrt(abs(1 - z_vertex / (r * r))));
+    double dtheta_dz = (1 / r - z_vertex * z_vertex / (r * r * r)) / std::sqrt(abs(1 - z_vertex * z_vertex / (r * r)));
 
-    // Double_t sigma_theta =std::sqrt(dtheta_dx * dtheta_dx * sigma_x * sigma_x + dtheta_dy * dtheta_dy * sigma_y * sigma_y + dtheta_dz * dtheta_dz * sigma_z * sigma_z);
+    // double sigma_theta =std::sqrt(dtheta_dx * dtheta_dx * sigma_x * sigma_x + dtheta_dy * dtheta_dy * sigma_y * sigma_y + dtheta_dz * dtheta_dz * sigma_z * sigma_z);
 
     // Calculate the error in phi
-    Double_t r_2D = std::sqrt(x_vertex * x_vertex + y_vertex * y_vertex);
+    double r_2D = std::sqrt(x_vertex * x_vertex + y_vertex * y_vertex);
 
-    Double_t dphi_dx = -x_vertex * y_vertex / (sqrt(x_vertex * x_vertex / (r_2D * r_2D)) * r_2D * r_2D * r_2D);
-    Double_t dphi_dy = std::sqrt(x_vertex * x_vertex / (r_2D * r_2D)) / r_2D;
+    double dphi_dx = -x_vertex * y_vertex / (sqrt(x_vertex * x_vertex / (r_2D * r_2D)) * r_2D * r_2D * r_2D);
+    double dphi_dy = std::sqrt(x_vertex * x_vertex / (r_2D * r_2D)) / r_2D;
 
-    Double_t dphi_dz = 0;
+    double dphi_dz = 0;
 
-    // Double_t sigma_phi =std::sqrt(dphi_dx * dphi_dx * sigma_x * sigma_x + dphi_dy * dphi_dy * sigma_y * sigma_y);
+    // double sigma_phi =std::sqrt(dphi_dx * dphi_dx * sigma_x * sigma_x + dphi_dy * dphi_dy * sigma_y * sigma_y);
 
     // Calculate the error in R
-    Double_t dR_dx = x_vertex / r_2D;
-    Double_t dR_dy = y_vertex / r_2D;
+    double dR_dx = x_vertex / r_2D;
+    double dR_dy = y_vertex / r_2D;
 
-    Double_t sigma_R = std::sqrt(dR_dx * dR_dx * sigma_x * sigma_x + dR_dy * dR_dy * sigma_y * sigma_y);
+    double sigma_R = std::sqrt(dR_dx * dR_dx * sigma_x * sigma_x + dR_dy * dR_dy * sigma_y * sigma_y);
 
     TMatrixD covarianceDetectorSystem;
     covarianceDetectorSystem.ResizeTo(3, 3);
@@ -159,6 +184,13 @@ void KFitNeutralCandFinder::calculateNeutralMotherCand()
     covarianceDetectorSystem(0, 0) = sigma_x * sigma_x;
     covarianceDetectorSystem(1, 1) = sigma_y * sigma_y;
     covarianceDetectorSystem(2, 2) = sigma_z * sigma_z;
+
+    covarianceDetectorSystem(0, 1) = sigma_xy * sigma_xy;
+    covarianceDetectorSystem(0, 2) = sigma_xz * sigma_xz;
+    covarianceDetectorSystem(1, 2) = sigma_yz * sigma_yz;
+    covarianceDetectorSystem(1, 0) = -covarianceDetectorSystem(0, 1);
+    covarianceDetectorSystem(2, 0) = -covarianceDetectorSystem(0, 2);
+    covarianceDetectorSystem(1, 2) = -covarianceDetectorSystem(2, 1);
 
     TMatrixD derivativeMatrix;
     derivativeMatrix.ResizeTo(3, 3);
@@ -197,12 +229,13 @@ void KFitNeutralCandFinder::calculateNeutralMotherCand()
     fCovarianceNeutralMother(3, 3) = sigma_R * sigma_R;
     fCovarianceNeutralMother(4, 4) = sigma_z * sigma_z;
 
+    // Set covariance of the mother candidate
     fNeutralMotherCandidate.setCovariance(fCovarianceNeutralMother);
 
+    // Set momentum of the mother candidate
     fNeutralMotherCandidate.setMomentum(fMomentumBeforeDecay);
 
-    // Set angles
-
+    // Set angles of the mother candidate
     fNeutralMotherCandidate.setTheta(thetaPrimaryToSecondaryVertex);
     fNeutralMotherCandidate.setPhi(phiPrimaryToSecondaryVertex);
 }

@@ -30,17 +30,12 @@ private:
 
     TVector3 fPrimaryVertex; // Vector pointing to the primary vertex
     TVector3 fDecayVertex; // Vector pointing to the decay vertex
-    Int_t fVerbose = 0;
+    int fVerbose = 0;
 
-    Double_t fMomentumBeforeDecay; // Estimated momentum of the neutral particle
-    Double_t fNeutralCandMass; // Assuption for the mass of the neutral particle
+    double fMomentumBeforeDecay; // Estimated momentum of the neutral particle
+    double fNeutralCandMass; // Assuption for the mass of the neutral particle
     
     KFitParticle fNeutralMotherCandidate;
-
-    //Double_t fDistParticle1Vertex;
-    //Double_t fDistParticle2Vertex;
-    //Double_t fDistParticle1Origin;
-    //Double_t fDistParticle2Origin; 
 
     double fPrimVtxResX; // Primary vertex resolution in x-direction
     double fPrimVtxResY; // Primary vertex resolution in y-direction
@@ -50,6 +45,14 @@ private:
     double fDecVtxResY; // Decay vertex resolution in y-direction
     double fDecVtxResZ; // Decay vertex resolution in z-direction
 
+    double fCorrPrimXY = 0; // Correlations between primary vertex uncertainties in X and Y direction
+    double fCorrPrimXZ = 0; // Correlations between primary vertex uncertainties in X and Z direction
+    double fCorrPrimYZ = 0; // Correlations between primary vertex uncertainties in Y and Z direction
+
+    double fCorrDecXY = 0; // Correlations between decay vertex uncertainties in X and Y direction
+    double fCorrDecXZ = 0; // Correlations between decay vertex uncertainties in X and Z direction
+    double fCorrDecYZ = 0; // Correlations between decay vertex uncertainties in Y and Z direction
+    
     /** Covariance matrix of the neutral mother candidate
     /* Diagonal entries correspond to the covariances 
     /* in the parameters in the following order
@@ -93,7 +96,27 @@ public:
     /** Default Constructor **/
     ~KFitNeutralCandFinder(){};
 
-    void setVerbosity(Int_t val) { fVerbose = val; }
+    void setVerbosity(int val) { fVerbose = val; }
+
+    /** @brief Set correlations between the x, y and z positions of the primary and the decay vertex
+    * @param valPrimXY - x-y correlation of primary vertex uncertainties
+    * @param valPrimXZ - x-z correlation of primary vertex uncertainties    
+    * @param valPrimYZ - y-z correlation of primary vertex uncertainties
+    * @param valDecXY -  x-y correlation of decay vertex uncertainties  
+    * @param valDecXZ -  x-z correlation of decay vertex uncertainties
+    * @param valDecYZ -  y-z correlation of decay vertex uncertainties
+    */
+    void setVertexCorrelations(double valPrimXY, double valPrimXZ, double valPrimYZ, double valDecXY, double valDecXZ, double valDecYZ){
+        
+        fCorrPrimXY = valPrimXY;
+        fCorrPrimXZ = valPrimXZ;
+        fCorrPrimYZ = valPrimYZ;
+
+        fCorrDecXY = valDecXY;
+        fCorrDecXZ = valDecXZ;
+        fCorrDecYZ = valDecYZ;
+        
+    }
 
     /** @brief Function that returns the neutral mother candidate
     */
