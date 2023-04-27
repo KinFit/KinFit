@@ -42,29 +42,29 @@ private:
 
     // Fitter input variables
     TString fTask;
-    std::vector<Int_t> fPids;
+    std::vector<int> fPids;
     //std::vector<int> fPidsPrim;
     //std::vector<int> fPidsDecay;
     TLorentzVector fIniSys;
     KFitParticle fMother;
-    Double_t fMass;
+    double fMass;
 
     // For combinatorics
-    Int_t fTotalCombos;
-    Int_t fCombiCounter;
-    std::vector<Int_t> particleCounter;
-    Bool_t doubleParticle;
+    int fTotalCombos;
+    int fCombiCounter;
+    std::vector<int> particleCounter;
+    bool doubleParticle;
 
     // Probability
-    Double_t fProb;
-    Double_t fBestProb;
-    Double_t fBestChi2;
+    double fProb;
+    double fBestProb;
+    double fBestChi2;
 
-    Int_t fVerbose;
+    int fVerbose;
 
 public:
-    KFitDecayBuilder(std::vector<std::vector<KFitParticle>> &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), Double_t mass = 0.);
-    KFitDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), Double_t mass = 0.);
+    KFitDecayBuilder(std::vector<std::vector<KFitParticle>> &cands, TString &task, std::vector<int> &pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), double mass = 0.);
+    KFitDecayBuilder(TString &task, std::vector<int> &pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), double mass = 0.);
     ~KFitDecayBuilder(){};
 
     void setVerbosity(int val) { fVerbose = val; }
@@ -73,7 +73,7 @@ public:
     void setInputCands(std::vector<std::vector<KFitParticle>> cands) {fCands = cands; }
     void setIniSys(TLorentzVector val) { fIniSys = val; }
     void setMother(KFitParticle val) { fMother = val; }
-    void setMass(Double_t val) { fMass = val; }
+    void setMass(double val) { fMass = val; }
 /*
     void setPidsInVertices(std::vector<int> val1, std::vector<int> val2)
     {
@@ -85,7 +85,7 @@ public:
 
     //void createNeutralCandidate();
 
-    Bool_t doFit();
+    bool doFit();
 
     void countCombis();
     void fillFitCands();
@@ -93,8 +93,8 @@ public:
 
     void createOutputParticle(KFitParticle FittedCand);
     void getFitCands(std::vector<KFitParticle> &cands) { cands = fOutputCands; }
-    Double_t getChi2() { return fBestChi2; }
-    Double_t getProbability() { return fBestProb; }
+    double getChi2() { return fBestChi2; }
+    double getProbability() { return fBestProb; }
 };
 
 #endif /* KFITDECAYBUILDER_H */

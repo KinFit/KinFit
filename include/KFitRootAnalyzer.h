@@ -29,10 +29,10 @@ class KFitRootAnalyzer
 private:
     //TString fInfileList, fOutprefix;
     std::vector< std::vector<KFitParticle> > fCandsFit;
-    std::vector<Int_t> fPids;
-    Int_t fEvents;
+    std::vector<int> fPids;
+    int fEvents;
 
-    Int_t fVerbose;
+    int fVerbose;
 
     //Read in data
     TFile *finFile;
@@ -44,23 +44,23 @@ private:
     TTree *fTree_out;
 
     // Fill KFitParticle with necessary information
-    //void FillData(TLorentzVector *cand, Double_t R, Double_t Z, KFitParticle &outcand, TMatrix_D cov, double mass);
+    //void FillData(TLorentzVector *cand, double R, double Z, KFitParticle &outcand, TMatrix_D cov, double mass);
     // put to KFitParticle, here cands should be fully filled already
     
 public:
-    KFitRootAnalyzer(TString inFileName, TString outFileName, Int_t nEvents=-1);
+    KFitRootAnalyzer(TString inFileName, TString outFileName, int nEvents=-1);
     ~KFitRootAnalyzer(){};
 
     //User functions
-    void doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), Double_t mm=0.);
-    void doFitterTask(TString task, std::vector<Int_t> pids, Double_t mm, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle());
-    //void addFitterTask(TString task, std::vector<Int_t> primPids, std::vector<Int_t> decayPids); // Jenny, for 3C fit
-    //void addBuilderTask(TString task, std::vector<Int_t> pids, TLorentzVector lv);
+    void doFitterTask(TString task, std::vector<int> pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), double mm=0.);
+    void doFitterTask(TString task, std::vector<int> pids, double mm, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle());
+    //void addFitterTask(TString task, std::vector<int> primPids, std::vector<int> decayPids); // Jenny, for 3C fit
+    //void addBuilderTask(TString task, std::vector<int> pids, TLorentzVector lv);
 
-    void setPids(std::vector<Int_t> val){ fPids = val; }
-    void setVerbosity(Int_t val){ fVerbose = val; }
+    void setPids(std::vector<int> val){ fPids = val; }
+    void setVerbosity(int val){ fVerbose = val; }
 
-    std::vector<Int_t> getPids(){ return fPids; }
+    std::vector<int> getPids(){ return fPids; }
     TTree* getFittedTree(){ return fTree_out; }
 
     // select and sort candidates according to their PID

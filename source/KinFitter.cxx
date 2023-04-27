@@ -40,7 +40,7 @@ KinFitter::KinFitter(const std::vector<KFitParticle> &cands) : fCands(cands),
 
     // set 'y=alpha' measurements
     // and the covariance
-    for (Int_t ix = 0; ix < fN; ix++)
+    for (int ix = 0; ix < fN; ix++)
     {
         KFitParticle cand = fCands[ix];
         y(0 + ix * cov_dim, 0) = 1. / cand.P();
@@ -60,7 +60,7 @@ KinFitter::KinFitter(const std::vector<KFitParticle> &cands) : fCands(cands),
     }
 }
 
-void KinFitter::addMassConstraint(Double_t mass)
+void KinFitter::addMassConstraint(double mass)
 {
     fMass = mass;
     if (!fMassConstraint)
@@ -68,7 +68,7 @@ void KinFitter::addMassConstraint(Double_t mass)
     fMassConstraint = true;
 }
 
-void KinFitter::addMMConstraint(Double_t mm, TLorentzVector init)
+void KinFitter::addMMConstraint(double mm, TLorentzVector init)
 {
     fMass = mm;
     fInit = init;
@@ -77,7 +77,7 @@ void KinFitter::addMMConstraint(Double_t mm, TLorentzVector init)
     fMMConstraint = true;
 }
 
-void KinFitter::addMassVtxConstraint(Double_t mass)
+void KinFitter::addMassVtxConstraint(double mass)
 {
     if (!fMassVtxConstraint)
         fNdf += 2;
@@ -107,7 +107,7 @@ void KinFitter::add3Constraint(KFitParticle mother)
     fM.clear();
 
     // set y to measurements and the covariance, set mass
-    for (Int_t ix = 0; ix < fN; ix++) // for daughters
+    for (int ix = 0; ix < fN; ix++) // for daughters
     {
         KFitParticle cand = fCands[ix];
 
@@ -167,7 +167,7 @@ void KinFitter::addVertexConstraint()
 }
 
 //For fit with missing particle
-void KinFitter::addMomConstraint(TLorentzVector lv, Double_t mass)
+void KinFitter::addMomConstraint(TLorentzVector lv, double mass)
 {
     fInit = lv;
     fMass = mass;
@@ -193,7 +193,7 @@ TMatrixD KinFitter::calcMissingMom(const TMatrixD &m_iter)
     xi(1, 0) = fInit.Py();
     xi(2, 0) = fInit.Pz();
 
-    for (Int_t q = 0; q < fN; q++)
+    for (int q = 0; q < fN; q++)
     {
         xi(0, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
         xi(1, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
@@ -211,7 +211,7 @@ TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
      if (fMassConstraint)
     {
         d.ResizeTo(1, 1);
-        Double_t Px = 0., Py = 0., Pz = 0., E = 0.;
+        double Px = 0., Py = 0., Pz = 0., E = 0.;
 
         for (int q = 0; q < fN; q++)
         {
@@ -236,7 +236,7 @@ TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
     if (fMassVtxConstraint)
     {
         d.ResizeTo(2, 1);
-        Double_t Px = 0., Py = 0., Pz = 0., E = 0.;
+        double Px = 0., Py = 0., Pz = 0., E = 0.;
 
         for (int q = 0; q < fN; q++)
         {
@@ -289,10 +289,10 @@ TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         d.ResizeTo(1, 1);
 
         //initial system
-        Double_t Px = fInit.Px();
-        Double_t Py = fInit.Py();
-        Double_t Pz = fInit.Pz();
-        Double_t E = fInit.E();
+        double Px = fInit.Px();
+        double Py = fInit.Py();
+        double Pz = fInit.Pz();
+        double E = fInit.E();
 
         for (int q = 0; q < fN; q++)
         {
@@ -348,7 +348,7 @@ TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         d(3, 0) = -sqrt(pow((1. / xi_iter(0, 0)), 2) + std::pow(fM[fN], 2));
 
         // daughters
-        for (Int_t q = 0; q < fN; q++)
+        for (int q = 0; q < fN; q++)
         {
             d(0, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
             d(1, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
@@ -369,7 +369,7 @@ TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         d(3, 0) = -fInit.E();
 
         // daughters
-        for (Int_t q = 0; q < fN; q++)
+        for (int q = 0; q < fN; q++)
         {
             d(0, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
             d(1, 0) += 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
@@ -409,7 +409,7 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         H.ResizeTo(2, fyDim);
         H.Zero();
 
-        Double_t Px = 0., Py = 0., Pz = 0., E = 0.;
+        double Px = 0., Py = 0., Pz = 0., E = 0.;
         for (int q = 0; q < fN; q++)
         {
             E += std::sqrt((1. / m_iter(0 + q * cov_dim, 0)) *
@@ -426,8 +426,8 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         }
         for (int q = 0; q < fN; q++)
         {
-            Double_t Pi = 1. / m_iter(0 + q * cov_dim, 0);
-            Double_t Ei = std::sqrt(Pi * Pi + fM[q] * fM[q]);
+            double Pi = 1. / m_iter(0 + q * cov_dim, 0);
+            double Ei = std::sqrt(Pi * Pi + fM[q] * fM[q]);
             H(0, 0 + q * cov_dim) =
                 -2 * E * (std::pow(Pi, 3) / Ei) +
                 2 * std::pow(Pi, 2) * std::sin(m_iter(1 + q * cov_dim, 0)) *
@@ -612,7 +612,7 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         H.ResizeTo(1, fyDim);
         H.Zero();
 
-        Double_t Px = 0., Py = 0., Pz = 0., E = 0.;
+        double Px = 0., Py = 0., Pz = 0., E = 0.;
         Px += fInit.Px();
         Py += fInit.Py();
         Pz += fInit.Pz();
@@ -634,8 +634,8 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 
         for (int q = 0; q < fN; q++)
         {
-            Double_t Pi = 1. / m_iter(0 + q * cov_dim, 0);
-            Double_t Ei = std::sqrt(Pi * Pi + fM[q] * fM[q]);
+            double Pi = 1. / m_iter(0 + q * cov_dim, 0);
+            double Ei = std::sqrt(Pi * Pi + fM[q] * fM[q]);
             H(0, 0 + q * cov_dim) =
                 2 * E * (std::pow(Pi, 3) / Ei) -
                 2 * std::pow(Pi, 2) * std::sin(m_iter(1 + q * cov_dim, 0)) *
@@ -826,7 +826,7 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         H.Zero();
 
         // Daughter variables
-        for (Int_t q = 0; q < fN; q++)
+        for (int q = 0; q < fN; q++)
         {
             // d(1/p)
             H(0, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 2) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
@@ -860,7 +860,7 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         H.ResizeTo(4, fyDim);
         H.Zero();
 
-        for (Int_t q = 0; q < fN; q++)
+        for (int q = 0; q < fN; q++)
         {
 
             // d(1/p)
@@ -885,7 +885,7 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         H.ResizeTo(1, fyDim);
         H.Zero();
 
-        Double_t  Px = 0., Py = 0., Pz = 0., E = 0.;
+        double  Px = 0., Py = 0., Pz = 0., E = 0.;
         for (int q = 0; q < fN; q++)
         {
             E += std::sqrt((1. / m_iter(0 + q * cov_dim, 0)) *
@@ -982,13 +982,13 @@ Bool_t KinFitter::fit()
         std::cout << "" << std::endl;
     }
 
-    Double_t lr = fLearningRate;
+    double lr = fLearningRate;
     TMatrixD alpha0(fyDim, 1), alpha(fyDim, 1);
     TMatrixD xi0(x), xi(x), neu_xi(x);
     TMatrixD A0(y), V0(V);
     alpha0 = y;
     alpha = alpha0;
-    Double_t chi2 = 1e6;
+    double chi2 = 1e6;
 
     // Calculating the inverse of the original covariance matrix that is not changed in the iterations
     TMatrixD V0_inv(V);
@@ -1047,7 +1047,7 @@ Bool_t KinFitter::fit()
     TMatrixD VDD(D_xi.GetNcols(), D_xi.GetNcols());
     VDD.Zero();
 
-    for (Int_t q = 0; q < fNumIterations; q++)
+    for (int q = 0; q < fNumIterations; q++)
     {
         TMatrixD delta_alpha = alpha0 - alpha;
         // calc r
@@ -1119,11 +1119,11 @@ Bool_t KinFitter::fit()
         fDNorm = 0;
         fAlphaNorm = 0;
         TMatrixD delta_alpha_it = alpha-neu_alpha;
-        for (Int_t i=0; i<d.GetNrows(); i++) fDNorm += pow(d(i,0),2);
+        for (int i=0; i<d.GetNrows(); i++) fDNorm += pow(d(i,0),2);
         fDNorm = sqrt(fDNorm);
-        for (Int_t i=0; i<delta_alpha.GetNrows(); i++) fAlphaNorm  += pow(delta_alpha_it(i,0),2);
+        for (int i=0; i<delta_alpha.GetNrows(); i++) fAlphaNorm  += pow(delta_alpha_it(i,0),2);
         if (f3Constraint || fMomConstraint){
-            for (Int_t i=0; i<delta_xi.GetNrows(); i++) fAlphaNorm  += pow(delta_xi(i,0),2);
+            for (int i=0; i<delta_xi.GetNrows(); i++) fAlphaNorm  += pow(delta_xi(i,0),2);
         }
         fAlphaNorm = sqrt(fAlphaNorm);
         if(fVerbose>2){
@@ -1195,15 +1195,15 @@ Bool_t KinFitter::fit()
         cout << " calc pulls" << endl;
     }
     fPull.ResizeTo(fyDim, fyDim);
-    for (Int_t b = 0; b < (fyDim); b++)
+    for (int b = 0; b < (fyDim); b++)
         fPull(b, b) = -10000;
 
     if (true)
     {
-        for (Int_t b = 0; b < (fyDim); b++)
+        for (int b = 0; b < (fyDim); b++)
         {
-            Double_t num = A0(b, 0) - alpha(b, 0);
-            Double_t dem = V0(b, b) - V(b, b);
+            double num = A0(b, 0) - alpha(b, 0);
+            double dem = V0(b, b) - V(b, b);
             if (dem > 0)
             {
                 fPull(b, b) = num / std::sqrt(dem);
@@ -1219,7 +1219,7 @@ Bool_t KinFitter::fit()
     else return fConverged; // for number of iterations equal to 1
 }
 
-KFitParticle KinFitter::getDaughter(Int_t val)
+KFitParticle KinFitter::getDaughter(int val)
 {
     return fCands[val];
 }
@@ -1240,18 +1240,18 @@ void KinFitter::updateDaughters()
     {
         cout << " update daughters" << endl;
     }
-    for (Int_t val = 0; val < fN; ++val)
+    for (int val = 0; val < fN; ++val)
     {
         KFitParticle &cand = fCands[val];
-        Double_t Px = (1. / y(0 + val * cov_dim, 0)) *
+        double Px = (1. / y(0 + val * cov_dim, 0)) *
                       std::sin(y(1 + val * cov_dim, 0)) *
                       std::cos(y(2 + val * cov_dim, 0));
-        Double_t Py = (1. / y(0 + val * cov_dim, 0)) *
+        double Py = (1. / y(0 + val * cov_dim, 0)) *
                       std::sin(y(1 + val * cov_dim, 0)) *
                       std::sin(y(2 + val * cov_dim, 0));
-        Double_t Pz =
+        double Pz =
             (1. / y(0 + val * cov_dim, 0)) * std::cos(y(1 + val * cov_dim, 0));
-        Double_t M = fM[val];
+        double M = fM[val];
         cand.SetXYZM(Px, Py, Pz, M);
         cand.setMomentum(1. / y(0 + val * cov_dim, 0));
         cand.setTheta(y(1 + val * cov_dim, 0));
@@ -1277,15 +1277,15 @@ void KinFitter::updateDaughters()
 void KinFitter::updateMother()
 {
     KFitParticle &mother = fMother;
-    Double_t Px = (1. / x(0, 0)) *
+    double Px = (1. / x(0, 0)) *
                   std::sin(y(0 + fN * cov_dim, 0)) *
                   std::cos(y(1 + fN * cov_dim, 0));
-    Double_t Py = (1. / x(0, 0)) *
+    double Py = (1. / x(0, 0)) *
                   std::sin(y(0 + fN * cov_dim, 0)) *
                   std::sin(y(1 + fN * cov_dim, 0));
-    Double_t Pz =
+    double Pz =
         (1. / x(0, 0)) * std::cos(y(0 + fN * cov_dim, 0));
-    Double_t M = fM[fN];
+    double M = fM[fN];
     mother.SetXYZM(Px, Py, Pz, M);
     mother.setR(y(2 + fN * cov_dim, 0));
     mother.setZ(y(3 + fN * cov_dim, 0));
@@ -1305,7 +1305,7 @@ void KinFitter::updateMother()
 
 void KinFitter::update()
 {
-    for (Int_t val = 0; val < fN; ++val)
+    for (int val = 0; val < fN; ++val)
     {
         KFitParticle &cand = fCands[val];
         cand.update();
@@ -1313,7 +1313,7 @@ void KinFitter::update()
 }
 
 
-void KinFitter::setConvergenceCriteria(Double_t val1, Double_t val2, Double_t val3)
+void KinFitter::setConvergenceCriteria(double val1, double val2, double val3)
 { 
     fConvergenceCriterionChi2 = val1;
     fConvergenceCriterionD = val2; 

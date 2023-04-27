@@ -1,7 +1,7 @@
 // ROOT includes
 #include "KFitParticle.h"
 
-KFitParticle::KFitParticle(TLorentzVector *cand, Double_t R, Double_t Z)
+KFitParticle::KFitParticle(TLorentzVector *cand, double R, double Z)
     : TLorentzVector(*cand), cand(cand), fMomentum(cand->P()), fTheta(cand->Theta()), fPhi(cand->Phi()), fR(R), fZ(Z)
 {
     fPid = -1;
@@ -9,10 +9,10 @@ KFitParticle::KFitParticle(TLorentzVector *cand, Double_t R, Double_t Z)
     fCov.ResizeTo(5, 5);
 }
 
-KFitParticle::KFitParticle(TLorentzVector *cand, Double_t X, Double_t Y, Double_t Z)
+KFitParticle::KFitParticle(TLorentzVector *cand, double X, double Y, double Z)
     : TLorentzVector(*cand), cand(cand), fMomentum(cand->P()), fTheta(cand->Theta()), fPhi(cand->Phi())
 {
-    Double_t deg2rad = TMath::DegToRad();
+    double deg2rad = TMath::DegToRad();
 
     // Base and direction vettor of particle cand
     TVector3 base(X, Y, Z);
@@ -29,13 +29,13 @@ KFitParticle::KFitParticle(TLorentzVector *cand, Double_t X, Double_t Y, Double_
 
     fR = abs(diff.Dot(cross)/(cross.Mag()));
     
-    Double_t a = beam_base.Dot(beam_dir);
-    Double_t b = beam_dir.Dot(beam_dir);
-    Double_t c = base.Dot(beam_dir);
-    Double_t d = (beam_base.Dot(dir)) * (dir.Dot(beam_dir)) / dir.Dot(dir);
-    Double_t e = (beam_dir.Dot(dir)) * (dir.Dot(beam_dir)) / dir.Dot(dir);
-    Double_t f = (base.Dot(dir)) * (dir.Dot(beam_dir)) / dir.Dot(dir);
-    Double_t u1 = (-a + c + d - f) / (b - e);
+    double a = beam_base.Dot(beam_dir);
+    double b = beam_dir.Dot(beam_dir);
+    double c = base.Dot(beam_dir);
+    double d = (beam_base.Dot(dir)) * (dir.Dot(beam_dir)) / dir.Dot(dir);
+    double e = (beam_dir.Dot(dir)) * (dir.Dot(beam_dir)) / dir.Dot(dir);
+    double f = (base.Dot(dir)) * (dir.Dot(beam_dir)) / dir.Dot(dir);
+    double u1 = (-a + c + d - f) / (b - e);
 
     fZ = beam_base.Z() + beam_dir.Z() * u1;
 

@@ -22,21 +22,21 @@
 using std::cout;
 using std::endl;
 
-const Double_t pi2 = TMath::PiOver2();
+const double pi2 = TMath::PiOver2();
 
 template <typename T>
 void Print(T const &matrix)
 {
-    Int_t nrows = matrix.GetNrows();
-    Int_t ncols = matrix.GetNcols();
+    int nrows = matrix.GetNrows();
+    int ncols = matrix.GetNcols();
 
     cout << "shape(" << nrows << "," << ncols << ")" << endl;
 
-    for (Int_t i = 0; i < nrows; i++)
+    for (int i = 0; i < nrows; i++)
     {
-        for (Int_t j = 0; j < ncols; j++)
+        for (int j = 0; j < ncols; j++)
         {
-            Double_t element = matrix(i, j);
+            double element = matrix(i, j);
             if (TMath::Abs(element) < 1e-10)
                 element = 0.;
             if (element >= 0.)
@@ -54,26 +54,26 @@ class KinFitter : public TObject
 {
 private:
     TMatrixD y, x, V, Vx, fPull;
-    Double_t fChi2, fProb;
-    Bool_t fConverged;
-    Double_t fDNorm, fAlphaNorm;
-    Int_t fIteration, fN, fyDim;
+    double fChi2, fProb;
+    bool fConverged;
+    double fDNorm, fAlphaNorm;
+    int fIteration, fN, fyDim;
     std::vector<KFitParticle> fCands;
     KFitParticle fMother;
     TLorentzVector fMissDaughter;
 
     // data members for constraints
-    Int_t fNdf;
-    std::vector<Double_t> fM;
+    int fNdf;
+    std::vector<double> fM;
     TLorentzVector fInit;
-    Double_t fMass;
+    double fMass;
 
     bool fMassConstraint, fMMConstraint, fMassVtxConstraint, fVtxConstraint, f3Constraint, f4Constraint, fMomConstraint;
     int fVerbose;
 
-    Double_t fLearningRate;
-    Int_t fNumIterations;
-    Double_t fConvergenceCriterionChi2, fConvergenceCriterionD, fConvergenceCriterionAlpha;
+    double fLearningRate;
+    int fNumIterations;
+    double fConvergenceCriterionChi2, fConvergenceCriterionD, fConvergenceCriterionAlpha;
 
 public:
     KinFitter(const std::vector<KFitParticle> &cands);
@@ -88,29 +88,29 @@ public:
     void add3Constraint(KFitParticle mother);
     void add4Constraint(TLorentzVector lv);
     void addVertexConstraint();
-    void addMomConstraint(TLorentzVector lv, Double_t mass);
-    void addMassConstraint(Double_t mass);
-    void addMMConstraint(Double_t mm, TLorentzVector init);
-    void addMassVtxConstraint(Double_t mass);
+    void addMomConstraint(TLorentzVector lv, double mass);
+    void addMassConstraint(double mass);
+    void addMMConstraint(double mm, TLorentzVector init);
+    void addMassVtxConstraint(double mass);
 
-    void setLearningRate(Double_t val) { fLearningRate = val; }
-    void setNumberOfIterations(Int_t val) { fNumIterations = val; }
-    void setConvergenceCriteria(Double_t val1, Double_t val2, Double_t val3);
+    void setLearningRate(double val) { fLearningRate = val; }
+    void setNumberOfIterations(int val) { fNumIterations = val; }
+    void setConvergenceCriteria(double val1, double val2, double val3);
     void setCovariance(TMatrixD &val) { V = val; }
     void setMeasurement(TMatrixD &val) { y = val; }
 
-    Double_t getChi2() const { return fChi2; }
-    Double_t getProb() const { return fProb; }
-    Double_t getPull(Int_t val = 0) { return fPull(val, val); }
-    Int_t getIteration() const { return fIteration; }
+    double getChi2() const { return fChi2; }
+    double getProb() const { return fProb; }
+    double getPull(int val = 0) { return fPull(val, val); }
+    int getIteration() const { return fIteration; }
 
-    Bool_t isConverged() const { return fConverged; }
+    bool isConverged() const { return fConverged; }
 
-    Bool_t fit();
+    bool fit();
 
-    void setVerbosity(Int_t val) { fVerbose = val; }
+    void setVerbosity(int val) { fVerbose = val; }
 
-    KFitParticle getDaughter(Int_t val);
+    KFitParticle getDaughter(int val);
     void getDaughters(std::vector<KFitParticle> &daughters) { daughters = fCands; }
     KFitParticle getMother();
     TLorentzVector getMissingDaughter();

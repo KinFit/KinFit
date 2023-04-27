@@ -25,13 +25,13 @@ class KFitParticle : public TLorentzVector
 private:
     TLorentzVector *cand; // TLorentzVector the KFitParticle
     // inherits from
-    Double_t fMomentum; // Momentum [MeV]
-    Double_t fTheta; // Polar angle [rad]
-    Double_t fPhi; // Azimuthal angle [rad]
-    Double_t fR; // Closest distance to beamline [cm]
-    Double_t fZ; // Point along beamline where track is closest to it [cm]
-    Int_t fPid; // PID code for the particle spices
-    Int_t fTrackId; // Track id
+    double fMomentum; // Momentum [MeV]
+    double fTheta; // Polar angle [rad]
+    double fPhi; // Azimuthal angle [rad]
+    double fR; // Closest distance to beamline [cm]
+    double fZ; // Point along beamline where track is closest to it [cm]
+    int fPid; // PID code for the particle spices
+    int fTrackId; // Track id
 
     /** Covariance matrix of the KFitParticle
     /* Diagonal entries correspond to the covariances 
@@ -51,27 +51,27 @@ private:
     TMatrixD fCov;
 
 public:
-    KFitParticle(TLorentzVector *cand, Double_t R, Double_t Z);
-    KFitParticle(TLorentzVector *cand, Double_t X, Double_t Y, Double_t Z);
+    KFitParticle(TLorentzVector *cand, double R, double Z);
+    KFitParticle(TLorentzVector *cand, double X, double Y, double Z);
     KFitParticle(); 
     ~KFitParticle(){};
-    void setMomentum(Double_t val) { fMomentum = val; }
-    void setTheta(Double_t val) { fTheta = val; }
-    void setPhi(Double_t val) { fPhi = val; }
-    void setR(Double_t val) { fR = val; }
-    void setZ(Double_t val) { fZ = val; }
+    void setMomentum(double val) { fMomentum = val; }
+    void setTheta(double val) { fTheta = val; }
+    void setPhi(double val) { fPhi = val; }
+    void setR(double val) { fR = val; }
+    void setZ(double val) { fZ = val; }
     void setCovariance(const TMatrixD &cov);
-    void setPid(Int_t val) { fPid = val; }
-    void setTrackId(Int_t val) { fTrackId = val; }
+    void setPid(int val) { fPid = val; }
+    void setTrackId(int val) { fTrackId = val; }
 
-    Double_t getMomentum() const { return fMomentum; }
-    Double_t getTheta() const { return fTheta; }
-    Double_t getPhi() const { return fPhi; }
-    Double_t getR() const { return fR; }
-    Double_t getZ() const { return fZ; }
+    double getMomentum() const { return fMomentum; }
+    double getTheta() const { return fTheta; }
+    double getPhi() const { return fPhi; }
+    double getR() const { return fR; }
+    double getZ() const { return fZ; }
     TMatrixD getCovariance() const { return fCov; }
-    Int_t getPid() const { return fPid; }
-    Int_t getTrackId() const { return fTrackId; }
+    int getPid() const { return fPid; }
+    int getTrackId() const { return fTrackId; }
 
     void reset();
     void update();

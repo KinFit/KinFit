@@ -1,6 +1,6 @@
 #include "KFitRootAnalyzer.h"
 
-KFitRootAnalyzer::KFitRootAnalyzer(TString inFileName, TString outFileName, Int_t nEvents) : fEvents(nEvents),
+KFitRootAnalyzer::KFitRootAnalyzer(TString inFileName, TString outFileName, int nEvents) : fEvents(nEvents),
                                                                                     fVerbose(0)
 {
     finFile = new TFile(inFileName, "READ");
@@ -15,7 +15,7 @@ KFitRootAnalyzer::KFitRootAnalyzer(TString inFileName, TString outFileName, Int_
 // Select and sort particles according to their PID
 void KFitRootAnalyzer::selectCandidates()
 {
-    Int_t ntracks = fCands_in->GetEntries();
+    int ntracks = fCands_in->GetEntries();
 
     fCandsFit.clear();
     std::vector<KFitParticle > tempVec;
@@ -24,7 +24,7 @@ void KFitRootAnalyzer::selectCandidates()
     for (size_t it = 0; it < fPids.size(); it++)
     {
         tempVec.clear();
-        for (Int_t j = 0; j < ntracks; j++)
+        for (int j = 0; j < ntracks; j++)
         {
             KFitParticle *cand = (KFitParticle *)fCands_in->At(j);
 
@@ -39,7 +39,7 @@ void KFitRootAnalyzer::selectCandidates()
 }
 
 /*
-void KFitRootAnalyzer::addBuilderTask(TString val, std::vector<Int_t> pids, TLorentzVector lv = TLorentzVector())
+void KFitRootAnalyzer::addBuilderTask(TString val, std::vector<int> pids, TLorentzVector lv = TLorentzVector())
 {
 
     // fCandsFit.Clear();
@@ -53,13 +53,13 @@ void KFitRootAnalyzer::addBuilderTask(TString val, std::vector<Int_t> pids, TLor
 }
 */
 
-void KFitRootAnalyzer::doFitterTask(TString task, std::vector<Int_t> pids, TLorentzVector lv, KFitParticle mother, Double_t mm)
+void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, TLorentzVector lv, KFitParticle mother, double mm)
 {
     cout << "Task added: " << task << endl;
 
     // Read input tree
     //TClonesArray *input_cands = new TClonesArray("KFitParticle");
-    Int_t Event;
+    int Event;
     //add error when branch not existing
     fTree->SetBranchAddress("KFitParticle", &fCands_in);
     
@@ -70,7 +70,7 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<Int_t> pids, TLore
     TString out_branchname = "cands_fitted";
     TClonesArray *fitted_cands = new TClonesArray("KFitParticle");
     TClonesArray &fit_arrayRef = *fitted_cands;
-    Double_t Chi2, Prob;
+    double Chi2, Prob;
     //TClonesArray &fit_arrayRef = *fit_array;
 
     fTree_out->Branch("Event", &Event, "Event/I");
@@ -84,12 +84,12 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<Int_t> pids, TLore
     fTree = (TTree *)tree_file.Get("data");
 */
 
-    Int_t entries = fTree->GetEntries();
+    int entries = fTree->GetEntries();
     if (fEvents < entries && fEvents > 0)
         entries = fEvents;
 
     // start of the event loop
-    for (Int_t i = 0; i < entries; i++)
+    for (int i = 0; i < entries; i++)
     {
         fTree->GetEntry(i);
         Event = i;
@@ -132,10 +132,10 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<Int_t> pids, TLore
         cout << "Best fit probability: " << Prob << endl;
 
         // Fill output TClonesArray with fit result
-        Int_t ii = 0;
+        int ii = 0;
         if(fitted_cands->GetEntries()>0) fitted_cands->Clear();
         if(Prob>0){
-        for (Int_t k = 0; k < result.size(); k++)
+        for (int k = 0; k < result.size(); k++)
         {
             cout << "fill cand" << endl;
             KFitParticle *fitted_cand = new (fit_arrayRef[ii]) KFitParticle();
@@ -148,13 +148,13 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<Int_t> pids, TLore
     } // end of event loop
 }
 
-void KFitRootAnalyzer::doFitterTask(TString task, std::vector<Int_t> pids, Double_t mm, TLorentzVector lv, KFitParticle mother)
+void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, double mm, TLorentzVector lv, KFitParticle mother)
 {
     cout << "Task added: " << task << endl;
 
     // Read input tree
     //TClonesArray *input_cands = new TClonesArray("KFitParticle");
-    Int_t Event;
+    int Event;
     fTree->SetBranchAddress("KFitParticle", &fCands_in);
     
     // Create output tree
@@ -164,7 +164,7 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<Int_t> pids, Doubl
     TString out_branchname = "cands_fitted";
     TClonesArray *fitted_cands = new TClonesArray("KFitParticle");
     TClonesArray &fit_arrayRef = *fitted_cands;
-    Double_t Chi2, Prob;
+    double Chi2, Prob;
     //TClonesArray &fit_arrayRef = *fit_array;
 
     fTree_out->Branch("Event", &Event, "Event/I");
@@ -178,7 +178,7 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<Int_t> pids, Doubl
     fTree = (TTree *)tree_file.Get("data");
 */
 
-    Int_t entries = fTree->GetEntries();
+    int entries = fTree->GetEntries();
     if (fEvents < entries && fEvents > 0)
         entries = fEvents;
 
@@ -187,7 +187,7 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<Int_t> pids, Doubl
     KFitDecayBuilder builder(task, fPids, lv, mother, mm);
 
     // start of the event loop
-    for (Int_t i = 1; i < entries; i++)
+    for (int i = 1; i < entries; i++)
     {
         cout<<"Event: "<<i<<endl;
         fTree->GetEntry(i);
@@ -235,11 +235,11 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<Int_t> pids, Doubl
         cout << "Best fit probability: " << Prob << endl;
 
         // Fill output TClonesArray with fit result
-        Int_t ii = 0;
+        int ii = 0;
         if(fitted_cands->GetEntries()>0) fitted_cands->Clear();
         cout << "clear fitted cands" << endl;
         if(Prob>0){
-        for (Int_t k = 0; k < result.size(); k++)
+        for (int k = 0; k < result.size(); k++)
         {
             cout << "fill cand" << endl;
             KFitParticle *fitted_cand = new (fit_arrayRef[ii]) KFitParticle(&result[k], result[k].getR(), result[k].getZ());

@@ -1,6 +1,6 @@
 #include "KFitDecayBuilder.h"
 
-KFitDecayBuilder::KFitDecayBuilder(std::vector<std::vector<KFitParticle>> &cands, TString &task, std::vector<Int_t> &pids, TLorentzVector lv, KFitParticle mother, Double_t mass) : fCands(cands),
+KFitDecayBuilder::KFitDecayBuilder(std::vector<std::vector<KFitParticle>> &cands, TString &task, std::vector<int> &pids, TLorentzVector lv, KFitParticle mother, double mass) : fCands(cands),
                                                                                                                                                                           fTask(task),
                                                                                                                                                                           fPids(pids),
                                                                                                                                                                           fCombiCounter(0),
@@ -27,7 +27,7 @@ KFitDecayBuilder::KFitDecayBuilder(std::vector<std::vector<KFitParticle>> &cands
     }
 }
 
-KFitDecayBuilder::KFitDecayBuilder(TString &task, std::vector<Int_t> &pids, TLorentzVector lv, KFitParticle mother, Double_t mass) : fTask(task),
+KFitDecayBuilder::KFitDecayBuilder(TString &task, std::vector<int> &pids, TLorentzVector lv, KFitParticle mother, double mass) : fTask(task),
                                                                                                                             fPids(pids),
                                                                                                                             fProb(0.00),
                                                                                                                             fVerbose(0)
@@ -107,24 +107,24 @@ void KFitDecayBuilder::createNeutralCandidate()
 
     std::vector<KFitParticle> candsPrim;
     std::vector<KFitParticle> candsDecay;
-    Int_t tempPid;
+    int tempPid;
 
-    for (Int_t i_pids = 0; i_pids = (Int_t)fPids.size(); i_pids++)
+    for (int i_pids = 0; i_pids = (int)fPids.size(); i_pids++)
     {
 
         tempPid = fPids[i_pids];
 
-        for (Int_t i_cand = 0; i_cand < (Int_t)fCands[i_pids].size(); i_cand++)
+        for (int i_cand = 0; i_cand < (int)fCands[i_pids].size(); i_cand++)
         {
 
-            std::vector<Int_t>::iterator it_prim = std::find(fPidsPrim.begin(), fPidsPrim.end(), tempPid);
+            std::vector<int>::iterator it_prim = std::find(fPidsPrim.begin(), fPidsPrim.end(), tempPid);
 
             if (it_prim != fPidsPrim.end())
             {
                 candsPrim.push_back(fCands[i_pids][i_cand]);
             }
 
-            std::vector<Int_t>::iterator it_decay = std::find(fPidsDecay.begin(), fPidsDecay.end(), tempPid);
+            std::vector<int>::iterator it_decay = std::find(fPidsDecay.begin(), fPidsDecay.end(), tempPid);
 
             if (it_decay != fPidsDecay.end())
             {
@@ -224,7 +224,7 @@ void KFitDecayBuilder::fillFitCands()
         fFitCands.push_back(fCands[i][particleCounter[i]]);
         cout << "fill in pid " << fPids[i] << endl;
     }
-    Int_t a = fPids.size() - 1;
+    int a = fPids.size() - 1;
     cout << "particle counter " << a << " is " << particleCounter[a] << " now" << endl;
     while (particleCounter[a] == (fCands[a].size() - 1))
     {

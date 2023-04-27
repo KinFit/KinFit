@@ -35,7 +35,7 @@ KFitVertexFinder::KFitVertexFinder(std::vector<KFitParticle> &cands) : fVerbose(
 }
 
 void KFitVertexFinder::addLinesToVertex(const TVector3 &r, const TVector3 &alpha,
-                             const Double_t w)
+                             const double w)
 {
 
     if (fVerbose > 0)
@@ -75,7 +75,7 @@ void KFitVertexFinder::findVertex(){
         std::cout << "" << std::endl;
     }
 
-    Double_t det = 0;
+    double det = 0;
 
     //det = fSys.Determinant();
    
@@ -98,9 +98,9 @@ void KFitVertexFinder::findVertex(){
     }
     else
     {
-        for (Int_t i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++)
         {
-            for (Int_t j = 0; j < 3; j++)
+            for (int j = 0; j < 3; j++)
                 fM(i, j) = fM(i, j) / (det);
         }
         fVertex = fM * fB;
@@ -111,9 +111,9 @@ void KFitVertexFinder::findVertex(){
 void KFitVertexFinder::reset()
 {
 
-    for (Int_t i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++)
     {
-        for (Int_t j = 0; j < 3; j++)
+        for (int j = 0; j < 3; j++)
             fM(i, j) = fSys(i, j) = 0.0;
     }
     fB.SetXYZ(0.0, 0.0, 0.0);

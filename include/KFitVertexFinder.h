@@ -40,7 +40,7 @@ private:
 
     TVector3 fBase; // Base vector used for each track in the fitting
  
-    void addLinesToVertex(const TVector3 &r, const TVector3 &alpha, const Double_t w = 1.0);
+    void addLinesToVertex(const TVector3 &r, const TVector3 &alpha, const double w = 1.0);
 
     /** @brief Function that finds the vertex via matrix multiplications
     */
