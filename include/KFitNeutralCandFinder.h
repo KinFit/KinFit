@@ -54,19 +54,19 @@ private:
     double fCorrDecYZ = 0; // Correlations between decay vertex uncertainties in Y and Z direction
     
     /** Covariance matrix of the neutral mother candidate
-    /* Diagonal entries correspond to the covariances 
-    /* in the parameters in the following order
-    /* 
-    /* -----------------------------
-    /* | 1/p                       |
-    /* |     theta                 |
-    /* |            phi            |
-    /* |                   R       |
-    /* |                        Z  |
-    /* -----------------------------
-    /* 
-    /* Off diagonal elements corresponds to the
-    /* correlations between the parameters
+    * Diagonal entries correspond to the covariances 
+    * in the parameters in the following order
+    * 
+    * -----------------------------
+    * | 1/p                       |
+    * |     theta                 |
+    * |            phi            |
+    * |                   R       |
+    * |                        Z  |
+    * -----------------------------
+    * 
+    * Off diagonal elements corresponds to the
+    * correlations between the parameters
     */
     TMatrixD fCovarianceNeutralMother; 
 
