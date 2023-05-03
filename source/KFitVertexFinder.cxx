@@ -12,8 +12,8 @@ KFitVertexFinder::KFitVertexFinder(std::vector<KFitParticle> &cands) : fVerbose(
     {
         KFitParticle cand = cands[i_cand];
 
-        double param_theta = cand.getTheta()*TMath::DegToRad();
-        double param_phi = cand.getPhi()*TMath::DegToRad();
+        double param_theta = cand.Theta(); //cand.getTheta()*TMath::DegToRad();
+        double param_phi = cand.Phi(); //cand.getPhi()*TMath::DegToRad();
         double param_R = cand.getR();
         double param_Z = cand.getZ();
 

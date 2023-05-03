@@ -1,26 +1,26 @@
-#include "KFitNeutralCandFinder.h"
+#include "KFitDecayingCandFinder.h"
 
-KFitNeutralCandFinder::KFitNeutralCandFinder(const std::vector<KFitParticle> &cands, TVector3 primaryVertex, TVector3 decayVertex) : fCands(cands), fVerbose(0), fMomentumBeforeDecay(-1.), fPrimaryVertex(primaryVertex), fDecayVertex(decayVertex), fNeutralCandMass(1115.683), fPrimVtxResX(1.78590), fPrimVtxResY(1.75516), fPrimVtxResZ(3.00431), fDecVtxResX(5.75369), fDecVtxResY(5.57198), fDecVtxResZ(10.2602)
+KFitDecayingCandFinder::KFitDecayingCandFinder(const std::vector<KFitParticle> &cands, TVector3 primaryVertex, TVector3 decayVertex) : fCands(cands), fVerbose(0), fMomentumBeforeDecay(-1.), fPrimaryVertex(primaryVertex), fDecayVertex(decayVertex), fDecayingCandMass(1115.683), fPrimVtxResX(1.78590), fPrimVtxResY(1.75516), fPrimVtxResZ(3.00431), fDecVtxResX(5.75369), fDecVtxResY(5.57198), fDecVtxResZ(10.2602)
 {
     if (fVerbose > 0)
     {
-        std::cout << "--------------- KFitNeutralCandFinder -----------------" << std::endl;
+        std::cout << "--------------- KFitDecayingCandFinder -----------------" << std::endl;
     }
     
-    calculateNeutralMotherCand();
+    calculateDecayingCand();
 }
 
-KFitNeutralCandFinder::KFitNeutralCandFinder(const std::vector<KFitParticle> &cands, double neutralCandMass, TVector3 primaryVertex, TVector3 decayVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ) : fCands(cands), fVerbose(0), fMomentumBeforeDecay(-1.), fPrimaryVertex(primaryVertex), fDecayVertex(decayVertex), fNeutralCandMass(neutralCandMass), fPrimVtxResX(primVtxResX), fPrimVtxResY(primVtxResY), fPrimVtxResZ(primVtxResZ), fDecVtxResX(decVtxResX), fDecVtxResY(decVtxResY), fDecVtxResZ(decVtxResZ)
+KFitDecayingCandFinder::KFitDecayingCandFinder(const std::vector<KFitParticle> &cands, double DecayingCandMass, TVector3 primaryVertex, TVector3 decayVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ) : fCands(cands), fVerbose(0), fMomentumBeforeDecay(-1.), fPrimaryVertex(primaryVertex), fDecayVertex(decayVertex), fDecayingCandMass(DecayingCandMass), fPrimVtxResX(primVtxResX), fPrimVtxResY(primVtxResY), fPrimVtxResZ(primVtxResZ), fDecVtxResX(decVtxResX), fDecVtxResY(decVtxResY), fDecVtxResZ(decVtxResZ)
 {
     if (fVerbose > 0)
     {
-        std::cout << "--------------- KFitNeutralCandFinder -----------------" << std::endl;
+        std::cout << "--------------- KFitDecayingCandFinder -----------------" << std::endl;
     }
     
-    calculateNeutralMotherCand();
+    calculateDecayingCand();
 }
 
-void KFitNeutralCandFinder::calculateNeutralMotherCand()
+void KFitDecayingCandFinder::calculateDecayingCand()
 {
     double param_p1, param_p2;
 
@@ -37,7 +37,7 @@ void KFitNeutralCandFinder::calculateNeutralMotherCand()
     energy_cand2 = std::sqrt(param_p2 * param_p2 + cand2.M() * cand2.M());
     
     // FOr one particle
-    //fMomentumBeforeDecay = std::sqrt(energy_cand1 * energy_cand1 + 2 * energy_cand1 * energy_cand2 + energy_cand2 * energy_cand2 - fNeutralCandMass * fNeutralCandMass);
+    //fMomentumBeforeDecay = std::sqrt(energy_cand1 * energy_cand1 + 2 * energy_cand1 * energy_cand2 + energy_cand2 * energy_cand2 - fDecayingCandMass * fDecayingCandMass);
     
     // For any number of particles
     double fMomentumBeforeDecay = 0; 
@@ -55,7 +55,7 @@ void KFitNeutralCandFinder::calculateNeutralMotherCand()
 
     if (fVerbose > 0)
     {
-        std::cout << " ----------- KFitNeutralCandFinder::calculateNeutralMotherCand() -----------" << std::endl;
+        std::cout << " ----------- KFitDecayingCandFinder::calculateDecayingCand() -----------" << std::endl;
         std::cout << "" << std::endl;
     }
 
@@ -109,8 +109,8 @@ void KFitNeutralCandFinder::calculateNeutralMotherCand()
     thetaPrimaryToSecondaryVertex = vecPrimToDecayVertex.Theta();
     phiPrimaryToSecondaryVertex = vecPrimToDecayVertex.Phi();
 
-    fNeutralMotherCandidate.setR(valR);
-    fNeutralMotherCandidate.setZ(valZ);
+    fDecayingCand.setR(valR);
+    fDecayingCand.setZ(valZ);
 
     /*double Px = (fMomentumBeforeDecay *
                    std::sin(thetaPrimaryToSecondaryVertex) *
@@ -120,7 +120,7 @@ void KFitNeutralCandFinder::calculateNeutralMotherCand()
                    std::sin(phiPrimaryToSecondaryVertex));
     double Pz =
         (fMomentumBeforeDecay * std::cos(thetaPrimaryToSecondaryVertex));
-    double M = fNeutralCandMass;
+    double M = fDecayingCandMass;
     */
     double Px = (fMomentumBeforeDecay *
                    std::sin(thetaPrimaryToSecondaryVertex) *
@@ -130,13 +130,13 @@ void KFitNeutralCandFinder::calculateNeutralMotherCand()
                    std::sin(phiPrimaryToSecondaryVertex));
     double Pz =
         (fMomentumBeforeDecay * std::cos(thetaPrimaryToSecondaryVertex));
-    double M = fNeutralCandMass;
+    double M = fDecayingCandMass;
 
-    fNeutralMotherCandidate.SetXYZM(Px, Py, Pz, M);
+    fDecayingCand.SetXYZM(Px, Py, Pz, M);
 
     if (fVerbose > 0)
     {
-        std::cout << "calculateNeutralMotherCandidate, fNeutralMotherCandidate: theta= " << fNeutralMotherCandidate.Theta() << " and phi = " << fNeutralMotherCandidate.Phi() << std::endl;
+        std::cout << "calculateDecayingCandidate, fDecayingCand: theta= " << fDecayingCand.Theta() << " and phi = " << fDecayingCand.Phi() << std::endl;
     }
 
     double x_vertex = vecPrimToDecayVertex.X();
@@ -220,26 +220,26 @@ void KFitNeutralCandFinder::calculateNeutralMotherCand()
     derivativeMatrixTranspose.Zero();
     derivativeMatrixTranspose.Transpose(derivativeMatrix);
 
-    TMatrixD covarianceNeutralMother;
-    covarianceNeutralMother.ResizeTo(3, 3);
-    covarianceNeutralMother = derivativeMatrix * covarianceDetectorSystem * derivativeMatrixTranspose;
+    TMatrixD covarianceDecayingCand;
+    covarianceDecayingCand.ResizeTo(3, 3);
+    covarianceDecayingCand = derivativeMatrix * covarianceDetectorSystem * derivativeMatrixTranspose;
 
-    fCovarianceNeutralMother.ResizeTo(5, 5);
-    fCovarianceNeutralMother(0, 0) = 9999999;
-    fCovarianceNeutralMother(1, 1) = covarianceNeutralMother(1, 1);
-    fCovarianceNeutralMother(2, 2) = covarianceNeutralMother(2, 2);
-    fCovarianceNeutralMother(1, 2) = covarianceNeutralMother(1, 2);
-    fCovarianceNeutralMother(2, 1) = covarianceNeutralMother(2, 1);
-    fCovarianceNeutralMother(3, 3) = sigma_R * sigma_R;
-    fCovarianceNeutralMother(4, 4) = sigma_z * sigma_z;
+    fCovarianceDecayingCand.ResizeTo(5, 5);
+    fCovarianceDecayingCand(0, 0) = 9999999;
+    fCovarianceDecayingCand(1, 1) = covarianceDecayingCand(1, 1);
+    fCovarianceDecayingCand(2, 2) = covarianceDecayingCand(2, 2);
+    fCovarianceDecayingCand(1, 2) = covarianceDecayingCand(1, 2);
+    fCovarianceDecayingCand(2, 1) = covarianceDecayingCand(2, 1);
+    fCovarianceDecayingCand(3, 3) = sigma_R * sigma_R;
+    fCovarianceDecayingCand(4, 4) = sigma_z * sigma_z;
 
-    // Set covariance of the mother candidate
-    fNeutralMotherCandidate.setCovariance(fCovarianceNeutralMother);
+    // Set covariance of the decaying candidate
+    fDecayingCand.setCovariance(fCovarianceDecayingCand);
 
-    // Set momentum of the mother candidate
-    fNeutralMotherCandidate.setMomentum(fMomentumBeforeDecay);
+    // Set momentum of the candidate
+    fDecayingCand.setMomentum(fMomentumBeforeDecay);
 
-    // Set angles of the mother candidate
-    fNeutralMotherCandidate.setTheta(thetaPrimaryToSecondaryVertex);
-    fNeutralMotherCandidate.setPhi(phiPrimaryToSecondaryVertex);
+    // Set angles of the candidate
+    fDecayingCand.setTheta(thetaPrimaryToSecondaryVertex);
+    fDecayingCand.setPhi(phiPrimaryToSecondaryVertex);
 }

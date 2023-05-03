@@ -8,7 +8,7 @@
 
 #pragma link C++ class KinFitter;
 #pragma link C++ class KFitParticle;
-#pragma link C++ class KFitNeutralCandFinder;
+#pragma link C++ class KFitDecayingCandFinder;
 #pragma link C++ class KFitVertexFinder;
 #pragma link C++ class KFitDecayBuilder;
 #pragma link C++ class KFitRootAnalyzer;

@@ -1,16 +1,16 @@
 /**
- * KFitNeutralCandFinder.h
+ * KFitDecayingCandFinder.h
  *
  *@updated 26.04.2023
  *@version v1.0.0 
  *
- * Class to calculate the neutral candidate
+ * Class to calculate the decaying candidate
  * from the decay products 
  * 
  */
 
-#ifndef KFITNEUTRALCANDFINDER_H
-#define KFITNEUTRALCANDFINDER_H
+#ifndef KFITDECAYINGCANDFINDER_H
+#define KFITDECAYINGCANDFINDER_H
 
 // system includes
 #include <iostream>
@@ -23,7 +23,7 @@
 using std::cout;
 using std::endl;
 
-class KFitNeutralCandFinder
+class KFitDecayingCandFinder
 {
 private:
     std::vector<KFitParticle> fCands; // Vector of decay products
@@ -32,10 +32,10 @@ private:
     TVector3 fDecayVertex; // Vector pointing to the decay vertex
     int fVerbose = 0;
 
-    double fMomentumBeforeDecay; // Estimated momentum of the neutral particle
-    double fNeutralCandMass; // Assuption for the mass of the neutral particle
+    double fMomentumBeforeDecay; // Estimated momentum of the decaying particle
+    double fDecayingCandMass; // Assuption for the mass of the decaying particle
     
-    KFitParticle fNeutralMotherCandidate;
+    KFitParticle fDecayingCand;
 
     double fPrimVtxResX; // Primary vertex resolution in x-direction
     double fPrimVtxResY; // Primary vertex resolution in y-direction
@@ -53,7 +53,7 @@ private:
     double fCorrDecXZ = 0; // Correlations between decay vertex uncertainties in X and Z direction
     double fCorrDecYZ = 0; // Correlations between decay vertex uncertainties in Y and Z direction
     
-    /** Covariance matrix of the neutral mother candidate
+    /** Covariance matrix of the decaying candidate
     * Diagonal entries correspond to the covariances 
     * in the parameters in the following order
     * 
@@ -68,12 +68,12 @@ private:
     * Off diagonal elements corresponds to the
     * correlations between the parameters
     */
-    TMatrixD fCovarianceNeutralMother; 
+    TMatrixD fCovarianceDecayingCand; 
 
 public:
     /** @brief Constructor
     * @param cands - vector of decay particles
-    * @param neutralCandMass - mass asumption for the neutral decaying particle
+    * @param decayingCandMass - mass asumption for the decaying particle
     * @param primaryVertex - vector with primary vertex positions
     * @param decayVertex - vector with decay vertex positions
     * @param primVtxResX - primary vertex resolution in x-direction
@@ -83,7 +83,7 @@ public:
     * @param decVtxResY - decay vertex resolution in y-direction
     * @param decVtxResZ - decay vertex resolution in z-direction
     */
-    KFitNeutralCandFinder(const std::vector<KFitParticle> &cands, double neutralCandMass, TVector3 primaryVertex, TVector3 decayVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ);
+    KFitDecayingCandFinder(const std::vector<KFitParticle> &cands, double decayingCandMass, TVector3 primaryVertex, TVector3 decayVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ);
     
     /** @brief Constructor
     * Decault vertex resolutions are used and lambda mass hypothesis
@@ -91,10 +91,10 @@ public:
     * @param primaryVertex - vector with primary vertex positions
     * @param decayVertex - vector with decay vertex positions
     */
-    KFitNeutralCandFinder(const std::vector<KFitParticle> &cands, TVector3 primaryVertex, TVector3 decayVertex);
+    KFitDecayingCandFinder(const std::vector<KFitParticle> &cands, TVector3 primaryVertex, TVector3 decayVertex);
     
     /** Default Constructor **/
-    ~KFitNeutralCandFinder(){};
+    ~KFitDecayingCandFinder(){};
 
     void setVerbosity(int val) { fVerbose = val; }
 
@@ -118,20 +118,20 @@ public:
         
     }
 
-    /** @brief Function that returns the neutral mother candidate
+    /** @brief Function that returns the decaying candidate
     */
-    KFitParticle getNeutralMotherCandidate() { return fNeutralMotherCandidate; }
+    KFitParticle getDecayingCand() { return fDecayingCand; }
 
-    /** @brief Function that returns the covariance matrix of the neutral mother candidate
+    /** @brief Function that returns the covariance matrix of the decaying candidate
     */
-    TMatrixD getCovarianceMatrixNeutralMother() { return fCovarianceNeutralMother; }
+    TMatrixD getCovarianceMatrixDecayingCand() { return fCovarianceDecayingCand; }
     
 private:
 
-   /** @brief Function that calculates the neutral mother candidate
+   /** @brief Function that calculates the decaying candidate
    */
-    void calculateNeutralMotherCand();
+    void calculateDecayingCand();
 
 };
 
-#endif /* KFITNEUTRALCANDFINDER_H */
+#endif /* KFITDECAYINGCANDFINDER_H */
