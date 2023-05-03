@@ -280,7 +280,7 @@ TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 
         d(0, 0) = std::pow(E, 2) - std::pow(Px, 2) - std::pow(Py, 2) -
                   std::pow(Pz, 2) - fMass * fMass;
-        d(1, 0) = std::fabs((dir_1.Cross(dir_2)).Dot((base_2 - base_1)));
+        d(1, 0) = (dir_1.Cross(dir_2)).Dot(base_2 - base_1);
     }
 
     // missing mass constraint
@@ -334,7 +334,7 @@ TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                          std::sin(m_iter(2 + 1 * cov_dim, 0)),
                      std::cos(m_iter(1 + 1 * cov_dim, 0)));
 
-        d(0, 0) = std::fabs((dir_1.Cross(dir_2)).Dot((base_1 - base_2)));
+        d(0, 0) = (dir_1.Cross(dir_2)).Dot(base_1 - base_2);
     }
 
     // for 4momentum fit in vertex with fixed mass, momentum unmeasured
@@ -1255,7 +1255,7 @@ void KinFitter::updateDaughters()
         cand.SetXYZM(Px, Py, Pz, M);
         cand.setMomentum(1. / y(0 + val * cov_dim, 0));
         cand.setTheta(y(1 + val * cov_dim, 0));
-        cand.setPhi((2 + val * cov_dim, 0));
+        cand.setPhi(y(2 + val * cov_dim, 0));
         cand.setR(y(3 + val * cov_dim, 0));
         cand.setZ(y(4 + val * cov_dim, 0));
         //cand.setPid(fCands[val].getPid());
