@@ -7,8 +7,8 @@ Installation:
 2) Build the library using cmake   
     mkdir build   
     cd build   
-    cmake ..
-    make   
+    cmake .. -DCMAKE_INSTALL_PREFIX=/your_preferred_install_location
+    make install
 3) Add library to rootlogon.C   
     gSystem->Load("pathtobuild/libKinFit.so")
 
