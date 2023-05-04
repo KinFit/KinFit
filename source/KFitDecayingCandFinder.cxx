@@ -249,6 +249,7 @@ void KFitDecayingCandFinder::calculateDecayingCand()
     fDecayingCand.setMomentum(fMomentumBeforeDecay);
 
     // Set angles of the candidate
-    fDecayingCand.setTheta(thetaPrimaryToSecondaryVertex);
-    fDecayingCand.setPhi(phiPrimaryToSecondaryVertex);
+    fDecayingCand.setThetaRad(thetaPrimaryToSecondaryVertex);
+    fDecayingCand.setPhiRad(phiPrimaryToSecondaryVertex);
+
 }

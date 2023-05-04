@@ -56,8 +56,10 @@ public:
     KFitParticle(); 
     ~KFitParticle(){};
     void setMomentum(double val) { fMomentum = val; }
-    void setTheta(double val) { fTheta = val; }
-    void setPhi(double val) { fPhi = val; }
+    void setThetaRad(double val) { fTheta = val; cand->SetTheta(val);}
+    void setPhiRad(double val) { fPhi = val; cand->SetTheta(val);}
+    void setThetaDeg(double val) { fTheta = val*TMath::DegToRad(); cand->SetTheta(val*TMath::DegToRad()); }
+    void setPhiDeg(double val) { fPhi = val*TMath::DegToRad(); cand->SetTheta(val*TMath::DegToRad()); }
     void setR(double val) { fR = val; }
     void setZ(double val) { fZ = val; }
     void setCovariance(const TMatrixD &cov);
@@ -65,8 +67,10 @@ public:
     void setTrackId(int val) { fTrackId = val; }
 
     double getMomentum() const { return fMomentum; }
-    double getTheta() const { return fTheta; }
-    double getPhi() const { return fPhi; }
+    double getThetaRad() const { return fTheta; }
+    double getPhiRad() const { return fPhi; }
+    double getThetaDeg() const { return fTheta*TMath::RadToDeg(); }
+    double getPhiDeg() const { return fPhi*TMath::RadToDeg(); }
     double getR() const { return fR; }
     double getZ() const { return fZ; }
     TMatrixD getCovariance() const { return fCov; }
