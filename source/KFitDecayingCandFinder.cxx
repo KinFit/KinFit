@@ -22,33 +22,42 @@ KFitDecayingCandFinder::KFitDecayingCandFinder(const std::vector<KFitParticle> &
 
 void KFitDecayingCandFinder::calculateDecayingCand()
 {
-    double param_p1, param_p2;
+    //double param_p1, param_p2;
 
-    KFitParticle cand1 = fCands[0];
+    //KFitParticle cand1 = fCands[0];
 
-    param_p1 = cand1.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
+    //param_p1 = cand1.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
 
-    KFitParticle cand2 = fCands[1];
+    //KFitParticle cand2 = fCands[1];
 
-    param_p2 = cand2.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
+    //param_p2 = cand2.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
 
-    double energy_cand1, energy_cand2;
-    energy_cand1 = std::sqrt(param_p1 * param_p1 + cand1.M() * cand1.M());
-    energy_cand2 = std::sqrt(param_p2 * param_p2 + cand2.M() * cand2.M());
+    //double energy_cand1, energy_cand2;
+    //energy_cand1 = std::sqrt(param_p1 * param_p1 + cand1.M() * cand1.M());
+    //energy_cand2 = std::sqrt(param_p2 * param_p2 + cand2.M() * cand2.M());
     
-    // FOr one particle
+    // For one particle
     //fMomentumBeforeDecay = std::sqrt(energy_cand1 * energy_cand1 + 2 * energy_cand1 * energy_cand2 + energy_cand2 * energy_cand2 - fDecayingCandMass * fDecayingCandMass);
     
     // For any number of particles
-    double fMomentumBeforeDecay = 0; 
+    double fMomentumBeforeDecay = 0;
+    double energyCand = 0;
+    double totalEnergy = 0;
+    KFitParticle cand;
     
     for(int i_cands=0; i_cands<fCands.size(); i_cands++){
 
-        KFitParticle cand = fCands[i_cands];
-    
-        fMomentumBeforeDecay += cand.P();
+        cand = fCands[i_cands];
+        
+        energyCand = std::sqrt(cand.P() * cand.P() + cand.M() * cand.M());
+        
+        //fMomentumBeforeDecay += cand.P();
+
+        totalEnergy = totalEnergy + energyCand;
 
     }
+
+    fMomentumBeforeDecay = sqrt(totalEnergy * totalEnergy - fDecayingCandMass * fDecayingCandMass);
 
     TVector3 primaryVertex = fPrimaryVertex;
     TVector3 decayVertex = fDecayVertex;
