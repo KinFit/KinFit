@@ -41,8 +41,8 @@ Set(INCLUDE_DIRECTORIES
 
 Include_Directories(${INCLUDE_DIRECTORIES})
 
-FILE(GLOB SRCFILES source/KinFitter.cxx source/KFitParticle.cxx source/KFitRootAnalyzer.cxx source/KFitDecayBuilder.cxx source/KFitDecayingCandFinder.cxx source/KFitVertexFinder.cxx)
-FILE(GLOB HFILES include/KinFitter.h include/KFitParticle.h include/KFitRootAnalyzer.h include/KFitDecayBuilder.h include/KFitDecayingCandFinder.h include/KFitVertexFinder.h)
+FILE(GLOB SRCFILES source/KinFitter.cxx source/KFitParticle.cxx source/KFitRootAnalyzer.cxx source/KFitDecayBuilder.cxx source/KFitDecayCandFinder.cxx source/KFitVertexFinder.cxx)
+FILE(GLOB HFILES include/KinFitter.h include/KFitParticle.h include/KFitRootAnalyzer.h include/KFitDecayBuilder.h include/KFitDecayCandFinder.h include/KFitVertexFinder.h)
 
 message (STATUS "${BoldGreen}ROOT${ColourReset} at " ${CMAKE_CURRENT_SOURCE_DIR})
 
