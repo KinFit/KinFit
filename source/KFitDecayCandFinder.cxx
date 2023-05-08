@@ -1,26 +1,26 @@
-#include "KFitDecayingCandFinder.h"
+#include "KFitDecayCandFinder.h"
 
-KFitDecayingCandFinder::KFitDecayingCandFinder(const std::vector<KFitParticle> &cands, TVector3 primaryVertex, TVector3 decayVertex) : fCands(cands), fVerbose(0), fMomentumBeforeDecay(-1.), fPrimaryVertex(primaryVertex), fDecayVertex(decayVertex), fDecayingCandMass(1115.683), fPrimVtxResX(1.78590), fPrimVtxResY(1.75516), fPrimVtxResZ(3.00431), fDecVtxResX(5.75369), fDecVtxResY(5.57198), fDecVtxResZ(10.2602)
+KFitDecayCandFinder::KFitDecayCandFinder(const std::vector<KFitParticle> &cands, TVector3 primaryVertex, TVector3 decayVertex) : fCands(cands), fVerbose(0), fMomentumBeforeDecay(-1.), fPrimaryVertex(primaryVertex), fDecayVertex(decayVertex), fDecayCandMass(1115.683), fPrimVtxResX(1.78590), fPrimVtxResY(1.75516), fPrimVtxResZ(3.00431), fDecVtxResX(5.75369), fDecVtxResY(5.57198), fDecVtxResZ(10.2602)
 {
     if (fVerbose > 0)
     {
-        std::cout << "--------------- KFitDecayingCandFinder -----------------" << std::endl;
+        std::cout << "--------------- KFitDecayCandFinder -----------------" << std::endl;
     }
     
-    calculateDecayingCand();
+    calculateDecayCand();
 }
 
-KFitDecayingCandFinder::KFitDecayingCandFinder(const std::vector<KFitParticle> &cands, double DecayingCandMass, TVector3 primaryVertex, TVector3 decayVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ) : fCands(cands), fVerbose(0), fMomentumBeforeDecay(-1.), fPrimaryVertex(primaryVertex), fDecayVertex(decayVertex), fDecayingCandMass(DecayingCandMass), fPrimVtxResX(primVtxResX), fPrimVtxResY(primVtxResY), fPrimVtxResZ(primVtxResZ), fDecVtxResX(decVtxResX), fDecVtxResY(decVtxResY), fDecVtxResZ(decVtxResZ)
+KFitDecayCandFinder::KFitDecayCandFinder(const std::vector<KFitParticle> &cands, double DecayCandMass, TVector3 primaryVertex, TVector3 decayVertex, double primVtxResX, double primVtxResY, double primVtxResZ, double decVtxResX, double decVtxResY, double decVtxResZ) : fCands(cands), fVerbose(0), fMomentumBeforeDecay(-1.), fPrimaryVertex(primaryVertex), fDecayVertex(decayVertex), fDecayCandMass(DecayCandMass), fPrimVtxResX(primVtxResX), fPrimVtxResY(primVtxResY), fPrimVtxResZ(primVtxResZ), fDecVtxResX(decVtxResX), fDecVtxResY(decVtxResY), fDecVtxResZ(decVtxResZ)
 {
     if (fVerbose > 0)
     {
-        std::cout << "--------------- KFitDecayingCandFinder -----------------" << std::endl;
+        std::cout << "--------------- KFitDecayCandFinder -----------------" << std::endl;
     }
     
-    calculateDecayingCand();
+    calculateDecayCand();
 }
 
-void KFitDecayingCandFinder::calculateDecayingCand()
+void KFitDecayCandFinder::calculateDecayCand()
 {
     //double param_p1, param_p2;
 
@@ -37,7 +37,7 @@ void KFitDecayingCandFinder::calculateDecayingCand()
     //energy_cand2 = std::sqrt(param_p2 * param_p2 + cand2.M() * cand2.M());
     
     // For one particle
-    //fMomentumBeforeDecay = std::sqrt(energy_cand1 * energy_cand1 + 2 * energy_cand1 * energy_cand2 + energy_cand2 * energy_cand2 - fDecayingCandMass * fDecayingCandMass);
+    //fMomentumBeforeDecay = std::sqrt(energy_cand1 * energy_cand1 + 2 * energy_cand1 * energy_cand2 + energy_cand2 * energy_cand2 - fDecayCandMass * fDecayCandMass);
     
     // For any number of particles
     double fMomentumBeforeDecay = 0;
@@ -57,14 +57,14 @@ void KFitDecayingCandFinder::calculateDecayingCand()
 
     }
 
-    fMomentumBeforeDecay = sqrt(totalEnergy * totalEnergy - fDecayingCandMass * fDecayingCandMass);
+    fMomentumBeforeDecay = sqrt(totalEnergy * totalEnergy - fDecayCandMass * fDecayCandMass);
 
     TVector3 primaryVertex = fPrimaryVertex;
     TVector3 decayVertex = fDecayVertex;
 
     if (fVerbose > 0)
     {
-        std::cout << " ----------- KFitDecayingCandFinder::calculateDecayingCand() -----------" << std::endl;
+        std::cout << " ----------- KFitDecayCandFinder::calculateDecayCand() -----------" << std::endl;
         std::cout << "" << std::endl;
     }
 
@@ -118,8 +118,8 @@ void KFitDecayingCandFinder::calculateDecayingCand()
     thetaPrimaryToSecondaryVertex = vecPrimToDecayVertex.Theta();
     phiPrimaryToSecondaryVertex = vecPrimToDecayVertex.Phi();
 
-    fDecayingCand.setR(valR);
-    fDecayingCand.setZ(valZ);
+    fDecayCand.setR(valR);
+    fDecayCand.setZ(valZ);
 
     /*double Px = (fMomentumBeforeDecay *
                    std::sin(thetaPrimaryToSecondaryVertex) *
@@ -129,7 +129,7 @@ void KFitDecayingCandFinder::calculateDecayingCand()
                    std::sin(phiPrimaryToSecondaryVertex));
     double Pz =
         (fMomentumBeforeDecay * std::cos(thetaPrimaryToSecondaryVertex));
-    double M = fDecayingCandMass;
+    double M = fDecayCandMass;
     */
     double Px = (fMomentumBeforeDecay *
                    std::sin(thetaPrimaryToSecondaryVertex) *
@@ -139,13 +139,13 @@ void KFitDecayingCandFinder::calculateDecayingCand()
                    std::sin(phiPrimaryToSecondaryVertex));
     double Pz =
         (fMomentumBeforeDecay * std::cos(thetaPrimaryToSecondaryVertex));
-    double M = fDecayingCandMass;
+    double M = fDecayCandMass;
 
-    fDecayingCand.SetXYZM(Px, Py, Pz, M);
+    fDecayCand.SetXYZM(Px, Py, Pz, M);
 
     if (fVerbose > 0)
     {
-        std::cout << "calculateDecayingCandidate, fDecayingCand: theta= " << fDecayingCand.Theta() << " and phi = " << fDecayingCand.Phi() << std::endl;
+        std::cout << "calculateDecayCandidate, fDecayCand: theta= " << fDecayCand.Theta() << " and phi = " << fDecayCand.Phi() << std::endl;
     }
 
     double x_vertex = vecPrimToDecayVertex.X();
@@ -229,27 +229,27 @@ void KFitDecayingCandFinder::calculateDecayingCand()
     derivativeMatrixTranspose.Zero();
     derivativeMatrixTranspose.Transpose(derivativeMatrix);
 
-    TMatrixD covarianceDecayingCand;
-    covarianceDecayingCand.ResizeTo(3, 3);
-    covarianceDecayingCand = derivativeMatrix * covarianceDetectorSystem * derivativeMatrixTranspose;
+    TMatrixD covarianceDecayCand;
+    covarianceDecayCand.ResizeTo(3, 3);
+    covarianceDecayCand = derivativeMatrix * covarianceDetectorSystem * derivativeMatrixTranspose;
 
-    fCovarianceDecayingCand.ResizeTo(5, 5);
-    fCovarianceDecayingCand(0, 0) = 9999999;
-    fCovarianceDecayingCand(1, 1) = covarianceDecayingCand(1, 1);
-    fCovarianceDecayingCand(2, 2) = covarianceDecayingCand(2, 2);
-    fCovarianceDecayingCand(1, 2) = covarianceDecayingCand(1, 2);
-    fCovarianceDecayingCand(2, 1) = covarianceDecayingCand(2, 1);
-    fCovarianceDecayingCand(3, 3) = sigma_R * sigma_R;
-    fCovarianceDecayingCand(4, 4) = sigma_z * sigma_z;
+    fCovarianceDecayCand.ResizeTo(5, 5);
+    fCovarianceDecayCand(0, 0) = 9999999;
+    fCovarianceDecayCand(1, 1) = covarianceDecayCand(1, 1);
+    fCovarianceDecayCand(2, 2) = covarianceDecayCand(2, 2);
+    fCovarianceDecayCand(1, 2) = covarianceDecayCand(1, 2);
+    fCovarianceDecayCand(2, 1) = covarianceDecayCand(2, 1);
+    fCovarianceDecayCand(3, 3) = sigma_R * sigma_R;
+    fCovarianceDecayCand(4, 4) = sigma_z * sigma_z;
 
-    // Set covariance of the decaying candidate
-    fDecayingCand.setCovariance(fCovarianceDecayingCand);
+    // Set covariance of the decay candidate
+    fDecayCand.setCovariance(fCovarianceDecayCand);
 
     // Set momentum of the candidate
-    fDecayingCand.setMomentum(fMomentumBeforeDecay);
+    fDecayCand.setMomentum(fMomentumBeforeDecay);
 
     // Set angles of the candidate
-    fDecayingCand.setThetaRad(thetaPrimaryToSecondaryVertex);
-    fDecayingCand.setPhiRad(phiPrimaryToSecondaryVertex);
+    fDecayCand.setThetaRad(thetaPrimaryToSecondaryVertex);
+    fDecayCand.setPhiRad(phiPrimaryToSecondaryVertex);
 
 }

@@ -2,7 +2,7 @@
 #include "KFitParticle.h"
 
 KFitParticle::KFitParticle(TLorentzVector *cand, double R, double Z)
-    : TLorentzVector(*cand), cand(cand), fMomentum(cand->P()), fTheta(cand->Theta()*180/M_PI), fPhi(cand->Phi()*180/M_PI), fR(R), fZ(Z)
+    : TLorentzVector(*cand), cand(cand), fMomentum(cand->P()), fTheta(cand->Theta()), fPhi(cand->Phi()), fR(R), fZ(Z)
 {
     fPid = -1;
     fTrackId = -1;
@@ -10,15 +10,15 @@ KFitParticle::KFitParticle(TLorentzVector *cand, double R, double Z)
 }
 
 KFitParticle::KFitParticle(TLorentzVector *cand, double X, double Y, double Z)
-    : TLorentzVector(*cand), cand(cand), fMomentum(cand->P()), fTheta(cand->Theta()*180/M_PI), fPhi(cand->Phi()*180/M_PI)
+    : TLorentzVector(*cand), cand(cand), fMomentum(cand->P()), fTheta(cand->Theta()), fPhi(cand->Phi())
 {
     double deg2rad = TMath::DegToRad();
 
     // Base and direction vettor of particle cand
     TVector3 base(X, Y, Z);
-    TVector3 dir(TMath::Sin(fTheta * deg2rad) * TMath::Cos(fPhi * deg2rad),
-                 TMath::Sin(fTheta * deg2rad) * TMath::Sin(fPhi * deg2rad),
-                 TMath::Cos(fTheta * deg2rad));
+    TVector3 dir(TMath::Sin(fTheta) * TMath::Cos(fPhi),
+                 TMath::Sin(fTheta) * TMath::Sin(fPhi),
+                 TMath::Cos(fTheta));
     
     // Base and direction vector of beamline
     TVector3 beam_base(0,0,1); 

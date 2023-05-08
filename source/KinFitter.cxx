@@ -1254,8 +1254,8 @@ void KinFitter::updateDaughters()
         double M = fM[val];
         cand.SetXYZM(Px, Py, Pz, M);
         cand.setMomentum(1. / y(0 + val * cov_dim, 0));
-        cand.setTheta(y(1 + val * cov_dim, 0));
-        cand.setPhi(y(2 + val * cov_dim, 0));
+        cand.setThetaRad(y(1 + val * cov_dim, 0));
+        cand.setPhiRad(y(2 + val * cov_dim, 0));
         cand.setR(y(3 + val * cov_dim, 0));
         cand.setZ(y(4 + val * cov_dim, 0));
         //cand.setPid(fCands[val].getPid());
