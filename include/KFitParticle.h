@@ -23,8 +23,7 @@ class KFitParticle : public TLorentzVector
     ClassDef(KFitParticle, 1);
 
 private:
-    TLorentzVector *cand; // TLorentzVector the KFitParticle
-    // inherits from
+    TLorentzVector cand; // TLorentzVector the KFitParticle inherits from
     double fMomentum; // Momentum [MeV]
     double fTheta; // Polar angle [rad]
     double fPhi; // Azimuthal angle [rad]
@@ -51,15 +50,15 @@ private:
     TMatrixD fCov;
 
 public:
-    KFitParticle(TLorentzVector *cand, double R, double Z);
-    KFitParticle(TLorentzVector *cand, double X, double Y, double Z);
+    KFitParticle(TLorentzVector cand, double R, double Z);
+    KFitParticle(TLorentzVector cand, double X, double Y, double Z);
     KFitParticle(); 
     ~KFitParticle(){};
     void setMomentum(double val) { fMomentum = val; }
-    void setThetaRad(double val) { fTheta = val; cand->SetTheta(val);}
-    void setPhiRad(double val) { fPhi = val; cand->SetTheta(val);}
-    void setThetaDeg(double val) { fTheta = val*TMath::DegToRad(); cand->SetTheta(val*TMath::DegToRad()); }
-    void setPhiDeg(double val) { fPhi = val*TMath::DegToRad(); cand->SetTheta(val*TMath::DegToRad()); }
+    void setThetaRad(double val) { fTheta = val; cand.SetTheta(val);}
+    void setPhiRad(double val) { fPhi = val; cand.SetTheta(val);}
+    void setThetaDeg(double val) { fTheta = val*TMath::DegToRad(); cand.SetTheta(val*TMath::DegToRad()); }
+    void setPhiDeg(double val) { fPhi = val*TMath::DegToRad(); cand.SetTheta(val*TMath::DegToRad()); }
     void setR(double val) { fR = val; }
     void setZ(double val) { fZ = val; }
     void setCovariance(const TMatrixD &cov);
@@ -76,9 +75,6 @@ public:
     TMatrixD getCovariance() const { return fCov; }
     int getPid() const { return fPid; }
     int getTrackId() const { return fTrackId; }
-
-    void reset();
-    void update();
 };
 
 #endif /* KFITPARTICLE_H */

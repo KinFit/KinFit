@@ -1,16 +1,16 @@
 // ROOT includes
 #include "KFitParticle.h"
 
-KFitParticle::KFitParticle(TLorentzVector *cand, double R, double Z)
-    : TLorentzVector(*cand), cand(cand), fMomentum(cand->P()), fTheta(cand->Theta()), fPhi(cand->Phi()), fR(R), fZ(Z)
+KFitParticle::KFitParticle(TLorentzVector cand, double R, double Z)
+    : TLorentzVector(cand), cand(cand), fMomentum(cand.P()), fTheta(cand.Theta()), fPhi(cand.Phi()), fR(R), fZ(Z)
 {
     fPid = -1;
     fTrackId = -1;
     fCov.ResizeTo(5, 5);
 }
 
-KFitParticle::KFitParticle(TLorentzVector *cand, double X, double Y, double Z)
-    : TLorentzVector(*cand), cand(cand), fMomentum(cand->P()), fTheta(cand->Theta()), fPhi(cand->Phi())
+KFitParticle::KFitParticle(TLorentzVector cand, double X, double Y, double Z)
+    : TLorentzVector(cand), cand(cand), fMomentum(cand.P()), fTheta(cand.Theta()), fPhi(cand.Phi())
 {
     double deg2rad = TMath::DegToRad();
 
@@ -58,7 +58,7 @@ KFitParticle::KFitParticle(TLorentzVector *cand, double X, double Y, double Z)
 KFitParticle::KFitParticle()
     : TLorentzVector()
 {
-    cand = new TLorentzVector();
+    cand.SetXYZM(0,0,0,0);
     fR = 0;
     fZ = 0;
     fPid = -1;
@@ -93,14 +93,4 @@ void KFitParticle::setCovariance(const TMatrixD &cov)
     {
         // TO-DO: do the error propagtion calculations
     }
-}
-
-void KFitParticle::reset()
-{
-    *(TLorentzVector *)this = *cand;
-}
-
-void KFitParticle::update()
-{
-    *((TLorentzVector *)cand) = *this;
 }

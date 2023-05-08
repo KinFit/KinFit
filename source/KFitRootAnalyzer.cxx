@@ -242,7 +242,7 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, double 
         for (int k = 0; k < result.size(); k++)
         {
             cout << "fill cand" << endl;
-            KFitParticle *fitted_cand = new (fit_arrayRef[ii]) KFitParticle(&result[k], result[k].getR(), result[k].getZ());
+            KFitParticle *fitted_cand = new (fit_arrayRef[ii]) KFitParticle(result[k], result[k].getR(), result[k].getZ());
             fitted_cand->setPid(result[k].getPid());
             fitted_cand->setTrackId(result[k].getTrackId());
             fitted_cand->setCovariance(result[k].getCovariance());
