@@ -52,7 +52,7 @@ void KFitRootAnalyzer::addBuilderTask(TString val, std::vector<int> pids, TLoren
     // end of the event loop
 }
 */
-
+/*
 void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, TLorentzVector lv, KFitParticle mother, double mm)
 {
     cout << "Task added: " << task << endl;
@@ -79,10 +79,6 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, TLorent
     fTree_out->Branch("Prob", &Prob, "Prob/D");
 
     setPids(pids);
-/*
-    TFile tree_file(fInfileList, "read");
-    fTree = (TTree *)tree_file.Get("data");
-*/
 
     int entries = fTree->GetEntries();
     if (fEvents < entries && fEvents > 0)
@@ -146,7 +142,7 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, TLorent
         fTree_out->Fill();
         }
     } // end of event loop
-}
+}*/
 
 void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, double mm, TLorentzVector lv, KFitParticle mother)
 {

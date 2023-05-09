@@ -52,8 +52,8 @@ public:
     ~KFitRootAnalyzer(){};
 
     //User functions
-    void doFitterTask(TString task, std::vector<int> pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), double mm=0.);
-    void doFitterTask(TString task, std::vector<int> pids, double mm, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle());
+    //void doFitterTask(TString task, std::vector<int> pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), double mm=0.);
+    void doFitterTask(TString task, std::vector<int> pids, double mm=0., TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle());
     //void addFitterTask(TString task, std::vector<int> primPids, std::vector<int> decayPids); // Jenny, for 3C fit
     //void addBuilderTask(TString task, std::vector<int> pids, TLorentzVector lv);
 
