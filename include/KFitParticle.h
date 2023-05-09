@@ -20,7 +20,7 @@
 class KFitParticle : public TLorentzVector
 {
 
-    ClassDef(KFitParticle, 1);
+    ClassDef(KFitParticle, 2);
 
 private:
     TLorentzVector cand; // TLorentzVector the KFitParticle inherits from

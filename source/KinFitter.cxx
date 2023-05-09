@@ -1234,6 +1234,46 @@ TLorentzVector KinFitter::getMissingDaughter()
     return fMissDaughter;
 }
 
+void KinFitter::updateDaughters()
+{
+    if (fVerbose > 1)
+    {
+        cout << " update daughters" << endl;
+    }
+    for (int val = 0; val < fN; ++val)
+    {
+        KFitParticle &cand = fCands[val];
+        double Px = (1. / y(0 + val * cov_dim, 0)) *
+                      std::sin(y(1 + val * cov_dim, 0)) *
+                      std::cos(y(2 + val * cov_dim, 0));
+        double Py = (1. / y(0 + val * cov_dim, 0)) *
+                      std::sin(y(1 + val * cov_dim, 0)) *
+                      std::sin(y(2 + val * cov_dim, 0));
+        double Pz =
+            (1. / y(0 + val * cov_dim, 0)) * std::cos(y(1 + val * cov_dim, 0));
+        double M = fM[val];
+        cand.SetXYZM(Px, Py, Pz, M);
+        cand.setMomentum(1. / y(0 + val * cov_dim, 0));
+        cand.setThetaRad(y(1 + val * cov_dim, 0));
+        cand.setPhiRad(y(2 + val * cov_dim, 0));
+        cand.setR(y(3 + val * cov_dim, 0));
+        cand.setZ(y(4 + val * cov_dim, 0));
+        //cand.setPid(fCands[val].getPid());
+
+        // ---------------------------------------------------------------------------
+        // set covariance
+        // ---------------------------------------------------------------------------
+        TMatrixD cov(5, 5);
+        cov(0, 0) = V(0 + val * cov_dim, 0 + val * cov_dim);
+        cov(1, 1) = V(1 + val * cov_dim, 1 + val * cov_dim);
+        cov(2, 2) = V(2 + val * cov_dim, 2 + val * cov_dim);
+        cov(3, 3) = V(3 + val * cov_dim, 3 + val * cov_dim);
+        cov(4, 4) = V(4 + val * cov_dim, 4 + val * cov_dim);
+        cand.setCovariance(cov);
+        // ---------------------------------------------------------------------------
+    }
+}
+
 void KinFitter::updateMother()
 {
     KFitParticle &mother = fMother;
