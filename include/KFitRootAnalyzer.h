@@ -42,17 +42,12 @@ private:
     //Output data
     TFile *foutFile;
     TTree *fTree_out;
-
-    // Fill KFitParticle with necessary information
-    //void FillData(TLorentzVector *cand, double R, double Z, KFitParticle &outcand, TMatrix_D cov, double mass);
-    // put to KFitParticle, here cands should be fully filled already
     
 public:
     KFitRootAnalyzer(TString inFileName, TString outFileName, int nEvents=-1);
     ~KFitRootAnalyzer(){};
 
     //User functions
-    void doFitterTask(TString task, std::vector<int> pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), double mm=0.);
     void doFitterTask(TString task, std::vector<int> pids, double mm, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle());
     //void addFitterTask(TString task, std::vector<int> primPids, std::vector<int> decayPids); // Jenny, for 3C fit
     //void addBuilderTask(TString task, std::vector<int> pids, TLorentzVector lv);

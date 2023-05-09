@@ -195,22 +195,7 @@ Bool_t KFitDecayBuilder::doFit()
         return kFALSE;
     }
 }
-/*
-bool KFitDecayBuilder::do3cFit()
-{
-    createNeutralCandidate();
-    KinFitter Fitter(fFitCands, fMother);
-    Fitter.add3Constraint();
-    Fitter.fit();
-}
 
-bool KFitDecayBuilder::doMissMomFit()
-{
-    KinFitter Fitter(fFitCands, fIniSys, fMass);
-    Fitter.addMomConstraint();
-    Fitter.fit();
-}
-*/
 void KFitDecayBuilder::fillFitCands()
 {
 
