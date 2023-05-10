@@ -7,10 +7,17 @@ Installation:
 2) Build the library using cmake   
     mkdir build   
     cd build   
-    cmake .. -DCMAKE_INSTALL_PREFIX=/your_preferred_install_location
-    make install
+    cmake .. -DCMAKE_INSTALL_PREFIX=/your_preferred_install_location   
+    make   
+    make install   
 3) Add library to rootlogon.C   
-    gSystem->Load("pathtobuild/libKinFit.so")
+    gSystem->Load("pathtoinstall/libKinFit.so")   
+
+KinFit depends on the ROOT libraries Core, Physics and Tree   
+When properly installed, KinFit can be included and linked to other CMake projects by   
+   
+find_package(KinFit REQUIRED)   
+target_link_libraries(your_executable other_dependencies KinFit::KinFit ROOT::Core ROOT::Physics ROOT::Tree)
 
 
 
