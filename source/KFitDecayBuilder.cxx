@@ -160,6 +160,7 @@ Bool_t KFitDecayBuilder::doFit()
 {
     KinFitter Fitter(fFitCands);
     if (fTask == "4C") Fitter.add4Constraint(fIniSys);
+    else if (fTask == "Vertex") Fitter.addVertexConstraint();
     else if (fTask == "Mass"){
         Fitter.addMassConstraint(fMass);
         cout << "constraint added, Mass = " << fMass << endl;
