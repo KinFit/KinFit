@@ -33,7 +33,7 @@ private:
     int fTrackId; // Track id
 
     /** Covariance matrix of the KFitParticle
-    * Diagonal entries correspond to the covariances 
+    * Diagonal entries correspond to the variances 
     * in the parameters in the following order
     * 
     * -----------------------------
@@ -45,7 +45,7 @@ private:
     * -----------------------------
     * 
     * Off diagonal elements corresponds to the
-    * correlations between the parameters
+    * covariances of the parameters
     */
     TMatrixD fCov;
 

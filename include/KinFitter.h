@@ -1,23 +1,27 @@
 /**
  * KinFitter.h
  *
+ * @updated 31.05.2023
+ * @version v1.0.0
+ * 
+ * Main class that performs the kinematic fit
  *
  */
 
 #ifndef KINFITTER_H
 #define KINFITTER_H
 
+// framework includes
+#include "KFitParticle.h"
+
+// ROOT includes
+#include "TObject.h"
+
 // system includes
 #include <iostream>
 #include <iomanip>
 #include <vector>
 #include <cmath>
-
-// ROOT includes
-#include "TObject.h"
-
-// framework includes
-#include "KFitParticle.h"
 
 using std::cout;
 using std::endl;

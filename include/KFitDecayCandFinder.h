@@ -12,13 +12,14 @@
 #ifndef KFITDECAYCANDFINDER_H
 #define KFITDECAYCANDFINDER_H
 
+// framework includes
+#include "KFitParticle.h"
+
 // system includes
 #include <iostream>
 #include <iomanip>
 #include <vector>
 #include <cmath>
-// framework includes
-#include "KFitParticle.h"
 
 using std::cout;
 using std::endl;
