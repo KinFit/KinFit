@@ -1,0 +1,4 @@
+include(CMakeFindDependencyMacro)
+
+find_dependency(ROOT QUIET REQUIRED COMPONENTS Core Physics Tree)
+include(${CMAKE_CURRENT_LIST_DIR}/@CMAKE_PROJECT_NAME@Targets.cmake)
