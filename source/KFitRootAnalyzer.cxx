@@ -3,10 +3,14 @@
 KFitRootAnalyzer::KFitRootAnalyzer(TString inFileName, TString outFileName, int nEvents) : fEvents(nEvents),
                                                                                     fVerbose(0)
 {
-    finFile = new TFile(inFileName, "READ");
-    fTree = (TTree*)finFile->Get("data");
+    if (fVerbose > 0)
+    {
+        std::cout << "--------------- KFitRootAnalyzer() -----------------" << std::endl;
+    }
 
-    //foutFile = new TFile(outFileName.Data(),"RECREATE");
+    TFile *inFile = new TFile(inFileName, "READ");
+    fTree = (TTree*)inFile->Get("data");
+
     foutFile = new TFile(outFileName,"RECREATE");
     fTree_out = new TTree("data_fitted", "output_tree");
 
@@ -15,11 +19,16 @@ KFitRootAnalyzer::KFitRootAnalyzer(TString inFileName, TString outFileName, int 
 // Select and sort particles according to their PID
 void KFitRootAnalyzer::selectCandidates()
 {
+    if (fVerbose > 0)
+    {
+        std::cout << " ----------- KFitRootAnalyzer::selectCandidates() -----------" << std::endl;
+        std::cout << "" << std::endl;
+    }
+
     int ntracks = fCands_in->GetEntries();
 
     fCandsFit.clear();
     std::vector<KFitParticle > tempVec;
-    //KFitParticle *cand = new KFitParticle();
 
     for (size_t it = 0; it < fPids.size(); it++)
     {
@@ -40,7 +49,13 @@ void KFitRootAnalyzer::selectCandidates()
 
 void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, double mm, TLorentzVector lv, KFitParticle mother)
 {
-    cout << "Task added: " << task << endl;
+    if (fVerbose > 0)
+    {
+        std::cout << " ----------- KFitRootAnalyzer::selectCandidates() -----------" << std::endl;
+        std::cout << "" << std::endl;
+        std::cout << "Task added: " << task << std::endl;
+        std::cout << "" << std::endl;
+    }
 
     // Read input tree
     int Event;
@@ -63,15 +78,21 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, double 
     int entries = fTree->GetEntries();
     if (fEvents < entries && fEvents > 0)
         entries = fEvents;
-
-    cout<<"entries: "<<entries<<endl;
-
+    if (fVerbose > 1 )
+    {
+        std::cout<<"EntEvents to be analyzed: "<<entries<<std::endl;
+    }
+    
     KFitDecayBuilder builder(task, fPids, lv, mother, mm);
+    builder.setVerbosity(fVerbose);
 
     // start of the event loop
+    if (fVerbose > 1 )
+    {
+        std::cout<<"Start of event loop"<<std::endl;
+    }
     for (int i = 1; i < entries; i++)
     {
-        //cout<<"Event: "<<i<<endl;
         fTree->GetEntry(i);
         Event = i;
 
@@ -96,6 +117,7 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, double 
         
         builder.buildDecay();
 
+        // get result from DecayBuilder
         std::vector<KFitParticle> result;
         if(result.size()>0) result.clear();
         builder.getFitCands(result);
@@ -118,7 +140,7 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, double 
 
         fTree_out->Fill();
         fitted_cands->Clear();
-        }
+        } 
         else 
         {
             cout << "no candidate found" << endl;
@@ -126,7 +148,11 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, double 
         }
         
     } // end of event loop
-    //cout<<"Event loop ended"<<endl;
+        // start of the event loop
+    if (fVerbose > 1 )
+    {
+        std::cout<<"Event loop finished!"<<std::endl;
+    }
     finish();
     //cout<<"finished"<<endl;
 }
@@ -139,37 +165,5 @@ void KFitRootAnalyzer::finish()
     foutFile->Save();
     foutFile->Close();
 
-    finFile->Close();
+    //finFile->Close();
 }
-
-/*
-// Function to fill KFitParticle -- not needed here if input is already KFitParticle
-void KFitRootAnalyzer::FillData(HParticleCandSim *cand, KFitParticle &outcand, double arr[5], double mass)
-{
-
-    if (fVerbose > 0)
-    {
-        std::cout << " ----------- KFitRootAnalyzer::FillData() -----------" << std::endl;
-        std::cout << "" << std::endl;
-    }
-
-    double deg2rad = TMath::DegToRad();
-
-    TMatrixD cov(5, 5);
-    cov(0, 0) = std::pow(arr[0], 2);
-    cov(1, 1) = std::pow(arr[1], 2);
-    cov(2, 2) = std::pow(arr[2], 2);
-    cov(3, 3) = std::pow(arr[3], 2);
-    cov(4, 4) = std::pow(arr[4], 2);
-
-    outcand.SetXYZM(cand->getMomentum() * std::sin(cand->getTheta() * deg2rad) *
-                        std::cos(cand->getPhi() * deg2rad),
-                    cand->getMomentum() * std::sin(cand->getTheta() * deg2rad) *
-                        std::sin(cand->getPhi() * deg2rad),
-                    cand->getMomentum() * std::cos(cand->getTheta() * deg2rad),
-                    mass);
-    outcand.setR(cand->getR());
-    outcand.setZ(cand->getZ());
-    outcand.setCovariance(cov);
-}
-*/

@@ -1,35 +1,7 @@
 #include "KFitDecayBuilder.h"
 
-KFitDecayBuilder::KFitDecayBuilder(std::vector<std::vector<KFitParticle>> &cands, TString &task, std::vector<int> &pids, TLorentzVector lv, KFitParticle mother, double mass) : fCands(cands),
-                                                                                                                                                                          fTask(task),
-                                                                                                                                                                          fPids(pids),
-                                                                                                                                                                          fCombiCounter(0),
-                                                                                                                                                                          fProb(0.01),
-                                                                                                                                                                          fVerbose(0)
-
-{
-    if (fVerbose > 0)
-    {
-        std::cout << "--------------- KFitDecayBuilder() -----------------" << std::endl;
-    }
-
-    setIniSys(lv);
-    setMother(mother);
-    setMass(mass);
-
-    // Determine the number of combinations of the input particles
-    fTotalCombos = 1;
-    if(particleCounter.size()>0) particleCounter.clear();
-    for (size_t i = 0; i < fPids.size(); i++)
-    {
-        fTotalCombos *= fCands[i].size();
-        particleCounter.push_back(0);
-    }
-}
-
 KFitDecayBuilder::KFitDecayBuilder(TString &task, std::vector<int> &pids, TLorentzVector lv, KFitParticle mother, double mass) : fTask(task),
                                                                                                                             fPids(pids),
-                                                                                                                            fProb(0.00),
                                                                                                                             fVerbose(0)
 
 {
@@ -46,6 +18,10 @@ KFitDecayBuilder::KFitDecayBuilder(TString &task, std::vector<int> &pids, TLoren
 
 void KFitDecayBuilder::countCombis()
 {
+    if (fVerbose > 0)
+    {
+        std::cout << "--------------- KFitDecayBuilder::countCombis() -----------------" << std::endl;
+    }
     fCombiCounter = 0;
     // Determine the number of combinations of the input particles
     fTotalCombos = 1;
@@ -60,16 +36,22 @@ void KFitDecayBuilder::countCombis()
 
 void KFitDecayBuilder::buildDecay()
 {
-
-    cout << "Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombos << endl;
-    cout << "Task is " << fTask << endl;
+    if (fVerbose > 0)
+    {
+        std::cout << "--------------- KFitDecayBuilder::buildDecay() -----------------" << std::endl;
+    }
+    if (fVerbose > 1)
+    {
+        std::cout << "Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombos << std::endl;
+        std::cout<< "Task is " << fTask <<std::endl;
+    }
 
     // For selection of best event according to probability
     fBestProb = 0;
     fBestChi2 = 1e6;
 
     while (fCombiCounter < (fTotalCombos ))
-    { // double check this
+    {
         cout << "fill fit cands" << endl;
         // Take one combination of particles
         fillFitCands();
@@ -89,8 +71,13 @@ void KFitDecayBuilder::buildDecay()
         }
         // Do task that was chosen by user
         doFit();
-        cout << "Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombos << endl;
-        cout << "fit finished" <<endl;
+
+        if (fVerbose > 1)
+        {
+            std::cout << "Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombos << std::endl;
+            std::cout << "fit finished" <<std::endl;
+        }
+        
         
         
     }
@@ -158,29 +145,34 @@ void KFitDecayBuilder::createNeutralCandidate()
 
 Bool_t KFitDecayBuilder::doFit()
 {
+    if (fVerbose > 0)
+    {
+        std::cout << "--------------- KFitDecayBuilder::doFit() -----------------" << std::endl;
+    }
     KinFitter Fitter(fFitCands);
     if (fTask == "4C") Fitter.add4Constraint(fIniSys);
     else if (fTask == "Vertex") Fitter.addVertexConstraint();
     else if (fTask == "Mass"){
         Fitter.addMassConstraint(fMass);
+        /*
         cout << "constraint added, Mass = " << fMass << endl;
         cout << "proton momentum = " << fFitCands[0].getMomentum() << endl;
-        cout << "pion momentum = " << fFitCands[1].getMomentum() << endl;
+        cout << "pion momentum = " << fFitCands[1].getMomentum() << endl;*/
         TMatrixD cov_p = fFitCands[0].getCovariance();
         TMatrixD cov_pi = fFitCands[1].getCovariance();
+        /*
         cout << "proton momentum error = " << cov_p(0,0) << endl;
         cout << "pion momentum error = " << cov_pi(0,0) << endl;
-
+*/
     } 
     else cout << "Task not available" << endl;
 
-    //Fitter.setNumberOfIterations(10);
-    //Fitter.setConvergenceCriteria(0.01, 0.01, 0.01);
-    //Fitter.setVerbosity(2);
-
-    if (Fitter.fit() && Fitter.getProb() > fProb)
+    if (Fitter.fit())
     {
-        cout << "fit successful" << endl;
+        if (fVerbose > 1)
+        {
+            std::cout << "fit successful" << std::endl;
+        }
         if (Fitter.getProb() > fBestProb)
         {
             fBestProb = Fitter.getProb();
@@ -192,13 +184,20 @@ Bool_t KFitDecayBuilder::doFit()
     }
     else
     {
-        cout << "fit not successful" << endl;
+        if (fVerbose > 1)
+        {
+            std::cout << "fit not successful" << std::endl;
+        }
         return kFALSE;
     }
 }
 
 void KFitDecayBuilder::fillFitCands()
 {
+    if (fVerbose > 0)
+    {
+        std::cout << "--------------- KFitDecayBuilder::fillFitCands() -----------------" << std::endl;
+    }
 
     if(fFitCands.size()>0) fFitCands.clear();
     doubleParticle = false;
@@ -237,6 +236,10 @@ void KFitDecayBuilder::fillFitCands()
 
 void KFitDecayBuilder::checkDoubleParticle(size_t i)
 {
+    if (fVerbose > 0)
+    {
+        std::cout << "--------------- KFitDecayBuilder::checkDoubleParticle() -----------------" << std::endl;
+    }
     for (size_t j = 0; j < i; j++)
     {
         if ((fPids[j] == fPids[i]) && (particleCounter[j] == particleCounter[i]))
@@ -245,26 +248,8 @@ void KFitDecayBuilder::checkDoubleParticle(size_t i)
             doubleParticle = true;
         }
     }
-    cout << "no double particle" << endl;
-}
-
-/*
-void KFitDecayBuilder::createOutputParticle(KFitParticle refitCand)
-{
-    if (fVerbose > 0)
+    if (fVerbose > 1)
     {
-        std::cout << "--------------- KFitDecayBuilder::createOutputParticle() -----------------" << std::endl;
+        std::cout << "no double particle" << std::endl;
     }
-    KFitParticle newParticle;
-
-    newParticle.setMomentum(refitCand.P());
-    newParticle.setTheta(refitCand.Theta());
-    newParticle.setPhi(refitCand.Phi());
-    newParticle.setR(refitCand.getR());
-    newParticle.setZ(refitCand.getZ());
-    newParticle.setCovariance(refitCand.getCovariance());
-    newParticle.setPid(refitCand.getPid());
-
-    fOutputCands.push_back(newParticle);
 }
-*/

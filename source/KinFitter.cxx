@@ -1116,22 +1116,22 @@ Bool_t KinFitter::fit()
 
         // for checking convergence
         fIteration = q;
-        fDNorm = 0;
-        fAlphaNorm = 0;
+        double dNorm = 0;
+        double alphaNorm = 0;
         TMatrixD delta_alpha_it = alpha-neu_alpha;
-        for (int i=0; i<d.GetNrows(); i++) fDNorm += pow(d(i,0),2);
-        fDNorm = sqrt(fDNorm);
-        for (int i=0; i<delta_alpha.GetNrows(); i++) fAlphaNorm  += pow(delta_alpha_it(i,0),2);
+        for (int i=0; i<d.GetNrows(); i++) dNorm += pow(d(i,0),2);
+        dNorm = sqrt(dNorm);
+        for (int i=0; i<delta_alpha.GetNrows(); i++) alphaNorm  += pow(delta_alpha_it(i,0),2);
         if (f3Constraint || fMomConstraint){
-            for (int i=0; i<delta_xi.GetNrows(); i++) fAlphaNorm  += pow(delta_xi(i,0),2);
+            for (int i=0; i<delta_xi.GetNrows(); i++) alphaNorm  += pow(delta_xi(i,0),2);
         }
-        fAlphaNorm = sqrt(fAlphaNorm);
+        alphaNorm = sqrt(alphaNorm);
         if(fVerbose>2){
             cout<<"chi2: "<<fabs(chi2 - chisqrd(0, 0))<<endl;
-            cout<<"delta apha norm: "<<fAlphaNorm<<endl;
-            cout<<"constraints norm: "<<fDNorm<<endl;
+            cout<<"delta apha norm: "<<alphaNorm<<endl;
+            cout<<"constraints norm: "<<dNorm<<endl;
         }
-        if (fabs(chi2 - chisqrd(0, 0)) < fConvergenceCriterionChi2 && fDNorm < fConvergenceCriterionD && fAlphaNorm < fConvergenceCriterionAlpha)
+        if (fabs(chi2 - chisqrd(0, 0)) < fConvergenceCriterionChi2 && dNorm < fConvergenceCriterionD && alphaNorm < fConvergenceCriterionAlpha)
         {
             fConverged = true;
             chi2 = chisqrd(0, 0);

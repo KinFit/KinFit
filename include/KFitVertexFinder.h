@@ -10,17 +10,17 @@
 #ifndef KFITVERTEXFINDER_H
 #define KFITVERTEXFINDER_H
 
+// framework includes
+#include "KFitParticle.h"
+
+// ROOT includes
+#include "TMatrixD.h"
+
 // system includes
 #include <iostream>
 #include <iomanip>
 #include <vector>
 #include <cmath>
-
-// ROOT includes
-#include "TMatrixD.h"
-
-// framework includes
-#include "KFitParticle.h"
 
 using std::cout;
 using std::endl;

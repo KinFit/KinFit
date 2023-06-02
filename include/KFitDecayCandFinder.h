@@ -94,7 +94,7 @@ public:
     */
     KFitDecayCandFinder(const std::vector<KFitParticle> &cands, TVector3 primaryVertex, TVector3 decayVertex);
     
-    /** Default Constructor **/
+    /** Default Deconstructor **/
     ~KFitDecayCandFinder(){};
 
     void setVerbosity(int val) { fVerbose = val; }

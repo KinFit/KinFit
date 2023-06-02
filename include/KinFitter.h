@@ -57,33 +57,42 @@ void Print(T const &matrix)
 class KinFitter : public TObject
 {
 private:
-    TMatrixD y, x, V, Vx, fPull;
-    double fChi2, fProb;
-    bool fConverged;
-    double fDNorm, fAlphaNorm;
-    int fIteration, fN, fyDim;
+    TMatrixD y; // Vector of measured variables
+    TMatrixD x;  // Vector of unmeasured variables
+    TMatrixD V;  // Covariance matrix of measured variables
+    TMatrixD Vx;  // Covariance matrix of unmeasured variables
+    TMatrixD fPull;  // Pull value for all measured variables
+    double fChi2;    // Chi2 of fit
+    double fProb;   // Probability of fit
+    bool fConverged;    // True if fit has converged
+    int fIteration; // Iterations needed until convergence
+    int fN;     // Number of input candidates
+    int fyDim;  // Dimension of y
     std::vector<KFitParticle> fCands;
     KFitParticle fMother;
     TLorentzVector fMissDaughter;
 
     // data members for constraints
-    int fNdf;
-    std::vector<double> fM;
-    TLorentzVector fInit;
-    double fMass;
+    int fNdf;   // Number of degrees of freedom
+    std::vector<double> fM; // Vector of particle masses
+    TLorentzVector fInit;   // 4-vector used for constraint
+    double fMass;   // Mass used for constraint
 
+    // Constraints, true if constraint is set, only one at a time
     bool fMassConstraint, fMMConstraint, fMassVtxConstraint, fVtxConstraint, f3Constraint, f4Constraint, fMomConstraint;
+
+    int fNumIterations; //Maximum number of iterations
+    // Convergence criteria: difference in chi2, constraint equation d, difference in track parameters between iterations
+    double fConvergenceCriterionChi2, fConvergenceCriterionD, fConvergenceCriterionAlpha;
+
     int fVerbose;
 
-    double fLearningRate;
-    int fNumIterations;
-    double fConvergenceCriterionChi2, fConvergenceCriterionD, fConvergenceCriterionAlpha;
+    TMatrixD calcMissingMom(const TMatrixD &m_iter);
+
 
 public:
     KinFitter(const std::vector<KFitParticle> &cands);
     ~KinFitter(){};
-
-    TMatrixD calcMissingMom(const TMatrixD &m_iter);
 
     TMatrixD f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter);
     TMatrixD Feta_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
@@ -97,7 +106,6 @@ public:
     void addMMConstraint(double mm, TLorentzVector init);
     void addMassVtxConstraint(double mass);
 
-    void setLearningRate(double val) { fLearningRate = val; }
     void setNumberOfIterations(int val) { fNumIterations = val; }
     void setConvergenceCriteria(double val1, double val2, double val3);
     void setCovariance(TMatrixD &val) { V = val; }
