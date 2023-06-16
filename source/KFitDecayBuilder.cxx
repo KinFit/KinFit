@@ -1,6 +1,6 @@
 #include "KFitDecayBuilder.h"
 
-KFitDecayBuilder::KFitDecayBuilder(TString &task, std::vector<int> &pids, TLorentzVector lv, KFitParticle mother, double mass) : fTask(task),
+KFitDecayBuilder::KFitDecayBuilder(TString task, std::vector<int> pids, TLorentzVector lv, KFitParticle mother, double mass) : fTask(task),
                                                                                                                             fPids(pids),
                                                                                                                             fVerbose(0)
 
@@ -152,12 +152,15 @@ Bool_t KFitDecayBuilder::doFit()
     KinFitter Fitter(fFitCands);
     if (fTask == "4C") Fitter.add4Constraint(fIniSys);
     else if (fTask == "Vertex") Fitter.addVertexConstraint();
+    else if (fTask == "MassVtx") Fitter.addMassVtxConstraint(fMass);
+    else if (fTask == "MM") Fitter.addMMConstraint(fMass, fIniSys);
+    else if (fTask == "Mom") Fitter.addMomConstraint(fIniSys, fMass);
     else if (fTask == "Mass"){
         Fitter.addMassConstraint(fMass);
         /*
         cout << "constraint added, Mass = " << fMass << endl;
         cout << "proton momentum = " << fFitCands[0].getMomentum() << endl;
-        cout << "pion momentum = " << fFitCands[1].getMomentum() << endl;*/
+        cout << "pion momentum = " << fFitCands[1].getMomentum() << endl;
         TMatrixD cov_p = fFitCands[0].getCovariance();
         TMatrixD cov_pi = fFitCands[1].getCovariance();
         /*

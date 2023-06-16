@@ -76,7 +76,7 @@ public:
      * @param mother optional, if mother particle is needed for fit
      * @param mm optional, mass or missing mass of particle if needed for fit
     */
-    KFitDecayBuilder(TString &task, std::vector<int> &pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), double mass = -1.);
+    KFitDecayBuilder(TString task, std::vector<int> pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), double mass = -1.);
     
     /** @brief Default deconstructor */
     ~KFitDecayBuilder(){};

@@ -85,7 +85,7 @@ public:
      * @param lv optinal, if 4-vector input is needed for fit
      * @param mother optional, if mother particle is needed for fit
     */
-    void doFitterTask(TString task, std::vector<int> pids, double mm=-1, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle());
+    void doFitterTask(TString task, std::vector<int> pids, double mm=-1., TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle());
     //void addFitterTask(TString task, std::vector<int> primPids, std::vector<int> decayPids); // Jenny, for 3C fit
     //void addBuilderTask(TString task, std::vector<int> pids, TLorentzVector lv);
 
