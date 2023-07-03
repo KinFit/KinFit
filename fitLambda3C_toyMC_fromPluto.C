@@ -15,9 +15,9 @@
 #include <map>
 #include <vector>
 
-#include "/home/jana/KinFit/include/KinFitter.h"
-#include "/home/jana/KinFit/include/KFitVertexFinder.h"
-#include "/home/jana/KinFit/include/KFitNeutralCandFinder.h"
+#include "/home/jana/KinFit_official/KinFit/include/KinFitter.h"
+#include "/home/jana/KinFit_official/KinFit/include/KFitVertexFinder.h"
+#include "/home/jana/KinFit_official/KinFit/include/KFitDecayCandFinder.h"
 
 using namespace std;
 
@@ -56,12 +56,21 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     hvertex2xyzres->SetYTitle(" Vy_{gen}-Vy_{reco} ");
     hvertex2xyzres->SetYTitle(" Vz_{gen}-Vz_{reco} ");
 
-    TH2F* hvertexPrim = new TH2F("hvertexPrim", "Primary Vertex Position", 100, -5, 5, 100, -2, 2);
-    hvertexPrim->SetXTitle(" Z ");
-    hvertexPrim->SetYTitle(" X ");
-    TH2F* hvertexDec = new TH2F("hvertexDec", "Decay Vertex Position", 100, -5, 100, 100, -5, 5);
-    hvertexDec->SetXTitle(" Z ");
-    hvertexDec->SetYTitle(" X ");
+    TH2F* hvertexPrim = new TH2F("hvertexPrim", "", 100, -5, 5, 100, -2, 2);
+    hvertexPrim->SetXTitle(" Z [cm] ");
+    hvertexPrim->SetYTitle(" X [cm] ");
+    TH2F* hvertexDec = new TH2F("hvertexDec", "", 100, -5, 100, 100, -50, 50);
+    hvertexDec->SetXTitle(" Z [cm] ");
+    hvertexDec->SetYTitle(" X [cm] ");
+
+    TH2F* hvertexPrim_R = new TH2F("hvertexPrim_R", "", 100, -5, 5, 100, -2, 2);
+    hvertexPrim_R->SetXTitle(" Z ");
+    hvertexPrim_R->SetYTitle(" R ");
+    TH2F* hvertexDec_R = new TH2F("hvertexDec_R", "", 100, -5, 100, 100, -50, 50);
+    hvertexDec_R->SetXTitle(" Z ");
+    hvertexDec_R->SetYTitle(" R ");
+
+    TH2F *hLambdaMassvsProb = new TH2F("hLambdaMassvsProb", "", 100, 1.09, 1.13, 100, 0, 1);
 
     
     TH1F* hLambdaMassPreFit = new TH1F("hLambdaMassPreFit", "", 100, 1.070, 1.250);
@@ -76,13 +85,13 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     TH1F* hLambdaPhiPreFit = new TH1F("hLambdaPhiPreFit", "", 100, -3.2, 3.2);
     hLambdaPhiPreFit->SetXTitle(" #varphi_{#Lambda} [rad]");
     hLambdaPhiPreFit->SetYTitle(" events ");
-    TH1F* hLambdaMomentumPreFitRes = new TH1F("hLambdaMomentumPreFitRes", "", 100, -0.5, 0.5);
-    hLambdaMomentumPreFitRes->SetXTitle(" p_{gen}-p_{reco}(#Lambda) [GeV/c]");
+    TH1F* hLambdaMomentumPreFitRes = new TH1F("hLambdaMomentumPreFitRes", "", 200, -0.3, 0.3);
+    hLambdaMomentumPreFitRes->SetXTitle(" (1/p_{gen}-1/p_{reco})/(1/p_{gen}) (#Lambda) ");
     hLambdaMomentumPreFitRes->SetYTitle(" events ");
-    TH1F* hLambdaThetaPreFitRes = new TH1F("hLambdaThetaPreFitRes", "", 100, -3.5, 3.5);
+    TH1F* hLambdaThetaPreFitRes = new TH1F("hLambdaThetaPreFitRes", "", 200, -0.06, 0.06);
     hLambdaThetaPreFitRes->SetXTitle(" #vartheta_{gen}-#vartheta_{reco}(#Lambda) [rad]");
     hLambdaThetaPreFitRes->SetYTitle(" events ");
-    TH1F* hLambdaPhiPreFitRes = new TH1F("hLambdaPhiPreFitRes", "", 100, -6.5, 6.5);
+    TH1F* hLambdaPhiPreFitRes = new TH1F("hLambdaPhiPreFitRes", "", 200, -0.06, 0.06);
     hLambdaPhiPreFitRes->SetXTitle(" #varphi_{gen}-#varphi_{reco}(#Lambda) [rad]");
     hLambdaPhiPreFitRes->SetYTitle(" events ");
 
@@ -119,28 +128,33 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     TH1F* hLambdaPhiPostFit = new TH1F("hLambdaPhiPostFit", "", 100, -3.2, 3.2);
     hLambdaPhiPostFit->SetXTitle(" #varphi_{#Lambda} [rad]");
     hLambdaPhiPostFit->SetYTitle(" events ");
-    TH1F* hLambdaMomPostFitRes = new TH1F("hLambdaMomPostFitRes", "", 100, -0.5, 0.5);
-    hLambdaMomPostFitRes->SetXTitle(" p_{gen}-p_{reco}(#Lambda) [GeV/c]");
+    TH1F* hLambdaMomPostFitRes = new TH1F("hLambdaMomPostFitRes", "", 200, -0.3, 0.3);
+    hLambdaMomPostFitRes->SetXTitle(" (1/p_{gen}-1/p_{reco})/(1/p_{gen}) (#Lambda)");
     hLambdaMomPostFitRes->SetYTitle(" events ");
-    TH1F* hLambdaThetaPostFitRes = new TH1F("hLambdaThetaPostFitRes", "", 100, -3.05, 3.05);
+    TH1F* hLambdaThetaPostFitRes = new TH1F("hLambdaThetaPostFitRes", "", 200, -0.06, 0.06);
     hLambdaThetaPostFitRes->SetXTitle(" #vartheta_{gen}-#vartheta_{reco}(#Lambda) [rad]");
     hLambdaThetaPostFitRes->SetYTitle(" events ");
-    TH1F* hLambdaPhiPostFitRes = new TH1F("hLambdaPhiPostFitRes", "", 100, -6.05, 6.05);
+    TH1F* hLambdaPhiPostFitRes = new TH1F("hLambdaPhiPostFitRes", "", 200, -0.06, 0.06);
     hLambdaPhiPostFitRes->SetXTitle(" #varphi_{gen}-#varphi_{reco}(#Lambda) [rad]");
     hLambdaPhiPostFitRes->SetYTitle(" events ");
 
     TH1F* hPull = new TH1F("hPull", "", 100, -5, 5);
-    hPull->SetXTitle("Pull(1/P_{p})");
+    hPull->SetXTitle("Pull(1/P_{p2})");
     hPull->SetYTitle(" counts ");
     TH1F *hPull_probCut = (TH1F*)hPull->Clone("hPull_probCut");
     hPull_probCut -> SetLineColor(kGreen);
     TH1F *hPull_converged = (TH1F*)hPull->Clone("hPull_converged");
     hPull_converged -> SetLineColor(kBlue);
     TH1F *hPull_tht = (TH1F*)hPull->Clone("hPull_tht");
+    hPull_tht->SetXTitle("Pull(#theta_{p2})");
     TH1F *hPull_phi = (TH1F*)hPull->Clone("hPull_phi");
+    hPull_phi->SetXTitle("Pull(#phi_{p2})");
     TH1F *hPull_p_pi = (TH1F*)hPull->Clone("hPull_p_pi");
+    hPull_p_pi->SetXTitle("Pull(1/P_{#pi^{-}})");
     TH1F *hPull_tht_pi = (TH1F*)hPull->Clone("hPull_tht_pi");
+    hPull_tht_pi->SetXTitle("Pull(#theta_{#pi^{-}})");
     TH1F *hPull_phi_pi = (TH1F*)hPull->Clone("hPull_phi_pi");
+    hPull_phi_pi->SetXTitle("Pull(#phi_{#pi^{-}})");
 
 
     TH1F* hNIterations = new TH1F("hNIterations", "", 20, 0, 20);
@@ -260,14 +274,14 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
 
         TLorentzVector lambda_gen = *proton2_gen + *pion_gen;
 
-        KFitParticle proton1_fit(proton1,p1CandRecoR,p1CandRecoZ);
+        KFitParticle proton1_fit(*proton1,p1CandRecoR,p1CandRecoZ);
         FillData(proton1_fit, proton1_errors);
-        KFitParticle kaon_fit(kaon,KCandRecoR,KCandRecoZ);
+        KFitParticle kaon_fit(*kaon,KCandRecoR,KCandRecoZ);
         FillData(kaon_fit, kaon_errors);
-        KFitParticle proton2_fit(proton2,p2CandRecoR,p2CandRecoZ);
+        KFitParticle proton2_fit(*proton2,p2CandRecoR,p2CandRecoZ);
         //KFitParticle proton2_fit(proton2,trueDecVtxX,trueDecVtxY,trueDecVtxZ);      // Use this for calculating R and Z with KFitParticle functions instead
         FillData(proton2_fit, proton2_errors);
-        KFitParticle pion_fit(pion,piCandRecoR, piCandRecoZ);
+        KFitParticle pion_fit(*pion,piCandRecoR, piCandRecoZ);
         //KFitParticle pion_fit(pion,trueDecVtxX, trueDecVtxY, trueDecVtxZ);          // Use this for calculating R and Z with KFitParticle functions instead 
         FillData(pion_fit, pion_errors);
 
@@ -281,6 +295,8 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
         cands2.clear();
         cands2.push_back(proton2_fit);
         cands2.push_back(pion_fit);
+
+        TLorentzVector lambda_orig = cands2[0] + cands2[1];
 
         KFitVertexFinder vtx1finder(cands1);
         KFitVertexFinder vtx2finder(cands2);
@@ -299,24 +315,32 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
         hvertexPrim->Fill(vtx1.Z(), vtx1.X());
         hvertexDec->Fill(vtx2.Z(), vtx2.X());
 
+        Double_t r1 = sqrt(pow(vtx1.X(),2) + pow(vtx1.Y(),2));
+        if (vtx1.X()<0) r1 = -r1;
+        Double_t r2 = sqrt(pow(vtx2.X(),2) + pow(vtx2.Y(),2));
+        if (vtx2.X()<0) r2 = -r2;
+        hvertexPrim_R->Fill(vtx1.Z(), r1);
+        hvertexDec_R->Fill(vtx2.Z(), r2);
+
         // ---------------------------------------------------------------------------------
         // find the neutral candidate
         // ---------------------------------------------------------------------------------
 
-        KFitNeutralCandFinder lambdafinder(cands2, 1.115683, vtx2, vtx1, 0.26, 0.26, 0.69, 0.26, 0.26, 0.7);
-        //KFitNeutralCandFinder lambdafinder(cands2, 1.115683, vtx2, vtx1, 0.5, 0.5, 1, 0.5, 0.5, 1);
+        //KFitDecayCandFinder lambdafinder(cands2, 1.115683, vtx1, vtx2, 0.26, 0.26, 0.69, 0.26, 0.26, 0.7);
+        //KFitDecayCandFinder lambdafinder(cands2, 1.115683, vtx2, vtx1, 0.42, 0.42, 1, 0.42, 0.42, 1);
+        KFitDecayCandFinder lambdafinder(cands2, 1.115683, vtx1, vtx2, 0.37, 0.37, 1.02, 0.49, 0.49, 1.6);   //From fit to projections of resolution
         lambdafinder.setVerbosity(0);
-        lambdafinder.setNeutralMotherCand();
+        //lambdafinder.calculateNeutralMotherCand();
 
-        KFitParticle lambda_cand = lambdafinder.getNeutralMotherCandidate();
+        KFitParticle lambda_cand = lambdafinder.getDecayCand();
         
-        //hLambdaMassPreFit->Fill((proton2_fit + pion_fit).M());
-        hLambdaMassPreFit->Fill((lambda_cand).M());
+        hLambdaMassPreFit->Fill(lambda_orig.M());
+        //hLambdaMassPreFit->Fill((lambda_cand).M());
         hLambdaMomentumPreFit->Fill(lambda_cand.P());
         hLambdaThetaPreFit->Fill(lambda_cand.Theta());
         hLambdaPhiPreFit->Fill(lambda_cand.Phi());
 
-        hLambdaMomentumPreFitRes->Fill(lambda_cand.P()-lambda_gen.P());
+        hLambdaMomentumPreFitRes->Fill((1/lambda_cand.P()-1/lambda_gen.P())/(1/lambda_gen.P()));
         hLambdaThetaPreFitRes->Fill(lambda_cand.Theta()-lambda_gen.Theta());
         hLambdaPhiPreFitRes->Fill(lambda_cand.Phi()-lambda_gen.Phi());
         
@@ -329,9 +353,10 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
         //fitter.setConvergenceCriteria(0.01, 1e6, 1e6);
         fitter.setNumberOfIterations(20);
         fitter.add3Constraint(lambda_cand);
-        fitter.fit();
-        if(1){
+        if(fitter.fit()){
+            if(fitter.getProb()>0.00){
 
+                //cout<<"Vertex2-Vertex1: "<< vtx2.X()-vtx1.X()<< ", "<<vtx2.Y()-vtx1.Y()<< ", "<<vtx2.Z()-vtx1.Z()<<endl;
             KFitParticle fcand1 = fitter.getDaughter(0); // proton
             KFitParticle fcand2 = fitter.getDaughter(1); // pion
             KFitParticle lambda_fit;
@@ -354,9 +379,11 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
             hLambdaMomPostFit->Fill(lambda_fit.P());
             hLambdaThetaPostFit->Fill(lambda_fit.Theta());
             hLambdaPhiPostFit->Fill(lambda_fit.Phi());
-            hLambdaMomPostFitRes->Fill(lambda_fit.P()-lambda_gen.P());
+            hLambdaMomPostFitRes->Fill((1/lambda_fit.P()-1/lambda_gen.P())/(1/lambda_gen.P()));
             hLambdaThetaPostFitRes->Fill(lambda_fit.Theta()-lambda_gen.Theta());
             hLambdaPhiPostFitRes->Fill(lambda_fit.Phi()-lambda_gen.Phi());
+
+            hLambdaMassvsProb->Fill(lambda_orig.M(), fitter.getProb());
             
             if(fitter.getProb()>0.01){
                 hChi2_probCut->Fill(fitter.getChi2());
@@ -368,21 +395,28 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
             }
 
             hNIterations->Fill(fitter.getIteration());
+            }
 
         }
         
     }
+    outfile->cd();
+    
+
+    
 
     // write histograms to the output file
-    outfile->cd();
 
     hvertex1xyz->Write();
     hvertex2xyz->Write();
     hvertex2xyzres->Write();
     hvertexPrim->Write();
     hvertexDec->Write();
+    hvertexPrim_R->Write();
+    hvertexDec_R->Write();
 
     hLambdaMassPreFit->Write();
+    hLambdaMassvsProb->Write();
     hLambdaMomentumPreFit->Write();
     hLambdaThetaPreFit->Write();
     hLambdaPhiPreFit->Write();

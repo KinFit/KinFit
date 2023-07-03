@@ -5,7 +5,6 @@ const size_t cov_dim = 5;
 // general KinFitter constructor
 KinFitter::KinFitter(const std::vector<KFitParticle> &cands) : fCands(cands),
                                                                fVerbose(0),
-                                                               fLearningRate(1),
                                                                fNumIterations(20)
 {
     // fN is the number of daughters e.g. (L->ppi-) n=2
@@ -68,10 +67,10 @@ void KinFitter::addMassConstraint(double mass)
     fMassConstraint = true;
 }
 
-void KinFitter::addMMConstraint(double mm, TLorentzVector init)
+void KinFitter::addMMConstraint(double mass, TLorentzVector lv)
 {
-    fMass = mm;
-    fInit = init;
+    fMass = mass;
+    fInit = lv;
     if (!fMMConstraint)
         fNdf += 1;
     fMMConstraint = true;
@@ -982,7 +981,6 @@ Bool_t KinFitter::fit()
         std::cout << "" << std::endl;
     }
 
-    double lr = fLearningRate;
     TMatrixD alpha0(fyDim, 1), alpha(fyDim, 1);
     TMatrixD xi0(x), xi(x), neu_xi(x);
     TMatrixD A0(y), V0(V);
@@ -1084,7 +1082,7 @@ Bool_t KinFitter::fit()
             {
                 cout << " calc neuxi" << endl;
             }
-            neu_xi = xi - lr * VDD * DT_xi * VD * r;
+            neu_xi = xi - VDD * DT_xi * VD * r;
         }
         TMatrixD delta_xi = neu_xi - xi;
         if (fVerbose > 1)
@@ -1099,7 +1097,7 @@ Bool_t KinFitter::fit()
         {
             cout << " calc neueta" << endl;
         }
-        neu_alpha = alpha0 - lr * V0 * DT * lambda;
+        neu_alpha = alpha0 - V0 * DT * lambda;
         delta_alpha = alpha0 - neu_alpha;
 
         // Calculate new chi2
@@ -1116,22 +1114,22 @@ Bool_t KinFitter::fit()
 
         // for checking convergence
         fIteration = q;
-        fDNorm = 0;
-        fAlphaNorm = 0;
+        double dNorm = 0;
+        double alphaNorm = 0;
         TMatrixD delta_alpha_it = alpha-neu_alpha;
-        for (int i=0; i<d.GetNrows(); i++) fDNorm += pow(d(i,0),2);
-        fDNorm = sqrt(fDNorm);
-        for (int i=0; i<delta_alpha.GetNrows(); i++) fAlphaNorm  += pow(delta_alpha_it(i,0),2);
+        for (int i=0; i<d.GetNrows(); i++) dNorm += pow(d(i,0),2);
+        dNorm = sqrt(dNorm);
+        for (int i=0; i<delta_alpha.GetNrows(); i++) alphaNorm  += pow(delta_alpha_it(i,0),2);
         if (f3Constraint || fMomConstraint){
-            for (int i=0; i<delta_xi.GetNrows(); i++) fAlphaNorm  += pow(delta_xi(i,0),2);
+            for (int i=0; i<delta_xi.GetNrows(); i++) alphaNorm  += pow(delta_xi(i,0),2);
         }
-        fAlphaNorm = sqrt(fAlphaNorm);
+        alphaNorm = sqrt(alphaNorm);
         if(fVerbose>2){
             cout<<"chi2: "<<fabs(chi2 - chisqrd(0, 0))<<endl;
-            cout<<"delta apha norm: "<<fAlphaNorm<<endl;
-            cout<<"constraints norm: "<<fDNorm<<endl;
+            cout<<"delta apha norm: "<<alphaNorm<<endl;
+            cout<<"constraints norm: "<<dNorm<<endl;
         }
-        if (fabs(chi2 - chisqrd(0, 0)) < fConvergenceCriterionChi2 && fDNorm < fConvergenceCriterionD && fAlphaNorm < fConvergenceCriterionAlpha)
+        if (fabs(chi2 - chisqrd(0, 0)) < fConvergenceCriterionChi2 && dNorm < fConvergenceCriterionD && alphaNorm < fConvergenceCriterionAlpha)
         {
             fConverged = true;
             chi2 = chisqrd(0, 0);
@@ -1181,11 +1179,11 @@ Bool_t KinFitter::fit()
         matrixT.Transpose(matrix);
         TMatrixD invertedMatrix = DT_xi * VD * D_xi;
         invertedMatrix.Invert();
-        V = V0 - lr * V0 * (DT * VD * D - (matrix * invertedMatrix * matrixT)) * V0;
+        V = V0 - V0 * (DT * VD * D - (matrix * invertedMatrix * matrixT)) * V0;
         Vx = invertedMatrix;
     }
     if (fVtxConstraint || f4Constraint || fMassConstraint || fMMConstraint || fMassVtxConstraint)
-        V = V0 - lr * V0 * DT * VD * D * V0;
+        V = V0 - V0 * DT * VD * D * V0;
 
     // -----------------------------------------
     // Pull
@@ -1301,15 +1299,6 @@ void KinFitter::updateMother()
     cov(4, 4) = V(3 + fN * cov_dim, 3 + fN * cov_dim);
     mother.setCovariance(cov);
     // ---------------------------------------------------------------------------
-}
-
-void KinFitter::update()
-{
-    for (int val = 0; val < fN; ++val)
-    {
-        KFitParticle &cand = fCands[val];
-        cand.update();
-    }
 }
 
 
