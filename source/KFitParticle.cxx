@@ -14,7 +14,7 @@ KFitParticle::KFitParticle(TLorentzVector cand, double X, double Y, double Z)
 {
     double deg2rad = TMath::DegToRad();
 
-    // Base and direction vettor of particle cand
+    // Base and direction vettor of particle candidate
     TVector3 base(X, Y, Z);
     TVector3 dir(TMath::Sin(fTheta) * TMath::Cos(fPhi),
                  TMath::Sin(fTheta) * TMath::Sin(fPhi),
@@ -27,7 +27,7 @@ KFitParticle::KFitParticle(TLorentzVector cand, double X, double Y, double Z)
     TVector3 cross = dir.Cross(beam_dir);
     TVector3 diff=base-beam_base;
 
-    fR = abs(diff.Dot(cross)/(cross.Mag()));
+    fR = diff.Dot(cross)/(cross.Mag());
     
     double a = beam_base.Dot(beam_dir);
     double b = beam_dir.Dot(beam_dir);
@@ -40,16 +40,6 @@ KFitParticle::KFitParticle(TLorentzVector cand, double X, double Y, double Z)
     fZ = beam_base.Z() + beam_dir.Z() * u1;
 
     double y = beam_base.Y() + dir.Y() * u1;
-
-    if(y < 0){
-
-        fR = -1 * fR;
-    }
-
-    //HParticleTool::calcSegVector(1, 0, 0, 0, beam_base, beam_dir);
-    //TVector3 POCA = HParticleTool::calculatePointOfClosestApproach(base, dir, beam_base, beam_dir);
-    //fR = base.Y() * TMath::Cos(fPhi) - base.X() * TMath::Sin(fPhi);
-    //fZ = POCA.Z();
 
     fPid = -1;
     fTrackId = -1;

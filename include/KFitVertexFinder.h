@@ -1,7 +1,7 @@
 /**
  * KFitVertexFinder.h
  *
- *@updated 27.04.2023
+ *@updated 03.08.2023
  *@version v1.0.0 
  *
  * Class 
@@ -29,10 +29,12 @@ class KFitVertexFinder
 {
 
 private:
+
+    int fVerbose; // Verbosity level
+
     std::vector<KFitParticle> fCands;
 
-    TVector3 fVertex;
-    int fVerbose;
+    TVector3 fVertex; // Vertex after finding
 
     TMatrixD fM; // Temporal matrix for calculations
 

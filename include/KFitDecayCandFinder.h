@@ -1,7 +1,7 @@
 /**
  * KFitDecayCandFinder.h
  *
- *@updated 26.04.2023
+ *@updated 03.08.2023
  *@version v1.0.0 
  *
  * Class to calculate the decay candidate
