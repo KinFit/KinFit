@@ -1,9 +1,9 @@
 /**
  * KinFitter.h
  *
- * @updated 31.05.2023
+ * @updated 03.08.2023
  * @version v1.0.0
- * 
+ *
  * Main class that performs the kinematic fit
  *
  */
@@ -57,129 +57,142 @@ void Print(T const &matrix)
 class KinFitter : public TObject
 {
 private:
-    TMatrixD y; // Vector of measured variables
-    TMatrixD x;  // Vector of unmeasured variables
-    TMatrixD V;  // Covariance matrix of measured variables
-    TMatrixD Vx;  // Covariance matrix of unmeasured variables
-    TMatrixD fPull;  // Pull value for all measured variables
-    double fChi2;    // Chi2 of fit
-    double fProb;   // Probability of fit
-    bool fConverged;    // True if fit has converged
-    int fIteration; // Iterations needed until convergence
-    int fN;     // Number of input candidates
-    int fyDim;  // Dimension of y
-    std::vector<KFitParticle> fCands;
-    KFitParticle fMother;
-    TLorentzVector fMissDaughter;
+    TMatrixD y;                       // Vector of measured variables
+    TMatrixD x;                       // Vector of unmeasured variables
+    TMatrixD V;                       // Covariance matrix of measured variables
+    TMatrixD Vx;                      // Covariance matrix of unmeasured variables
+    TMatrixD fPull;                   // Pull value for all measured variables
+    double fChi2 = 1e6;               // Chi2 of fit
+    double fProb = 1e6;               // Probability of fit
+    bool fConverged = false;          // True if fit has converged
+    int fIteration = 0;               // Iterations needed until convergence
+    int fN;                           // Number of input candidates
+    int fyDim;                        // Dimension of y
+    std::vector<KFitParticle> fCands; // Vector of input candidates
+    KFitParticle fMother;             // Decaying particle
+    TLorentzVector fMissDaughter;     // Missing decay product
 
-    // data members for constraints
-    int fNdf;   // Number of degrees of freedom
+    // Data members for constraints
+    int fNdf = 0;           // Number of degrees of freedom
     std::vector<double> fM; // Vector of particle masses
     TLorentzVector fInit;   // 4-vector used for constraint
-    double fMass;   // Mass used for constraint
+    double fMass = 99999.9; // Mass used for constraint
 
     // Constraints, true if constraint is set, only one at a time
-    bool fMassConstraint, fMMConstraint, fMassVtxConstraint, fVtxConstraint, f3Constraint, f4Constraint, fMomConstraint;
+    bool fMassConstraint = false;
+    bool fMissingMassConstraint = false;
+    bool fMassVtxConstraint = false;
+    bool fVtxConstraint = false;
+    bool f3Constraint = false;
+    bool f4Constraint = false;
+    bool fMissingParticleConstraint = false;
 
-    int fNumIterations; //Maximum number of iterations
+    int fNumIterations = 20; // Maximum number of iterations
+
     // Convergence criteria: difference in chi2, constraint equation d, difference in track parameters between iterations
-    double fConvergenceCriterionChi2, fConvergenceCriterionD, fConvergenceCriterionAlpha;
+    double fConvergenceCriterionChi2 = 1e-4;
+    double fConvergenceCriterionD = 1e-4;
+    double fConvergenceCriterionAlpha = 1e-4;
 
-    int fVerbose;
+    int fVerbose = 0;
 
     TMatrixD calcMissingMom(const TMatrixD &m_iter);
 
-
 public:
     /** @brief Constructor
-    * @param cands - vector of particles to be fitted
-    */
+     * @param cands - vector of particles to be fitted
+     */
     KinFitter(const std::vector<KFitParticle> &cands);
 
     /** Default Deconstructor **/
     ~KinFitter(){};
 
     /** @brief Evaluation of constraint equations
-    * @param m_iter - measured track parameters
-    * @param xi_iter - unmeasured track parameters    
-    */
+     * @param m_iter - measured track parameters
+     * @param xi_iter - unmeasured track parameters
+     */
     TMatrixD f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter);
 
     /** @brief Evaluation of Jacobian w.r.t. measured track parameters
-    * @param m_iter - measured track parameters
-    * @param xi_iter - unmeasured track parameters    
-    */
+     * @param m_iter - measured track parameters
+     * @param xi_iter - unmeasured track parameters
+     */
     TMatrixD Feta_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
 
     /** @brief Evaluation of Jacobian w.r.t. unmeasured track parameters
-    * @param m_iter - measured track parameters
-    * @param xi_iter - unmeasured track parameters    
-    */
+     * @param m_iter - measured track parameters
+     * @param xi_iter - unmeasured track parameters
+     */
     TMatrixD Fxi_eval(const TMatrixD &miter, const TMatrixD &xi_iter);
 
-
     /** @brief Functions for choice of constraint equation
-    * @param mother - mother particle
-    * @param lv - initial beam-target 4-momentum  
-    * @param mass - mass of particle / missing mass of system (depending on constraint)  
-    */
-    void add3Constraint(KFitParticle mother);
-    void add4Constraint(TLorentzVector lv);
-    void addVertexConstraint();
-    void addMomConstraint(TLorentzVector lv, double mass);
-    void addMassConstraint(double mass);
-    void addMMConstraint(double mass, TLorentzVector lv);
-    void addMassVtxConstraint(double mass);
-
+     * @param mother - mother particle
+     * @param lv - initial beam-target 4-momentum
+     * @param mass - mass of particle / missing mass of system (depending on constraint)
+     */
+    void add3Constraint(KFitParticle mother);                          // 4-momentum constraint in a decay vertex
+    void add4Constraint(TLorentzVector lv);                            // 4-momentum constrint of final state particles to the initial system, lv
+    void addVertexConstraint();                                        // Geometrical vertex constraint
+    void addMissingParticleConstraint(TLorentzVector lv, double mass); // Constraint of the final state particles + one undetected to the initial system, lv, and a missing particle with mass m
+    void addMassConstraint(double mass);                               // Constraining decay products from decaying particle to the mass, m, of the decaying particle
+    void addMissingMassConstraint(TLorentzVector lv, double mass);     // Constrains all final state particles to the initial system, lv, and a missing mass , m
+    void addMassVtxConstraint(double mass);                            // Constrains all particles to a common vertex and a mass, m, of a decaying particle
 
     /** @brief Set maximum number of iterations, default = 20
-    */
+     */
     void setNumberOfIterations(int val) { fNumIterations = val; }
 
     /** @brief Set convergence criteria
      * @param val1 - difference in chi2 of consecutive iterations
      * @param val2 - Norm of all constraint equations
      * @param val2 - Difference in norm of track parameter vector of consecutive iterations
-    */
+     */
     void setConvergenceCriteria(double val1, double val2, double val3);
-    //void setCovariance(TMatrixD &val) { V = val; }
-    //void setMeasurement(TMatrixD &val) { y = val; }
 
+    /** @brief Chi2 of the fit is returned
+     */
     double getChi2() const { return fChi2; }
+
+    /** @brief Probability of the fit is returned
+     */
     double getProb() const { return fProb; }
+
+    /** @brief Pull distributions of the fit parameters are returned
+     * val = 0 + n : 1/p
+     * val = 1 + n : theta
+     */
     double getPull(int val = 0) { return fPull(val, val); }
     int getIteration() const { return fIteration; }
 
     /** @brief Returns true if fit converged within max number of iterations
-    */
+     */
     bool isConverged() const { return fConverged; }
 
-    /** @brief Main fit function, iterative fitting procedure using 
-     * Lagrange multiplyers is applied, covariance and track parameters 
+    /** @brief Main fit function, iterative fitting procedure using
+     * Lagrange multiplyers is applied, covariance and track parameters
      * are updated, pulls are calculated
-    */
+     */
     bool fit();
 
     void setVerbosity(int val) { fVerbose = val; }
 
     /** @brief Fitted particle number val is returned with updated track parameters
-    */
-    KFitParticle getDaughter(int val);
-    /** @brief All fitted particles are returned 
-    */
+     */
+    KFitParticle getDaughter(int val) { return fCands[val]; }
+    /** @brief All fitted particles are returned
+     */
     void getDaughters(std::vector<KFitParticle> &daughters) { daughters = fCands; }
     /** @brief Returns fitted mother particle
-    */
-    KFitParticle getMother();
+     */
+    KFitParticle getMother() { return fMother; }
     /** @brief Returns TLorentzVector fitted missing particle if existing
-    */
-    TLorentzVector getMissingDaughter();
+     */
+    TLorentzVector getMissingDaughter() { return fMissDaughter; }
 
-    //void update();
-
-protected:
+private:
     void updateDaughters();
     void updateMother();
+
     ClassDef(KinFitter, 1)
 };
 

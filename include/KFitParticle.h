@@ -1,7 +1,7 @@
 /**
  * KFitParticle.h
  *
- *@updated 27.04.2023
+ *@updated 03.08.2023
  *@version v1.0.0 
  *
  * Object containing track parameters
@@ -24,13 +24,13 @@ class KFitParticle : public TLorentzVector
 
 private:
     TLorentzVector cand; // TLorentzVector the KFitParticle inherits from
-    double fMomentum; // Momentum [MeV]
+    double fMomentum; // Momentum [MeV/c]
     double fTheta; // Polar angle [rad]
     double fPhi; // Azimuthal angle [rad]
-    double fR; // Closest distance to beamline [cm]
-    double fZ; // Point along beamline where track is closest to it [cm]
+    double fR; // Closest distance to beamline [mm]
+    double fZ; // Point along beamline where track is closest to it [mm]
     int fPid; // PID code for the particle spices
-    int fTrackId; // Track id
+    int fTrackId; // Track id, can be used to differentiate different track types, e.g. reconstructed in different parts of the detector
 
     /** Covariance matrix of the KFitParticle
     * Diagonal entries correspond to the variances 
@@ -50,31 +50,48 @@ private:
     TMatrixD fCov;
 
 public:
-    KFitParticle(TLorentzVector cand, double R, double Z);
-    KFitParticle(TLorentzVector cand, double X, double Y, double Z);
+    /** Default Constructor **/
     KFitParticle(); 
-    ~KFitParticle(){};
-    void setMomentum(double val) { fMomentum = val; }
-    void setThetaRad(double val) { fTheta = val; cand.SetTheta(val);}
-    void setPhiRad(double val) { fPhi = val; cand.SetTheta(val);}
-    void setThetaDeg(double val) { fTheta = val*TMath::DegToRad(); cand.SetTheta(val*TMath::DegToRad()); }
-    void setPhiDeg(double val) { fPhi = val*TMath::DegToRad(); cand.SetTheta(val*TMath::DegToRad()); }
-    void setR(double val) { fR = val; }
-    void setZ(double val) { fZ = val; }
-    void setCovariance(const TMatrixD &cov);
-    void setPid(int val) { fPid = val; }
-    void setTrackId(int val) { fTrackId = val; }
 
-    double getMomentum() const { return fMomentum; }
-    double getThetaRad() const { return fTheta; }
-    double getPhiRad() const { return fPhi; }
-    double getThetaDeg() const { return fTheta*TMath::RadToDeg(); }
-    double getPhiDeg() const { return fPhi*TMath::RadToDeg(); }
-    double getR() const { return fR; }
-    double getZ() const { return fZ; }
-    TMatrixD getCovariance() const { return fCov; }
-    int getPid() const { return fPid; }
-    int getTrackId() const { return fTrackId; }
+    /** @brief Constructor
+    * @param cand - TLorentzVector with theta, phi and momentum set
+    * @param R - Closest distance between particle cand and beam line
+    * @param Z - Point along the beamline where the particle passes closest to it
+    */
+    KFitParticle(TLorentzVector cand, double R, double Z);
+
+    /** @brief Constructor
+    * @param cand - TLorentzVector with theta, phi and momentum set
+    * @param X - Starting X-position of track
+    * @param Y - Starting Y-position of track
+    * @param Z - Starting Z-position of track
+    */
+    KFitParticle(TLorentzVector cand, double X, double Y, double Z);
+    
+    /** Default Destructor **/
+    ~KFitParticle(){};
+
+    void setMomentum(double val) { fMomentum = val; } // Sets the momentum [MeV/c]
+    void setThetaRad(double val) { fTheta = val; cand.SetTheta(val); } // Sets the polar angle [radians]
+    void setPhiRad(double val) { fPhi = val; cand.SetTheta(val); } // Sets the azimuthal angle [radians]
+    void setThetaDeg(double val) { fTheta = val*TMath::DegToRad(); cand.SetTheta(val*TMath::DegToRad()); } // Sets the polar angle [deg]
+    void setPhiDeg(double val) { fPhi = val*TMath::DegToRad(); cand.SetTheta(val*TMath::DegToRad()); } // Sets the azimuthal angle [deg]
+    void setR(double val) { fR = val; } // Sets R [mm]
+    void setZ(double val) { fZ = val; } // Sets Z [mm]
+    void setCovariance(const TMatrixD &cov); // Sets the covariance matrix
+    void setPid(int val) { fPid = val; } // Sets the PID of the particle (user defined)
+    void setTrackId(int val) { fTrackId = val; } // Sets the track id
+
+    double getMomentum() const { return fMomentum; } // Returns the momentum [MeV/c]
+    double getThetaRad() const { return fTheta; } // Returns the polar angle [radians]
+    double getPhiRad() const { return fPhi; } // Returns the azimuthal angle [radians]
+    double getThetaDeg() const { return fTheta*TMath::RadToDeg(); } // Returns the polar angle [deg]
+    double getPhiDeg() const { return fPhi*TMath::RadToDeg(); } // Returns the azimuthal angle [deg]
+    double getR() const { return fR; } // Returns R [mm]
+    double getZ() const { return fZ; } // Returns Z [mm]
+    TMatrixD getCovariance() const { return fCov; } // Returns the covariance matrix
+    int getPid() const { return fPid; } // Returns the PID of the particle (user defined)
+    int getTrackId() const { return fTrackId; } // Returns the track id
 };
 
 #endif /* KFITPARTICLE_H */

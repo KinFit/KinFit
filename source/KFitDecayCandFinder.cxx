@@ -22,22 +22,6 @@ KFitDecayCandFinder::KFitDecayCandFinder(const std::vector<KFitParticle> &cands,
 
 void KFitDecayCandFinder::calculateDecayCand()
 {
-    //double param_p1, param_p2;
-
-    //KFitParticle cand1 = fCands[0];
-
-    //param_p1 = cand1.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
-
-    //KFitParticle cand2 = fCands[1];
-
-    //param_p2 = cand2.P(); // Not the inverse, this momentum is used for estimating the momentum of the Lambda Candidate
-
-    //double energy_cand1, energy_cand2;
-    //energy_cand1 = std::sqrt(param_p1 * param_p1 + cand1.M() * cand1.M());
-    //energy_cand2 = std::sqrt(param_p2 * param_p2 + cand2.M() * cand2.M());
-    
-    // For one particle
-    //fMomentumBeforeDecay = std::sqrt(energy_cand1 * energy_cand1 + 2 * energy_cand1 * energy_cand2 + energy_cand2 * energy_cand2 - fDecayCandMass * fDecayCandMass);
     
     // For any number of particles
     double fMomentumBeforeDecay = 0;
@@ -50,8 +34,6 @@ void KFitDecayCandFinder::calculateDecayCand()
         cand = fCands[i_cands];
         
         energyCand = std::sqrt(cand.P() * cand.P() + cand.M() * cand.M());
-        
-        //fMomentumBeforeDecay += cand.P();
 
         totalEnergy = totalEnergy + energyCand;
 
@@ -75,11 +57,7 @@ void KFitDecayCandFinder::calculateDecayCand()
     vtx_geom_base.SetX(vecPrimToDecayVertex.X());
     vtx_geom_base.SetY(vecPrimToDecayVertex.Y());
     vtx_geom_base.SetZ(vecPrimToDecayVertex.Z());
-/*
-    vtx_geom_dir.SetX(std::sin(TMath::RadToDeg() * vecPrimToDecayVertex.Theta()) * std::cos(TMath::RadToDeg() * vecPrimToDecayVertex.Phi()));
-    vtx_geom_dir.SetY(std::sin(TMath::RadToDeg() * vecPrimToDecayVertex.Theta()) * std::sin(TMath::RadToDeg() * vecPrimToDecayVertex.Phi()));
-    vtx_geom_dir.SetZ(std::cos(TMath::RadToDeg() * vecPrimToDecayVertex.Theta()));
-*/
+
     vtx_geom_dir.SetX(std::sin(vecPrimToDecayVertex.Theta()) * std::cos(vecPrimToDecayVertex.Phi()));
     vtx_geom_dir.SetY(std::sin(vecPrimToDecayVertex.Theta()) * std::sin(vecPrimToDecayVertex.Phi()));
     vtx_geom_dir.SetZ(std::cos(vecPrimToDecayVertex.Theta()));
@@ -121,16 +99,6 @@ void KFitDecayCandFinder::calculateDecayCand()
     fDecayCand.setR(valR);
     fDecayCand.setZ(valZ);
 
-    /*double Px = (fMomentumBeforeDecay *
-                   std::sin(thetaPrimaryToSecondaryVertex) *
-                   std::cos(phiPrimaryToSecondaryVertex));
-    double Py = (fMomentumBeforeDecay *
-                   std::sin(thetaPrimaryToSecondaryVertex) *
-                   std::sin(phiPrimaryToSecondaryVertex));
-    double Pz =
-        (fMomentumBeforeDecay * std::cos(thetaPrimaryToSecondaryVertex));
-    double M = fDecayCandMass;
-    */
     double Px = (fMomentumBeforeDecay *
                    std::sin(thetaPrimaryToSecondaryVertex) *
                    std::cos(phiPrimaryToSecondaryVertex));
