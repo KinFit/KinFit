@@ -1,6 +1,6 @@
 #include "KFitDecayBuilder.h"
 
-KFitDecayBuilder::KFitDecayBuilder(TString task, std::vector<int> pids, TLorentzVector lv, KFitParticle mother, double mass) : fTask(task),
+KFitDecayBuilder::KFitDecayBuilder(TString task, std::vector<int> pids, TLorentzVector lv, double mass) : fTask(task),
                                                                                                                             fPids(pids),
                                                                                                                             fVerbose(0)
 
@@ -11,7 +11,6 @@ KFitDecayBuilder::KFitDecayBuilder(TString task, std::vector<int> pids, TLorentz
     }
 
     setIniSys(lv);
-    setMother(mother);
     setMass(mass);
 
 }
@@ -24,11 +23,11 @@ void KFitDecayBuilder::countCombis()
     }
     fCombiCounter = 0;
     // Determine the number of combinations of the input particles
-    fTotalCombos = 1;
+    fTotalCombis = 1;
     if(particleCounter.size()>0) particleCounter.clear();
     for (size_t i = 0; i < fPids.size(); i++)
     {
-        fTotalCombos *= fCands[i].size();
+        fTotalCombis *= fCands[i].size();
         particleCounter.push_back(0);
     }
 
@@ -42,7 +41,7 @@ void KFitDecayBuilder::buildDecay()
     }
     if (fVerbose > 1)
     {
-        std::cout << "Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombos << std::endl;
+        std::cout << "Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombis << std::endl;
         std::cout<< "Task is " << fTask <<std::endl;
     }
 
@@ -50,7 +49,7 @@ void KFitDecayBuilder::buildDecay()
     fBestProb = 0;
     fBestChi2 = 1e6;
 
-    while (fCombiCounter < (fTotalCombos ))
+    while (fCombiCounter < (fTotalCombis ))
     {
         cout << "fill fit cands" << endl;
         // Take one combination of particles
@@ -74,7 +73,7 @@ void KFitDecayBuilder::buildDecay()
 
         if (fVerbose > 1)
         {
-            std::cout << "Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombos << std::endl;
+            std::cout << "Combi counter: " << fCombiCounter << " total Combos: " << fTotalCombis << std::endl;
             std::cout << "fit finished" <<std::endl;
         }
         
@@ -83,65 +82,6 @@ void KFitDecayBuilder::buildDecay()
     }
     
 }
-
-/*
-void KFitDecayBuilder::createNeutralCandidate()
-{
-    if (fVerbose > 0)
-    {
-        std::cout << "--------------- KFitDecayBuilder::createNeutralCandidate() -----------------" << std::endl;
-    }
-
-    std::vector<KFitParticle> candsPrim;
-    std::vector<KFitParticle> candsDecay;
-    int tempPid;
-
-    for (int i_pids = 0; i_pids = (int)fPids.size(); i_pids++)
-    {
-
-        tempPid = fPids[i_pids];
-
-        for (int i_cand = 0; i_cand < (int)fCands[i_pids].size(); i_cand++)
-        {
-
-            std::vector<int>::iterator it_prim = std::find(fPidsPrim.begin(), fPidsPrim.end(), tempPid);
-
-            if (it_prim != fPidsPrim.end())
-            {
-                candsPrim.push_back(fCands[i_pids][i_cand]);
-            }
-
-            std::vector<int>::iterator it_decay = std::find(fPidsDecay.begin(), fPidsDecay.end(), tempPid);
-
-            if (it_decay != fPidsDecay.end())
-            {
-                candsDecay.push_back(fCands[i_pids][i_cand]);
-            }
-        }
-    }
-
-    TVector3 primVertex;
-    TVector3 decayVertex;
-
-    // Find first vertex from all particle combinations if user set PIDs
-
-    KFitVertexFinder *vtxFinderPrim = new KFitVertexFinder();
-    primVertex = vtxFinderPrim->findVertex(candsPrim);
-
-    // Find second vertex from all particle combinations of user set PIDs
-
-    KFitVertexFinder *vtxFinderSec = new KFitVertexFinder();
-    decayVertex = vtxFinderSec->findVertex(candsDecay);
-
-    KFitNeutralCandFinder candFinder(candsDecay);
-    candFinder.setNeutralMotherCand(primVertex, decayVertex);
-
-    fFitCands = candsDecay;
-    fMother = candFinder.getNeutralMotherCandidate();
-
-    do3cFit();
-}
-*/
 
 Bool_t KFitDecayBuilder::doFit()
 {
@@ -221,8 +161,8 @@ void KFitDecayBuilder::fillFitCands()
         a--;
         if (a < 0)
         {
-            if (!(fCombiCounter == fTotalCombos-1))
-                cout << "counted wrong: " << fCombiCounter << " != " << fTotalCombos << endl;
+            if (!(fCombiCounter == fTotalCombis-1))
+                cout << "counted wrong: " << fCombiCounter << " != " << fTotalCombis << endl;
             break;
 
             a = 1e6;
@@ -233,7 +173,7 @@ void KFitDecayBuilder::fillFitCands()
     fCombiCounter++;
     
 
-    if (doubleParticle && (fCombiCounter < fTotalCombos))
+    if (doubleParticle && (fCombiCounter < fTotalCombis))
         fillFitCands(); // If some particle has been filled more than once into fFitCands, repeat the procedure with the next combination
 }
 

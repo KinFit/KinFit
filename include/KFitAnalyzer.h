@@ -1,7 +1,7 @@
 /**
- * KFitRootAnalyzer.h
+ * KFitAnalyzer.h
  *
- * @updated 01.06.2023
+ * @updated 01.08.2023
  * @version v1.0.0
  * 
  * "User interface" class to automatically analyze and fit root file 
@@ -29,7 +29,7 @@
 using std::cout;
 using std::endl;
 
-class KFitRootAnalyzer
+class KFitAnalyzer
 {
 private:
     std::vector< std::vector<KFitParticle> > fCandsFit; // Vector of vector of particle candidates for each PID
@@ -64,10 +64,10 @@ public:
      * @param outFileName Hull file name of ouput root-file
      * @param nEvents Number of events to be analyzed
     */
-    KFitRootAnalyzer(TString inFileName, TString outFileName, int nEvents=-1);
+    KFitAnalyzer(TString inFileName, TString outFileName, int nEvents=-1);
 
     /** @brief Default deconstructor */
-    ~KFitRootAnalyzer(){};
+    ~KFitAnalyzer(){};
     
     void setVerbosity(int val){ fVerbose = val; }
 
@@ -81,11 +81,10 @@ public:
      *          fills output tree with fit result
      * @param task String defining the task to be performed. Possibilities: 4C, Vertex, Mass
      * @param pids Vector of PIDs of all particles included in fit
-     * @param mm optional, mass or missing mass of particle if needed for fit
+     * @param mass optional, mass or missing mass of particle if needed for fit
      * @param lv optinal, if 4-vector input is needed for fit
-     * @param mother optional, if mother particle is needed for fit
     */
-    void doFitterTask(TString task, std::vector<int> pids, double mm=-1., TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle());
+    void doFitterTask(TString task, std::vector<int> pids, double mass=-1., TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle());
     //void addFitterTask(TString task, std::vector<int> primPids, std::vector<int> decayPids); // Jenny, for 3C fit
     //void addBuilderTask(TString task, std::vector<int> pids, TLorentzVector lv);
 

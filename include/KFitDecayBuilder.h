@@ -1,7 +1,7 @@
 /**
- * KFitRootAnalyzer.h
+ * KFitDecayBuilder.h
  *
- * @updated 02.06.2023
+ * @updated 01.08.2023
  * @version v1.0.0
  * 
  * Class responsible for doing the combinatorics for each event in the automated
@@ -49,7 +49,7 @@ private:
     double fMass;   // Mass as input to fit
 
     // For combinatorics
-    int fTotalCombos;   // Total number of combinations for event
+    int fTotalCombis;   // Total number of combinations for event
     int fCombiCounter;  // Number of combination that is evaluated 
     std::vector<int> particleCounter;   // Vector, each entry is a counter for respective PID of PID vector
     bool doubleParticle;    // True if same particle was used twice in same combination
@@ -73,10 +73,9 @@ public:
      * @param task String defining the task to be performed. Possibilities: 4C, Vertex, Mass
      * @param pids Vector of PIDs of all particles included in fit
      * @param lv optinal, if 4-vector input is needed for fit
-     * @param mother optional, if mother particle is needed for fit
-     * @param mm optional, mass or missing mass of particle if needed for fit
+     * @param mass optional, mass or missing mass of particle if needed for fit
     */
-    KFitDecayBuilder(TString task, std::vector<int> pids, TLorentzVector lv = TLorentzVector(), KFitParticle mother = KFitParticle(), double mass = -1.);
+    KFitDecayBuilder(TString task, std::vector<int> pids, TLorentzVector lv = TLorentzVector(), double mass = -1.);
     
     /** @brief Default deconstructor */
     ~KFitDecayBuilder(){};
@@ -89,8 +88,19 @@ public:
     */
     void setInputCands(std::vector<std::vector<KFitParticle>> cands) {fCands = cands; }
 
+    /** @brief Set beam + target 4-momentum
+     * @param fIniSys beam + target 4-momentum
+    */
     void setIniSys(TLorentzVector val) { fIniSys = val; }
+
+    /** @brief Set mother particle
+     * @param fMother mother KFitParticle
+    */
     void setMother(KFitParticle val) { fMother = val; }
+
+    /** @brief Set input mass
+     * @param fMass mass
+    */
     void setMass(double val) { fMass = val; }
 
     /** @brief Count number of combination of particles in event */

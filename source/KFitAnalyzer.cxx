@@ -47,7 +47,7 @@ void KFitRootAnalyzer::selectCandidates()
     } // end of PIDs loop
 }
 
-void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, double mm, TLorentzVector lv, KFitParticle mother)
+void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, double mass, TLorentzVector lv, KFitParticle mother)
 {
     if (fVerbose > 0)
     {
@@ -83,7 +83,7 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, double 
         std::cout<<"EntEvents to be analyzed: "<<entries<<std::endl;
     }
     
-    KFitDecayBuilder builder(task, fPids, lv, mother, mm);
+    KFitDecayBuilder builder(task, fPids, lv, mass);
     builder.setVerbosity(fVerbose);
 
     // start of the event loop
