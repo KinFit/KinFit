@@ -153,8 +153,8 @@ Bool_t KFitDecayBuilder::doFit()
     if (fTask == "4C") Fitter.add4Constraint(fIniSys);
     else if (fTask == "Vertex") Fitter.addVertexConstraint();
     else if (fTask == "MassVtx") Fitter.addMassVtxConstraint(fMass);
-    else if (fTask == "MM") Fitter.addMMConstraint(fMass, fIniSys);
-    else if (fTask == "Mom") Fitter.addMomConstraint(fIniSys, fMass);
+    else if (fTask == "MM" || fTask == "MissingMass" ) Fitter.addMissingMassConstraint(fIniSys, fMass);
+    else if (fTask == "Mom" || fTask == "MissingParticle") Fitter.addMissingParticleConstraint(fIniSys, fMass);
     else if (fTask == "Mass"){
         Fitter.addMassConstraint(fMass);
         /*

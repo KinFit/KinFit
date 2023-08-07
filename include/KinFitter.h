@@ -133,7 +133,7 @@ public:
     void add3Constraint(KFitParticle mother);                          // 4-momentum constraint in a decay vertex
     void add4Constraint(TLorentzVector lv);                            // 4-momentum constrint of final state particles to the initial system, lv
     void addVertexConstraint();                                        // Geometrical vertex constraint
-    void addMissingParticleConstraint(TLorentzVector lv, double mass); // Constraint of the final state particles to the initial system, lv, and a missing particle with mass m
+    void addMissingParticleConstraint(TLorentzVector lv, double mass); // Constraint of the final state particles + one undetected to the initial system, lv, and a missing particle with mass m
     void addMassConstraint(double mass);                               // Constraining decay products from decaying particle to the mass, m, of the decaying particle
     void addMissingMassConstraint(TLorentzVector lv, double mass);     // Constrains all final state particles to the initial system, lv, and a missing mass , m
     void addMassVtxConstraint(double mass);                            // Constrains all particles to a common vertex and a mass, m, of a decaying particle
