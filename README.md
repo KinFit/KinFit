@@ -1,6 +1,8 @@
-KinFit: A library for few-GeV hadronic and leptonic decays
+# KinFit: A Kinematic Refit Package for Hadron Physics Experiments
 
-Installation:
+**For a more detailed user's guide and description of the package see**
+
+## Installation:
 
 1) Clone the repository
     git clone https://github.com/KinFit/KinFit.git
@@ -21,7 +23,7 @@ target_link_libraries(your_executable other_dependencies KinFit::KinFit ROOT::Co
 
 
 
-Direkt use of the fitter tools in your own analysis:   
+## Direkt use of the fitter tools in your own analysis:   
 
 1) Create KFitParticles from your particle candidates   
     KFitParticle particle(TLorentzVector lv, Double_t R, Double_t Z);   
@@ -43,7 +45,7 @@ The procedure is illustrated in the example macro fit_toyMC.C in QA. An example 
 
 
 
-Automated analysis:   
+## Automated analysis:   
 
 The KFitAnalyzer can be used to automatically analyze a root file event by event, performing the selected fit. The best particle combination for each event according to fit probability is written to an output file.   
 
@@ -51,13 +53,11 @@ Input: A root file containing a TClonesArray of KFitParticles. Example: QA/test_
 
 Output: A root file containing a TClonesArray of KFitParticles, fit probability and chi2   
 
-Usage:   
+### Usage:   
 1) User uses the macro analysis_user.C to define input and output and the fit that should be performed.   
 
 2) KFitAnalyzer object is created. User adds fitting tasks to it, defines PIDs of particles to be fitted.    
 
 3) KFitAnalyzer creates the output tree. The particle combination with the best probability is written there for each event.   
 
-
-For a more detailed user's guide and description of the package see
 
