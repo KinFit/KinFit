@@ -19,6 +19,8 @@
 #include "/home/jana/KinFit_official/KinFit/include/KFitVertexFinder.h"
 #include "/home/jana/KinFit_official/KinFit/include/KFitDecayCandFinder.h"
 
+#include "plotsStyleMacro.C"
+
 using namespace std;
 
 void FillData(KFitParticle& outcand, double arr[])
@@ -57,11 +59,11 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     hvertex2xyzres->SetYTitle(" Vz_{gen}-Vz_{reco} ");
 
     TH2F* hvertexPrim = new TH2F("hvertexPrim", "", 100, -5, 5, 100, -2, 2);
-    hvertexPrim->SetXTitle(" Z [cm] ");
-    hvertexPrim->SetYTitle(" X [cm] ");
+    hvertexPrim->SetXTitle(" Z [mm] ");
+    hvertexPrim->SetYTitle(" X [mm] ");
     TH2F* hvertexDec = new TH2F("hvertexDec", "", 100, -5, 100, 100, -50, 50);
-    hvertexDec->SetXTitle(" Z [cm] ");
-    hvertexDec->SetYTitle(" X [cm] ");
+    hvertexDec->SetXTitle(" Z [mm] ");
+    hvertexDec->SetYTitle(" X [mm] ");
 
     TH2F* hvertexPrim_R = new TH2F("hvertexPrim_R", "", 100, -5, 5, 100, -2, 2);
     hvertexPrim_R->SetXTitle(" Z ");
@@ -274,14 +276,14 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
 
         TLorentzVector lambda_gen = *proton2_gen + *pion_gen;
 
-        KFitParticle proton1_fit(*proton1,p1CandRecoR,p1CandRecoZ);
+        KFitParticle proton1_fit(proton1,p1CandRecoR,p1CandRecoZ);
         FillData(proton1_fit, proton1_errors);
-        KFitParticle kaon_fit(*kaon,KCandRecoR,KCandRecoZ);
+        KFitParticle kaon_fit(kaon,KCandRecoR,KCandRecoZ);
         FillData(kaon_fit, kaon_errors);
-        KFitParticle proton2_fit(*proton2,p2CandRecoR,p2CandRecoZ);
+        KFitParticle proton2_fit(proton2,p2CandRecoR,p2CandRecoZ);
         //KFitParticle proton2_fit(proton2,trueDecVtxX,trueDecVtxY,trueDecVtxZ);      // Use this for calculating R and Z with KFitParticle functions instead
         FillData(proton2_fit, proton2_errors);
-        KFitParticle pion_fit(*pion,piCandRecoR, piCandRecoZ);
+        KFitParticle pion_fit(pion,piCandRecoR, piCandRecoZ);
         //KFitParticle pion_fit(pion,trueDecVtxX, trueDecVtxY, trueDecVtxZ);          // Use this for calculating R and Z with KFitParticle functions instead 
         FillData(pion_fit, pion_errors);
 
@@ -333,7 +335,7 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
         //lambdafinder.calculateNeutralMotherCand();
 
         KFitParticle lambda_cand = lambdafinder.getDecayCand();
-        
+
         hLambdaMassPreFit->Fill(lambda_orig.M());
         //hLambdaMassPreFit->Fill((lambda_cand).M());
         hLambdaMomentumPreFit->Fill(lambda_cand.P());
@@ -402,7 +404,21 @@ Int_t fitLambda3C_toyMC_fromPluto(TString infile, Int_t nEvents)
     }
     outfile->cd();
     
-
+    //Outut plots
+    plotsStyleMacro(hvertexPrim, "prim_vtx");
+    plotsStyleMacro(hvertexDec, "sec_vtx");
+    plotsStyleMacro(hPChi2, "prob_3C");
+    plotsStyleMacro(hLambdaMomentumPreFitRes, hLambdaMomPostFitRes, "mom_res", "before KinFit", "after KinFit");
+    plotsStyleMacro(hLambdaThetaPreFitRes, hLambdaThetaPostFitRes, "tht_res", "before KinFit", "after KinFit");
+    plotsStyleMacro(hLambdaPhiPreFitRes, hLambdaPhiPostFitRes, "phi_res", "before KinFit", "after KinFit");
+    plotsStyleMacro3(hLambdaMomentumPreFitRes, hLambdaThetaPreFitRes, hLambdaPhiPreFitRes, hLambdaMomPostFitRes, hLambdaThetaPostFitRes, hLambdaPhiPostFitRes, "res", "before KinFit", "after KinFit");
+    plotsStyleMacro_andFit(hPull_p_pi, "pull_pi_p");
+    plotsStyleMacro_andFit(hPull_tht_pi, "pull_pi_tht");
+    plotsStyleMacro_andFit(hPull_phi_pi, "pull_pi_phi");
+    plotsStyleMacro_andFit3(hPull_p_pi, hPull_tht_pi, hPull_phi_pi, "pull_pi");
+    plotsStyleMacro_andFit(hPull, "pull_p_p");
+    plotsStyleMacro_andFit(hPull_tht, "pull_p_tht");
+    plotsStyleMacro_andFit(hPull_phi, "pull_p_phi");
     
 
     // write histograms to the output file
