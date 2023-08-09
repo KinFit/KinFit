@@ -51,21 +51,22 @@ void KFitDecayBuilder::buildDecay()
 
     while (fCombiCounter < (fTotalCombis ))
     {
-        cout << "fill fit cands" << endl;
         // Take one combination of particles
         fillFitCands();
         
         // Check if correct number of particles
         if (fFitCands.size() != fPids.size())
         {
-            cout << "wrong number of particles" << endl;
+            if (fVerbose > 1)
+                std::cout << "wrong number of particles" << std::endl;
             fCombiCounter++;
             continue;
         }
         // Check for double usage of same particle
         if (doubleParticle)
         {
-            cout << "particle used twice" << endl;
+            if (fVerbose > 1)
+                std::cout << "particle used twice" << std::endl;
             continue;
         }
         // Do task that was chosen by user
@@ -148,28 +149,34 @@ void KFitDecayBuilder::fillFitCands()
     for (size_t i = 0; i < fPids.size(); i++)
     {
         checkDoubleParticle(i);
-        cout << "particle counter " << i << " is " << particleCounter[i] << " now" << endl;
+        if (fVerbose > 1)
+            std::cout << "particle counter " << i << " is " << particleCounter[i] << " now" << std::endl;
         fFitCands.push_back(fCands[i][particleCounter[i]]);
-        cout << "fill in pid " << fPids[i] << endl;
+        if (fVerbose > 1)
+            std::cout << "fill in pid " << fPids[i] << std::endl;
     }
     int a = fPids.size() - 1;
-    cout << "particle counter " << a << " is " << particleCounter[a] << " now" << endl;
+    if (fVerbose > 1)
+        std::cout << "particle counter " << a << " is " << particleCounter[a] << " now" << std::endl;
     while (particleCounter[a] == (fCands[a].size() - 1))
     {
         particleCounter[a] = 0;
-        cout << "particle counter " << a << " is " << particleCounter[a] << " now" << endl;
+        if (fVerbose > 1)
+            std::cout << "particle counter " << a << " is " << particleCounter[a] << " now" << std::endl;
         a--;
         if (a < 0)
         {
             if (!(fCombiCounter == fTotalCombis-1))
-                cout << "counted wrong: " << fCombiCounter << " != " << fTotalCombis << endl;
+            if (fVerbose > 1)
+                std::cout << "counted wrong: " << fCombiCounter << " != " << fTotalCombis << std::endl;
             break;
 
             a = 1e6;
         }
     }
     particleCounter[a]++;
-    cout << "particle counter " << a << " is " << particleCounter[a] << " now" << endl;
+    if (fVerbose > 1)
+        std::cout << "particle counter " << a << " is " << particleCounter[a] << " now" << std::endl;
     fCombiCounter++;
     
 
@@ -187,7 +194,8 @@ void KFitDecayBuilder::checkDoubleParticle(size_t i)
     {
         if ((fPids[j] == fPids[i]) && (particleCounter[j] == particleCounter[i]))
         {
-            cout << "double particle" << endl;
+            if (fVerbose > 1)
+                std::cout << "double particle" << std::endl;
             doubleParticle = true;
         }
     }

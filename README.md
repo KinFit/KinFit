@@ -17,11 +17,11 @@ KinFit depends on the ROOT libraries Core, Physics and Tree
 When properly installed, KinFit can be included and linked to other CMake projects by   
    
 find_package(KinFit REQUIRED)   
-target_link_libraries(your_executable other_dependencies KinFit::KinFit ROOT::Core ROOT::Physics ROOT::Tree)
+target_link_libraries(your_executable other_dependencies KinFit::KinFit ROOT::Core ROOT::Physics ROOT::Tree)   
 
 
 
-Direkt use of the fitter tools in your own analysis:
+Direkt use of the fitter tools in your own analysis:   
 
 1) Create KFitParticles from your particle candidates   
     KFitParticle particle(TLorentzVector lv, Double_t R, Double_t Z);   
@@ -34,34 +34,30 @@ Direkt use of the fitter tools in your own analysis:
 3) Initialize the KinFitter and fit   
     KinFitter fitter(cands);   
     fitter.addXXConstraint(arguments);   
-    fitter.fit()
+    fitter.fit()   
 
 4) Get the fit result   
-    KFitParticle fcand = fitter.getDaughter(0);
+    KFitParticle fcand = fitter.getDaughter(0);   
 
-The procedure is illustrated in the example macro fit_toyMC.C.   
-A more advanced example including the construction of a neutral weakly decaying particle is given in the macro fitLambda3C_toyMC_fromPluto.C.
-
+The procedure is illustrated in the example macro fit_toyMC.C in QA. An example input file is provided in QA/test_files/toy_montecarlo_rz_vtx.root.   
 
 
-Automated analysis:
 
-The KFitRootAnalyzer can be used to automatically analyze a root file event by event, performing the selected fit. The best particle combination for each event according to fit probability is written to an output file.
+Automated analysis:   
 
-Input: A root file containing a TClonesArray of KFitParticles
+The KFitAnalyzer can be used to automatically analyze a root file event by event, performing the selected fit. The best particle combination for each event according to fit probability is written to an output file.   
 
-Output: A root file containing a TClonesArray of KFitParticles, fit probability and chi2
+Input: A root file containing a TClonesArray of KFitParticles. Example: QA/test_files/input.root   
 
-Usage:
-1) User uses the macro analysis_user.C to define input and output and the fit that should be performed.
+Output: A root file containing a TClonesArray of KFitParticles, fit probability and chi2   
 
-2) HRootAnalyzer object is created. User adds fitting tasks to it, defines PIDs of particles to be fitted. 
+Usage:   
+1) User uses the macro analysis_user.C to define input and output and the fit that should be performed.   
 
-3) HRootAnalyzer creates the output tree. Event loop in wich particles are selected according to their PID. A DecayBuilder object is created if the minimum of necessary particles for this task is found.
+2) KFitAnalyzer object is created. User adds fitting tasks to it, defines PIDs of particles to be fitted.    
 
-4) Decaybuilder performs combinatorics, creates a Fitter object, adds the constraint and calls the fitter for each combination
+3) KFitAnalyzer creates the output tree. The particle combination with the best probability is written there for each event.   
 
-5) Fitter performes the fit
 
-6) Get the updated particle candidates and write to output tree
+For a more detailed user's guide and description of the package see
 

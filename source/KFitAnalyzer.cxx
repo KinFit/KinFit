@@ -148,13 +148,12 @@ void KFitAnalyzer::doFitterTask(TString task, std::vector<int> pids, double mass
         }
         
     } // end of event loop
-        // start of the event loop
-    if (fVerbose > 1 )
+    
+    if (fVerbose > 0 )
     {
         std::cout<<"Event loop finished!"<<std::endl;
     }
     finish();
-    //cout<<"finished"<<endl;
 }
 
 // Close everything
@@ -165,5 +164,4 @@ void KFitAnalyzer::finish()
     foutFile->Save();
     foutFile->Close();
 
-    //finFile->Close();
 }

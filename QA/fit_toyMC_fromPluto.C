@@ -14,7 +14,7 @@
 #include <map>
 #include <vector>
 
-#include "/home/jana/KinFit/include/KinFitter.h"
+#include "KinFitter.h"
 
 using namespace std;
 
@@ -39,6 +39,8 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
     // -----------------------------------------------------------------------
     // set ouput file
     TFile* outfile = new TFile("testFit_toyMC_fromPluto_vtxfit.root", "recreate");
+
+    // create histograms
     TH1F* h01 = new TH1F("hLambdaMassPreFit", "", 100, 1.070, 1.250);
     h01->SetXTitle(" M_{p#pi^{-}} [GeV/c^{2}]");
     h01->SetYTitle(" events ");
@@ -86,20 +88,7 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
     TH1F *h056 = (TH1F*)h05->Clone("hPull_p_pi");
     TH1F *h057 = (TH1F*)h05->Clone("hPull_tht_pi");
     TH1F *h058 = (TH1F*)h05->Clone("hPull_phi_pi");
-    /*
-    TH1F* h06 = new TH1F("hTotMomPreFit", "", 100, 3800, 4800);
-    h06->SetXTitle(" p [MeV/c]");
-    h06->SetYTitle(" events ");
-    
-    TH1F* h07 = new TH1F("hTotMomPostFit", "", 100, 3800, 4800);
-    h07->SetXTitle(" p [MeV/c]");
-    h07->SetYTitle(" events ");
-    h07 -> SetLineColor(kRed);
-    TH1F *h072 = (TH1F*)h07->Clone("hTotMomPostFit_probCut");
-    h072 -> SetLineColor(kGreen);
-    TH1F *h073 = (TH1F*)h07->Clone("hTotMomPostFit_converged");
-    h073 -> SetLineColor(kBlue);
-    */
+
     TH1F* h08 = new TH1F("hNIterations", "", 20, 0, 20);
     h08->SetXTitle(" Iteration");
     h08->SetYTitle(" events ");
@@ -197,13 +186,13 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
         h01->Fill(lambda.M());
         h012->Fill(lambda.P());
 
-        KFitParticle proton1_fit(proton1,p1CandRecoR,p1CandRecoZ);
+        KFitParticle proton1_fit(*proton1,p1CandRecoR,p1CandRecoZ);
         FillData(proton1_fit, proton1_errors);
-        KFitParticle kaon_fit(kaon,KCandRecoR,KCandRecoZ);
+        KFitParticle kaon_fit(*kaon,KCandRecoR,KCandRecoZ);
         FillData(kaon_fit, kaon_errors);
-        KFitParticle proton2_fit(proton2,p2CandRecoR,p2CandRecoZ);
+        KFitParticle proton2_fit(*proton2,p2CandRecoR,p2CandRecoZ);
         FillData(proton2_fit, proton2_errors);
-        KFitParticle pion_fit(pion,piCandRecoR, piCandRecoZ);
+        KFitParticle pion_fit(*pion,piCandRecoR, piCandRecoZ);
         FillData(pion_fit, pion_errors);
 
         // ---------------------------------------------------------------------------------
@@ -211,21 +200,14 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
         // ---------------------------------------------------------------------------------
         std::vector<KFitParticle> cands;
         cands.clear();
-        cands.push_back(proton1_fit);
-        cands.push_back(kaon_fit);
-        //cands.push_back(proton2_fit);
-        //cands.push_back(pion_fit);
+        cands.push_back(proton2_fit);
+        cands.push_back(pion_fit);
 
         KinFitter fitter(cands);
         fitter.setVerbosity(0);
         fitter.setNumberOfIterations(20);
-        //fitter.setLearningRate(1);
         fitter.setConvergenceCriteria(0.01, 1e5, 1e6);
-        //fitter.addMassConstraint(1.11568);
         fitter.addVertexConstraint();
-        //fitter.addMassVtxConstraint(1.11568);
-        //fitter.add4Constraint(ini);
-        //fitter.addMomConstraint(ini, mp);
         if(fitter.fit()){
 
             KFitParticle fcand1 = fitter.getDaughter(0); // proton
@@ -250,7 +232,6 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
             if(fitter.getProb()>0.01){
                 h022->Fill(fitter.getChi2());
                 h042->Fill(lambda_fit.M());
-               // h072->Fill(all_fit.P());
 
                 // get Pull example (1/P for the fitted proton)
                 h052->Fill(fitter.getPull(0));
@@ -281,12 +262,6 @@ Int_t fit_toyMC_fromPluto(TString infile, Int_t nEvents)
     h056->Write();
     h057->Write();
     h058->Write();
-    /*
-    h06->Write();
-    h07->Write();
-    h072->Write();
-    h073->Write();
-    */
     h08->Write();
     h09->Write();
     h092->Write();

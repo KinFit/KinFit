@@ -1,6 +1,6 @@
 #include "KFitAnalyzer.h"
 
-Int_t analysis_user(TString infileList="~/KinFit_official/KinFit/QA/test_files/input.root", TString outfile = "fitted_test.root", Int_t nEvents=1000){
+Int_t analysis_user(TString infileList="../KinFit/QA/test_files/input.root", TString outfile = "fitted_test.root", Int_t nEvents=1000){
 
     // Initialize Analyzer 
     // Arguments are input file(list), output file name and number of events to analyze
@@ -19,8 +19,8 @@ Int_t analysis_user(TString infileList="~/KinFit_official/KinFit/QA/test_files/i
 
     RootAnalyzer.doFitterTask("4C", pids, -1, ppSystem);
     //RootAnalyzer.doFitterTask("Mass", pids, mLambda);  
-    //RootAnalyzer.doFitterTask("MassVtx", pids, mLambda);  //no candidate found
-    //RootAnalyzer.doFitterTask("MissingMass", pids, mK, ppSystem);  // no candidate found
+    //RootAnalyzer.doFitterTask("MassVtx", pids, mLambda); 
+    //RootAnalyzer.doFitterTask("MissingMass", pids, mK, ppSystem);  
     //RootAnalyzer.doFitterTask("MissingParticle", pids, mK, ppSystem); 
     //RootAnalyzer.doFitterTask("Vertex", pids, -1);  
     
