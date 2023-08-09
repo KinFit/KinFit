@@ -11,6 +11,6 @@
 #pragma link C++ class KFitDecayCandFinder;
 #pragma link C++ class KFitVertexFinder;
 #pragma link C++ class KFitDecayBuilder;
-#pragma link C++ class KFitRootAnalyzer;
+#pragma link C++ class KFitAnalyzer;
 
 #endif

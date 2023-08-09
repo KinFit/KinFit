@@ -54,8 +54,8 @@ private:
     std::vector<int> particleCounter;   // Vector, each entry is a counter for respective PID of PID vector
     bool doubleParticle;    // True if same particle was used twice in same combination
 
-    double fBestProb;   // Probability of best combination
-    double fBestChi2;   // Chi2 of best combination
+    double fBestProb = 0;   // Probability of best combination
+    double fBestChi2 = 1e6;   // Chi2 of best combination
 
     int fVerbose;   // Verbosity 0-1-high
     

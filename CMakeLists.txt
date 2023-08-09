@@ -16,11 +16,11 @@ if(NOT ROOT_FOUND)
 endif(NOT ROOT_FOUND)
 
 set(SRCFILES
-    source/KinFitter.cxx source/KFitParticle.cxx source/KFitRootAnalyzer.cxx
+    source/KinFitter.cxx source/KFitParticle.cxx source/KFitAnalyzer.cxx
     source/KFitDecayBuilder.cxx source/KFitDecayCandFinder.cxx
     source/KFitVertexFinder.cxx source/CoordinateConversion.cxx) # source/hvertextools.cxx)
 set(HFILES
-    include/KinFitter.h include/KFitParticle.h include/KFitRootAnalyzer.h
+    include/KinFitter.h include/KFitParticle.h include/KFitAnalyzer.h
     include/KFitDecayBuilder.h include/KFitDecayCandFinder.h
     include/KFitVertexFinder.h include/CoordinateConversion.h) # include/hvertextools.h)
 

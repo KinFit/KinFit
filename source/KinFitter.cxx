@@ -1176,11 +1176,11 @@ Bool_t KinFitter::fit()
             dNorm += pow(d(i, 0), 2);
         dNorm = sqrt(dNorm);
         for (int i = 0; i < delta_alpha.GetNrows(); i++)
-            alphaNorm += pow(delta_alpha_it(i, 0), 2);
+            alphaNorm += pow((delta_alpha_it(i, 0)/alpha0(i, 0)), 2);
         if (f3Constraint || fMissingParticleConstraint)
         {
             for (int i = 0; i < delta_xi.GetNrows(); i++)
-                alphaNorm += pow(delta_xi(i, 0), 2);
+                alphaNorm += pow((delta_xi(i, 0)/xi0(1, 0)), 2);
         }
         alphaNorm = sqrt(alphaNorm);
         if (fVerbose > 2)

@@ -1,8 +1,8 @@
 #include "KFitDecayBuilder.h"
 
 KFitDecayBuilder::KFitDecayBuilder(TString task, std::vector<int> pids, TLorentzVector lv, double mass) : fTask(task),
-                                                                                                                            fPids(pids),
-                                                                                                                            fVerbose(0)
+                                                                                                            fPids(pids),
+                                                                                                            fVerbose(0)
 
 {
     if (fVerbose > 0)

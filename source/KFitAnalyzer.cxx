@@ -1,11 +1,11 @@
-#include "KFitRootAnalyzer.h"
+#include "KFitAnalyzer.h"
 
-KFitRootAnalyzer::KFitRootAnalyzer(TString inFileName, TString outFileName, int nEvents) : fEvents(nEvents),
+KFitAnalyzer::KFitAnalyzer(TString inFileName, TString outFileName, int nEvents) : fEvents(nEvents),
                                                                                     fVerbose(0)
 {
     if (fVerbose > 0)
     {
-        std::cout << "--------------- KFitRootAnalyzer() -----------------" << std::endl;
+        std::cout << "--------------- KFitAnalyzer() -----------------" << std::endl;
     }
 
     TFile *inFile = new TFile(inFileName, "READ");
@@ -17,11 +17,11 @@ KFitRootAnalyzer::KFitRootAnalyzer(TString inFileName, TString outFileName, int 
 }
 
 // Select and sort particles according to their PID
-void KFitRootAnalyzer::selectCandidates()
+void KFitAnalyzer::selectCandidates()
 {
     if (fVerbose > 0)
     {
-        std::cout << " ----------- KFitRootAnalyzer::selectCandidates() -----------" << std::endl;
+        std::cout << " ----------- KFitAnalyzer::selectCandidates() -----------" << std::endl;
         std::cout << "" << std::endl;
     }
 
@@ -47,11 +47,11 @@ void KFitRootAnalyzer::selectCandidates()
     } // end of PIDs loop
 }
 
-void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, double mass, TLorentzVector lv, KFitParticle mother)
+void KFitAnalyzer::doFitterTask(TString task, std::vector<int> pids, double mass, TLorentzVector lv, KFitParticle mother)
 {
     if (fVerbose > 0)
     {
-        std::cout << " ----------- KFitRootAnalyzer::selectCandidates() -----------" << std::endl;
+        std::cout << " ----------- KFitAnalyzer::selectCandidates() -----------" << std::endl;
         std::cout << "" << std::endl;
         std::cout << "Task added: " << task << std::endl;
         std::cout << "" << std::endl;
@@ -158,7 +158,7 @@ void KFitRootAnalyzer::doFitterTask(TString task, std::vector<int> pids, double 
 }
 
 // Close everything
-void KFitRootAnalyzer::finish()
+void KFitAnalyzer::finish()
 {
     foutFile->cd();
     fTree_out->Write();

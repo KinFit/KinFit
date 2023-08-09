@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef KFITROOTANALYZER_H
-#define KFITROOTANALYZER_H
+#ifndef KFITANALYZER_H
+#define KFITANALYZER_H
 
 #include "KFitParticle.h"
 #include "KFitDecayBuilder.h"
@@ -99,4 +99,4 @@ public:
 
 };
 
-#endif /* KFITROOTANALYZER_H */
+#endif /* KFITANALYZER_H */
