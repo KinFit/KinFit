@@ -1180,7 +1180,7 @@ Bool_t KinFitter::fit()
         if (f3Constraint || fMissingParticleConstraint)
         {
             for (int i = 0; i < delta_xi.GetNrows(); i++)
-                alphaNorm += pow((delta_xi(i, 0)/xi0(1, 0)), 2);
+                alphaNorm += pow((delta_xi(i, 0)/xi0(i, 0)), 2);
         }
         alphaNorm = sqrt(alphaNorm);
         if (fVerbose > 2)
