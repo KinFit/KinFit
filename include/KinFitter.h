@@ -84,6 +84,7 @@ private:
     bool fMassVtxConstraint = false;
     bool fVtxConstraint = false;
     bool f3Constraint = false;
+    bool fPvaConstraint = false;
     bool f4Constraint = false;
     bool fMissingParticleConstraint = false;
 
@@ -131,6 +132,7 @@ public:
      * @param mass - mass of particle / missing mass of system (depending on constraint)
      */
     void add3Constraint(KFitParticle mother);                          // 4-momentum constraint in a decay vertex
+    void addPvaConstraint(KFitParticle mother);                        // 3-momentum constraint in a decay vertex, Vector pointing from primary to secondary vertex has to agree with momentum direction of daughters
     void add4Constraint(TLorentzVector lv);                            // 4-momentum constrint of final state particles to the initial system, lv
     void addVertexConstraint();                                        // Geometrical vertex constraint
     void addMissingParticleConstraint(TLorentzVector lv, double mass); // Constraint of the final state particles + one undetected to the initial system, lv, and a missing particle with mass m

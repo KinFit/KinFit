@@ -28,18 +28,25 @@ void KFitDecayCandFinder::calculateDecayCand()
     double energyCand = 0;
     double totalEnergy = 0;
     KFitParticle cand;
+    TLorentzVector lambda_tmp(0,0,0,0);
     
     for(int i_cands=0; i_cands<fCands.size(); i_cands++){
 
         cand = fCands[i_cands];
         
         energyCand = std::sqrt(cand.P() * cand.P() + cand.M() * cand.M());
+        lambda_tmp = lambda_tmp + cand;
 
         totalEnergy = totalEnergy + energyCand;
 
     }
 
-    fMomentumBeforeDecay = sqrt(totalEnergy * totalEnergy - fDecayCandMass * fDecayCandMass);
+    if (fDecayCandMass>=0) 
+    {
+        fMomentumBeforeDecay = sqrt(totalEnergy * totalEnergy - fDecayCandMass * fDecayCandMass);
+    } else {
+        fMomentumBeforeDecay = lambda_tmp.P();
+    }
 
     TVector3 primaryVertex = fPrimaryVertex;
     TVector3 decayVertex = fDecayVertex;
