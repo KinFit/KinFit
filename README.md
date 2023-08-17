@@ -1,4 +1,4 @@
-# KinFit: A Kinematic Refit Package for Hadron Physics Experiments
+# KinFit: A Kinematic Fitting Package for Hadron Physics Experiments
 
 **For a more detailed user's guide and description of the package see**
 
