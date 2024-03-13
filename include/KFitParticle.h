@@ -29,6 +29,7 @@ private:
     double fPhi; // Azimuthal angle [rad]
     double fR; // Closest distance to beamline [mm]
     double fZ; // Point along beamline where track is closest to it [mm]
+    double fBeta; // Beta
     int fPid; // PID code for the particle spices
     int fTrackId; // Track id, can be used to differentiate different track types, e.g. reconstructed in different parts of the detector
 
@@ -78,6 +79,7 @@ public:
     void setPhiDeg(double val) { fPhi = val*TMath::DegToRad(); cand.SetTheta(val*TMath::DegToRad()); } // Sets the azimuthal angle [deg]
     void setR(double val) { fR = val; } // Sets R [mm]
     void setZ(double val) { fZ = val; } // Sets Z [mm]
+    void setBeta(double val) { fBeta = val; } // Sets Beta
     void setCovariance(const TMatrixD &cov); // Sets the covariance matrix
     void setPid(int val) { fPid = val; } // Sets the PID of the particle (user defined)
     void setTrackId(int val) { fTrackId = val; } // Sets the track id
@@ -89,6 +91,7 @@ public:
     double getPhiDeg() const { return fPhi*TMath::RadToDeg(); } // Returns the azimuthal angle [deg]
     double getR() const { return fR; } // Returns R [mm]
     double getZ() const { return fZ; } // Returns Z [mm]
+    double getBeta() const { return fBeta; } // Returns Beta
     TMatrixD getCovariance() const { return fCov; } // Returns the covariance matrix
     int getPid() const { return fPid; } // Returns the PID of the particle (user defined)
     int getTrackId() const { return fTrackId; } // Returns the track id
