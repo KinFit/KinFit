@@ -1,3 +1,19 @@
+//****************************************************************************
+//*                    This file is part of KinFit.                          *
+//*                                                                          *
+//*            	KinFit is distributed under the terms of the                 *
+//*              GNU General Public License (GPL) version 3,                 *
+//*                 copied verbatim in the file "LICENSE".                   *
+//*                                                                          *
+//*  				           Copyright 2024                                *
+//*		         GSI Helmholtzzentrum für Schwerionenforschung               *
+//* 	      This software is distributed under the terms of the            *
+//*	          GNU General Public Licence version 3 (GPL Version 3)           *
+//*		      			     				                                 *
+//*     The copyright holders are listed in the file "COPYRIGHTHOLDERS".     *
+//*               The authors are listed in the file "AUTHORS".              *
+//****************************************************************************
+
 #include "KFitDecayCandFinder.h"
 
 KFitDecayCandFinder::KFitDecayCandFinder(const std::vector<KFitParticle> &cands, TVector3 primaryVertex, TVector3 decayVertex) : fCands(cands), fVerbose(0), fMomentumBeforeDecay(-1.), fPrimaryVertex(primaryVertex), fDecayVertex(decayVertex), fDecayCandMass(1115.683), fPrimVtxResX(1.78590), fPrimVtxResY(1.75516), fPrimVtxResZ(3.00431), fDecVtxResX(5.75369), fDecVtxResY(5.57198), fDecVtxResZ(10.2602)
