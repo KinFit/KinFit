@@ -12,5 +12,6 @@
 #pragma link C++ class KFitVertexFinder;
 #pragma link C++ class KFitDecayBuilder;
 #pragma link C++ class KFitAnalyzer;
+#pragma link C++ class KFitoordinateConversion;
 
 #endif

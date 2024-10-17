@@ -16,7 +16,8 @@
 
 // ROOT includes
 #include "KFitParticle.h"
-#include "CoordinateConversion.h"
+#include "KFitCoordinateConversion.h"
 
-void CoordTest();
+KFitCoordinateConversion::KFitCoordinateConversion(){
 
+}
