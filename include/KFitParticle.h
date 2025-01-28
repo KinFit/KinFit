@@ -45,6 +45,13 @@ private:
     double fPhi; // Azimuthal angle [rad]
     double fR; // Closest distance to beamline [mm]
     double fZ; // Point along beamline where track is closest to it [mm]
+
+    double fBeta = -9999999999.9;
+    double fChi2 = -9999999999.9;
+    double fTOF = -9999999999.9;
+
+    int fCharge = 0;
+
     int fPid; // PID code for the particle spices
     int fTrackId; // Track id, can be used to differentiate different track types, e.g. reconstructed in different parts of the detector
 
@@ -94,9 +101,13 @@ public:
     void setPhiDeg(double val) { fPhi = val*TMath::DegToRad(); cand.SetTheta(val*TMath::DegToRad()); } // Sets the azimuthal angle [deg]
     void setR(double val) { fR = val; } // Sets R [mm]
     void setZ(double val) { fZ = val; } // Sets Z [mm]
+    void setCharge(double val) { fCharge = val; } // Sets Charge
+    void setBeta(double val) { fBeta = val; } // Sets Beta
+    void setChi2(double val) { fChi2 = val; } // Sets Chi2
     void setCovariance(const TMatrixD &cov); // Sets the covariance matrix
     void setPid(int val) { fPid = val; } // Sets the PID of the particle (user defined)
     void setTrackId(int val) { fTrackId = val; } // Sets the track id
+    void setTOF(int val) { fTOF = val; } // Sets the tof
 
     double getMomentum() const { return fMomentum; } // Returns the momentum [MeV/c]
     double getThetaRad() const { return fTheta; } // Returns the polar angle [radians]
@@ -105,9 +116,13 @@ public:
     double getPhiDeg() const { return fPhi*TMath::RadToDeg(); } // Returns the azimuthal angle [deg]
     double getR() const { return fR; } // Returns R [mm]
     double getZ() const { return fZ; } // Returns Z [mm]
+    double getCharge() const { return fCharge; } // Returns  Charge
+    double getBeta() const { return fBeta; } // Returns Beta
+    double getChi2() const { return fChi2; } // Returns Chi2
     TMatrixD getCovariance() const { return fCov; } // Returns the covariance matrix
     int getPid() const { return fPid; } // Returns the PID of the particle (user defined)
     int getTrackId() const { return fTrackId; } // Returns the track id
+    int getTOF() const { return fTOF; } // Returns the TOF
 };
 
 #endif /* KFITPARTICLE_H */

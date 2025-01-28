@@ -112,6 +112,8 @@ private:
 
     int fVerbose = 0;
 
+    double fNExclusive = -1;
+
     TMatrixD calcMissingMom(const TMatrixD &m_iter);
 
 public:
@@ -154,6 +156,8 @@ public:
     void addMissingMassConstraint(TLorentzVector lv, double mass);     // Constrains all final state particles to the initial system, lv, and a missing mass , m
     void addMassVtxConstraint(double mass);                            // Constrains all particles to a common vertex and a mass, m, of a decaying particle
 
+    void setNumberOfExclusiveCandidates(double number) { fNExclusive = number; }
+
     /** @brief Set maximum number of iterations, default = 20
      */
     void setNumberOfIterations(int val) { fNumIterations = val; }
@@ -174,8 +178,12 @@ public:
     double getProb() const { return fProb; }
 
     /** @brief Pull distributions of the fit parameters are returned
-     * val = 0 + n : 1/p
-     * val = 1 + n : theta
+     * val = 0 + 5 * n : 1/p
+     * val = 1 + 5 * n : theta
+     * val = 2 + 5 * n : phi
+     * val = 3 + 5 * n : R
+     * val + 4 + 5 * n : Z 
+     * n = particle at entry 0, 1, 2... in the input vector 
      */
     double getPull(int val = 0) { return fPull(val, val); }
     int getIteration() const { return fIteration; }
