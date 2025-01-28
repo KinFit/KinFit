@@ -42,8 +42,9 @@ KFitParticle::KFitParticle(TLorentzVector cand, double X, double Y, double Z)
     TVector3 cross = dir.Cross(beam_dir);
     TVector3 diff=base-beam_base;
 
-    fR = diff.Dot(cross)/(cross.Mag());
-    
+    // fR = diff.Dot(cross)/(cross.Mag());
+    fR = -((cross.Dot(diff)) / cross.Mag()); // R is signed
+
     double a = beam_base.Dot(beam_dir);
     double b = beam_dir.Dot(beam_dir);
     double c = base.Dot(beam_dir);
