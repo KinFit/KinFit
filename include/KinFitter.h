@@ -93,6 +93,7 @@ private:
     std::vector<double> fM; // Vector of particle masses
     TLorentzVector fInit;   // 4-vector used for constraint
     double fMass = 99999.9; // Mass used for constraint
+    double fMassMissingParticle = 99999.9; // Mass used for missing particle constraint
 
     // Constraints, true if constraint is set, only one at a time
     bool fMassConstraint = false;
