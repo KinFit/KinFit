@@ -93,8 +93,8 @@ private:
     std::vector<double> fM; // Vector of particle masses
     TLorentzVector fInit;   // 4-vector used for constraint
     double fMass = 99999.9; // Mass used for constraint
-    double fMassMissingParticle = 99999.9; // Mass used for missing particle constraint
-
+    double fMassMissingParticle = 99999.9; // Mass used for constraint
+    
     // Constraints, true if constraint is set, only one at a time
     bool fMassConstraint = false;
     bool fMissingMassConstraint = false;
@@ -111,9 +111,13 @@ private:
     double fConvergenceCriterionD = 1e-4;
     double fConvergenceCriterionAlpha = 1e-4;
 
+    std::vector<int> fFlexiParticlesInFit;
+    std::vector<std::vector<int >> fMassFitPair;
+
     int fVerbose = 0;
 
-    double fNExclusive = -1;
+    int fNExclusive = -1;
+    int fNumMassFits = 0;
 
     TMatrixD calcMissingMom(const TMatrixD &m_iter);
 
@@ -157,7 +161,10 @@ public:
     void addMissingMassConstraint(TLorentzVector lv, double mass);     // Constrains all final state particles to the initial system, lv, and a missing mass , m
     void addMassVtxConstraint(double mass);                            // Constrains all particles to a common vertex and a mass, m, of a decaying particle
 
-    void setNumberOfExclusiveCandidates(double number) { fNExclusive = number; }
+    void setNumberOfExclusiveCandidates(int number) { fNExclusive = number; }
+    void setUseCandInFit(int number){ 
+        fFlexiParticlesInFit.push_back(number);
+     };
 
     /** @brief Set maximum number of iterations, default = 20
      */

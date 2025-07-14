@@ -89,8 +89,11 @@ void KinFitter::addMassConstraint(double mass)
         std::cout << "--------------- KinFitter::addMassConstraint() -----------------" << std::endl;
     }
 
+    fNumMassFits = fNumMassFits + 1;
+    fMassFitPair.push_back(fFlexiParticlesInFit);
+    fFlexiParticlesInFit.clear();
     fMass = mass;
-    if (!fMassConstraint)
+    //if (!fMassConstraint)
         fNdf += 1;
     fMassConstraint = true;
 }
@@ -471,6 +474,35 @@ TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
             }
             d(cof, 0) = std::pow(E, 2) - std::pow(Px, 2) - std::pow(Py, 2) -
                     std::pow(Pz, 2) - fMass * fMass;
+        } 
+        else if((int) fFlexiParticlesInFit.size() > 1) 
+        {
+
+            for (int numMassFits = 0; numMassFits < (int)fMassFitPair.size(); numMassFits++)
+            {
+                int cof = d.GetNrows();
+                d.ResizeTo(cof + 1, 1);
+
+                for (int q = 0; q < (int) fMassFitPair[numMassFits].size(); q++)
+                {
+
+                    int particle = fMassFitPair[numMassFits][q];
+
+                    E += std::sqrt((1. / m_iter(0 + particle * cov_dim, 0)) *
+                                       (1. / m_iter(0 + particle * cov_dim, 0)) +
+                                   fM[particle] * fM[particle]);
+                    Px += (1. / m_iter(0 + particle * cov_dim, 0)) *
+                          std::sin(m_iter(1 + particle * cov_dim, 0)) *
+                          std::cos(m_iter(2 + particle * cov_dim, 0));
+                    Py += (1. / m_iter(0 + particle * cov_dim, 0)) *
+                          std::sin(m_iter(1 + particle * cov_dim, 0)) *
+                          std::sin(m_iter(2 + particle * cov_dim, 0));
+                    Pz += (1. / m_iter(0 + particle * cov_dim, 0)) *
+                          std::cos(m_iter(1 + particle * cov_dim, 0));
+                }
+                d(cof, 0) = std::pow(E, 2) - std::pow(Px, 2) - std::pow(Py, 2) -
+                            std::pow(Pz, 2) - fMass * fMass;
+            }
         }
         else
         {
@@ -1054,6 +1086,69 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                 H(cof, 4 + q * 4) = 0.;
             }
         }
+        else if((int) fFlexiParticlesInFit.size() > 1) 
+        {
+            for (int numMassFits = 0; numMassFits < (int)fMassFitPair.size(); numMassFits++)
+            {
+                int cof = H.GetNrows();
+                H.ResizeTo(cof + 1, fyDim);
+                for (int k = 0; k < fyDim; k++)
+                {
+                    H(cof, k) = 0.;
+                }
+
+                for (int q = 0; q < (int) fMassFitPair[numMassFits].size(); q++)
+                {
+
+                    int particle = fMassFitPair[numMassFits][q];
+
+                    E += std::sqrt((1. / m_iter(0 + particle * cov_dim, 0)) *
+                                       (1. / m_iter(0 + particle * cov_dim, 0)) +
+                                   fM[particle] * fM[particle]);
+                    Px += (1. / m_iter(0 + particle * cov_dim, 0)) *
+                          std::sin(m_iter(1 + particle * cov_dim, 0)) *
+                          std::cos(m_iter(2 + particle * cov_dim, 0));
+                    Py += (1. / m_iter(0 + particle * cov_dim, 0)) *
+                          std::sin(m_iter(1 + particle * cov_dim, 0)) *
+                          std::sin(m_iter(2 + particle * cov_dim, 0));
+                    Pz += (1. / m_iter(0 + particle * cov_dim, 0)) *
+                          std::cos(m_iter(1 + particle * cov_dim, 0));
+                }
+
+                for (int q = 0; q < fFlexiParticlesInFit.size(); q++)
+                {
+
+                    int particle = fFlexiParticlesInFit[q];
+
+                    double Pi = 1. / m_iter(0 + particle * cov_dim, 0);
+                    double Ei = std::sqrt(Pi * Pi + fM[particle] * fM[particle]);
+
+                    H(cof, 0 + particle * cov_dim) =
+                        -2 * E * (std::pow(Pi, 3) / Ei) +
+                        2 * std::pow(Pi, 2) * std::sin(m_iter(1 + particle * cov_dim, 0)) *
+                            std::cos(m_iter(2 + particle * cov_dim, 0)) * Px +
+                        2 * std::pow(Pi, 2) * std::sin(m_iter(1 + particle * cov_dim, 0)) *
+                            std::sin(m_iter(2 + particle * cov_dim, 0)) * Py +
+                        2 * std::pow(Pi, 2) * std::cos(m_iter(1 + particle * cov_dim, 0)) * Pz;
+
+                    H(cof, 1 + particle * cov_dim) =
+                        -2 * Pi * std::cos(m_iter(1 + particle * cov_dim, 0)) *
+                            std::cos(m_iter(2 + particle * cov_dim, 0)) * Px -
+                        2 * Pi * std::cos(m_iter(1 + particle * cov_dim, 0)) *
+                            std::sin(m_iter(2 + particle * cov_dim, 0)) * Py +
+                        2 * Pi * std::sin(m_iter(1 + particle * cov_dim, 0)) * Pz;
+
+                    H(cof, 2 + particle * cov_dim) =
+                        2 * Pi * std::sin(m_iter(1 + particle * cov_dim, 0)) *
+                            std::sin(m_iter(2 + particle * cov_dim, 0)) * Px -
+                        2 * Pi * std::sin(m_iter(1 + particle * cov_dim, 0)) *
+                            std::cos(m_iter(2 + particle * cov_dim, 0)) * Py;
+
+                    H(cof, 3 + particle * cov_dim) = 0.;
+                    H(cof, 4 + particle * 4) = 0.;
+                }
+            }
+        }
         else
         {
             H.ResizeTo(1, fyDim);
@@ -1359,7 +1454,7 @@ Bool_t KinFitter::fit()
 
     for (int q = 0; q < fNumIterations; q++)
     {
-        if (fVerbose > -1)
+        if (fVerbose > 0)
         {
             std::cout << "Number of iterations: " << q << std::endl;
         }
@@ -1561,7 +1656,7 @@ Bool_t KinFitter::fit()
             D_xi = Fxi_eval(alpha, xi);
         d = f_eval(alpha, xi);
 
-        if (fVerbose > -1)
+        if (fVerbose > 0)
         {
             std::cout << " ------------------------ END OF LOOP -------------------------------------------" << std::endl;
         }
