@@ -30,6 +30,7 @@ KinFitter::KinFitter(const std::vector<KFitParticle> &cands) : fCands(cands)
     // fN is the number of daughters e.g. (L->ppi-) n=2
     fN = fCands.size();
     fyDim = fN * cov_dim; // Dimension of full covariance matrix (number of measured variables x cov_dim)
+    fMassVec.clear();
 
     y.ResizeTo(fyDim, 1);
     x.ResizeTo(1, 1);
@@ -93,6 +94,7 @@ void KinFitter::addMassConstraint(double mass)
     fMassFitPair.push_back(fFlexiParticlesInFit);
     fFlexiParticlesInFit.clear();
     fMass = mass;
+    fMassVec.push_back(mass);
     //if (!fMassConstraint)
         fNdf += 1;
     fMassConstraint = true;
@@ -501,7 +503,7 @@ TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                           std::cos(m_iter(1 + particle * cov_dim, 0));
                 }
                 d(cof, 0) = std::pow(E, 2) - std::pow(Px, 2) - std::pow(Py, 2) -
-                            std::pow(Pz, 2) - fMass * fMass;
+                            std::pow(Pz, 2) - fMassVec[numMassFits] * fMassVec[numMassFits];
             }
         }
         else
@@ -1115,7 +1117,7 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                           std::cos(m_iter(1 + particle * cov_dim, 0));
                 }
 
-                for (int q = 0; q < fFlexiParticlesInFit.size(); q++)
+                for (int q = 0; q < (int) fFlexiParticlesInFit.size(); q++)
                 {
 
                     int particle = fFlexiParticlesInFit[q];
@@ -1798,13 +1800,6 @@ void KinFitter::updateMother()
     cov(4, 4) = V(3 + fN * cov_dim, 3 + fN * cov_dim);
     mother.setCovariance(cov);
     // ---------------------------------------------------------------------------
-}
-
-void KinFitter::setConvergenceCriteria(double val1, double val2, double val3)
-{
-    fConvergenceCriterionChi2 = val1;
-    fConvergenceCriterionD = val2;
-    fConvergenceCriterionAlpha = val3;
 }
 
 ClassImp(KinFitter)

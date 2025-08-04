@@ -87,6 +87,7 @@ private:
     std::vector<KFitParticle> fCands; // Vector of input candidates
     KFitParticle fMother;             // Decaying particle
     TLorentzVector fMissDaughter;     // Missing decay product
+    std::vector <double > fMassVec;   // Vector of masses that is used if several mass fits are used
 
     // Data members for constraints
     int fNdf = 0;           // Number of degrees of freedom
@@ -107,9 +108,10 @@ private:
     int fNumIterations = 20; // Maximum number of iterations
 
     // Convergence criteria: difference in chi2, constraint equation d, difference in track parameters between iterations
+    // If default parameters are used only the chi2 will be used for convergence
     double fConvergenceCriterionChi2 = 1e-4;
-    double fConvergenceCriterionD = 1e-4;
-    double fConvergenceCriterionAlpha = 1e-4;
+    double fConvergenceCriterionD = 1e6;
+    double fConvergenceCriterionAlpha = 1e6;
 
     std::vector<int> fFlexiParticlesInFit;
     std::vector<std::vector<int >> fMassFitPair;
@@ -175,7 +177,15 @@ public:
      * @param val2 - Norm of all constraint equations
      * @param val2 - Difference in norm of track parameter vector of consecutive iterations
      */
-    void setConvergenceCriteria(double val1, double val2, double val3);
+    void setConvergenceCriteria(double val1, double val2, double val3){
+
+        fConvergenceCriterionChi2 = val1;
+        fConvergenceCriterionD = val2;
+        fConvergenceCriterionAlpha = val3;
+
+    }
+
+    void setConvergenceCriterionChi2(double val) { fConvergenceCriterionChi2 = val; }
 
     /** @brief Chi2 of the fit is returned
      */
