@@ -58,6 +58,8 @@ Output: A root file containing a TClonesArray of KFitParticles, fit probability 
 
 2) KFitAnalyzer object is created. User adds fitting tasks to it, defines PIDs of particles to be fitted.    
 
-3) KFitAnalyzer creates the output tree. The particle combination with the best probability is written there for each event.   
+3) KFitAnalyzer creates the output tree. The particle combination with the best probability is written there for each event.
+
+## (Python Implementation of the KinFit library)[https://github.com/KinFit/PyKinFit]
 
 
