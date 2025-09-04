@@ -87,13 +87,15 @@ private:
     std::vector<KFitParticle> fCands; // Vector of input candidates
     KFitParticle fMother;             // Decaying particle
     TLorentzVector fMissDaughter;     // Missing decay product
+    std::vector <double > fMassVec;   // Vector of masses that is used if several mass fits are used
 
     // Data members for constraints
     int fNdf = 0;           // Number of degrees of freedom
     std::vector<double> fM; // Vector of particle masses
     TLorentzVector fInit;   // 4-vector used for constraint
     double fMass = 99999.9; // Mass used for constraint
-
+    double fMassMissingParticle = 99999.9; // Mass used for constraint
+    
     // Constraints, true if constraint is set, only one at a time
     bool fMassConstraint = false;
     bool fMissingMassConstraint = false;
@@ -106,13 +108,18 @@ private:
     int fNumIterations = 20; // Maximum number of iterations
 
     // Convergence criteria: difference in chi2, constraint equation d, difference in track parameters between iterations
+    // If default parameters are used only the chi2 will be used for convergence
     double fConvergenceCriterionChi2 = 1e-4;
-    double fConvergenceCriterionD = 1e-4;
-    double fConvergenceCriterionAlpha = 1e-4;
+    double fConvergenceCriterionD = 1e6;
+    double fConvergenceCriterionAlpha = 1e6;
+
+    std::vector<int> fFlexiParticlesInFit;
+    std::vector<std::vector<int >> fMassFitPair;
 
     int fVerbose = 0;
 
-    double fNExclusive = -1;
+    int fNExclusive = -1;
+    int fNumMassFits = 0;
 
     TMatrixD calcMissingMom(const TMatrixD &m_iter);
 
@@ -156,7 +163,10 @@ public:
     void addMissingMassConstraint(TLorentzVector lv, double mass);     // Constrains all final state particles to the initial system, lv, and a missing mass , m
     void addMassVtxConstraint(double mass);                            // Constrains all particles to a common vertex and a mass, m, of a decaying particle
 
-    void setNumberOfExclusiveCandidates(double number) { fNExclusive = number; }
+    void setNumberOfExclusiveCandidates(int number) { fNExclusive = number; }
+    void setUseCandInFit(int number){ 
+        fFlexiParticlesInFit.push_back(number);
+     };
 
     /** @brief Set maximum number of iterations, default = 20
      */
@@ -167,7 +177,15 @@ public:
      * @param val2 - Norm of all constraint equations
      * @param val2 - Difference in norm of track parameter vector of consecutive iterations
      */
-    void setConvergenceCriteria(double val1, double val2, double val3);
+    void setConvergenceCriteria(double val1, double val2, double val3){
+
+        fConvergenceCriterionChi2 = val1;
+        fConvergenceCriterionD = val2;
+        fConvergenceCriterionAlpha = val3;
+
+    }
+
+    void setConvergenceCriterionChi2(double val) { fConvergenceCriterionChi2 = val; }
 
     /** @brief Chi2 of the fit is returned
      */

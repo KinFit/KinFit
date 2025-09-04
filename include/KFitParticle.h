@@ -46,9 +46,34 @@ private:
     double fR; // Closest distance to beamline [mm]
     double fZ; // Point along beamline where track is closest to it [mm]
 
+    double fGenMomentum;
+    double fGenTheta;
+    double fGenPhi;
+    double fGenR;
+    double fGenZ;
+
+    double fVtxX = -999999999.9;
+    double fVtxY = -999999999.9;
+    double fVtxZ = -999999999.9;
+    double fGenVtxX = -999999999.9;
+    double fGenVtxY = -999999999.9;
+    double fGenVtxZ = -999999999.9;
+
+    double fSector; // HADES sector 0-5
+
+    double fRapidity = -9999999999.9;
+    double fPt = -9999999999.9;
+    double fPx = -9999999999.9; 
+    double fPy = -9999999999.9; 
+    double fPz = -9999999999.9;  
+
     double fBeta = -9999999999.9;
     double fChi2 = -9999999999.9;
     double fTOF = -9999999999.9;
+
+    int fPID = -99999;
+    int fParentPID = -99999;
+    int fGrandParentPID = -99999;   
 
     int fCharge = 0;
 
@@ -108,12 +133,38 @@ public:
     void setPid(int val) { fPid = val; } // Sets the PID of the particle (user defined)
     void setTrackId(int val) { fTrackId = val; } // Sets the track id
     void setTOF(int val) { fTOF = val; } // Sets the tof
+    void setRapidity(int val) { fRapidity = val; } // Sets the rapidity
+    void setPt(double val) { fPt = val; } // Sets the transverse momentum [MeV/c]
+    void setPx(double val) { fPx = val; } // Sets the x momentum [MeV/c]
+    void setPy(double val) { fPy = val; } // Sets the y momentum [MeV/c]
+    void setPz(double val) { fPz = val; } // Sets the z momentum [MeV/c]
+    void setVertexX(double val) { fVtxX = val; } // Sets the x-vertex [mm]
+    void setVertexY(double val) { fVtxY = val; } // Sets the y-vertex [mm]
+    void setVertexZ(double val) { fVtxZ = val; } // Sets the z-vertex [mm]
+    void setGenVertexX(double val) { fGenVtxX = val; } // Sets the generated x-vertex [mm]
+    void setGenVertexY(double val) { fGenVtxY = val; } // Sets the generated y-vertex [mm]
+    void setGenVertexZ(double val) { fGenVtxZ = val; } // Sets the generated z-vertex [mm]
+
+    // MC Truth Matching Information
+    void setPID(int val) { fPID = val; }
+    void setParentPID(int val) { fParentPID = val; }
+    void setGrandParentPID(int val) {fGrandParentPID = val; }
+
+    void setGenMomentum(double val) { fGenMomentum = val; } // Sets the momentum [MeV/c]
+    void setGenThetaDeg(double val) { fGenTheta = val; } // Sets the polar angle [deg]
+    void setGenPhiDeg(double val) { fGenPhi = val; } // Sets the azimuthal angle [deg]
+    void setGenR(double val) { fGenR = val; } // Sets R [mm]
+    void setGenZ(double val) { fGenZ = val; } // Sets Z [mm]
+
+    void setSector(int val) { fSector = val; } // Sets the sector
 
     double getMomentum() const { return fMomentum; } // Returns the momentum [MeV/c]
     double getThetaRad() const { return fTheta; } // Returns the polar angle [radians]
     double getPhiRad() const { return fPhi; } // Returns the azimuthal angle [radians]
     double getThetaDeg() const { return fTheta*TMath::RadToDeg(); } // Returns the polar angle [deg]
     double getPhiDeg() const { return fPhi*TMath::RadToDeg(); } // Returns the azimuthal angle [deg]
+    double getGenThetaDeg() const { return fGenTheta; } // Returns the generated polar angle [deg]
+    double getGenPhiDeg() const { return fGenPhi; } // Returns the generated azimuthal angle [deg]
     double getR() const { return fR; } // Returns R [mm]
     double getZ() const { return fZ; } // Returns Z [mm]
     double getCharge() const { return fCharge; } // Returns  Charge
@@ -123,6 +174,30 @@ public:
     int getPid() const { return fPid; } // Returns the PID of the particle (user defined)
     int getTrackId() const { return fTrackId; } // Returns the track id
     int getTOF() const { return fTOF; } // Returns the TOF
+    double getPt() const { return fPt; } // Returns the transverse momentum [MeV/c]
+    double getPx() const { return fPx; } // Returns the x momentum [MeV/c]
+    double getPy() const { return fPy; } // Returns the y momentum [MeV/c]
+    double getPz() const { return fPz; } // Returns the z momentum [MeV/c]
+    double getVertexX() const { return fVtxX; } // Returns the x-vertex [mm]
+    double getVertexY() const { return fVtxY; } // Returns the y-vertex [mm] 
+    double getVertexZ() const { return fVtxZ; } // Returns the z-vertex [mm]
+    double getGenVertexX() const { return fGenVtxX; } // Returns the generated x-vertex [mm]
+    double getGenVertexY() const { return fGenVtxY; } // Returns the generated y-vertex [mm] 
+    double getGenVertexZ() const { return fGenVtxZ; } // Returns the generated z-vertex [mm]
+    double getRapidity() const { return fRapidity; } // Returns the rapidity
+
+    // MC Truth Matching Information
+    int getPID() const { return fPID; }
+    int getParentPID() const { return fParentPID; }
+    int getGrandParentPID() const { return fGrandParentPID; }
+
+    double getGenMomentum() const { return fGenMomentum; }
+    double getGenTheta() const { return fGenTheta; }
+    double getGenPhi() const { return fGenPhi; }
+    double getGenR() const { return fGenR; }
+    double getGenZ() const { return fGenZ; }
+
+    int getSector() const { return fSector; } // Returns the sector
 };
 
 #endif /* KFITPARTICLE_H */
