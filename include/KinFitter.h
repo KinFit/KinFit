@@ -120,12 +120,15 @@ private:
     std::vector<int> fFlexiParticlesInVtxFit; // When several mass fits are performed this vector is used when more than one vertex fit is performed
     std::vector<std::vector<int>> fVtxFitPair;
 
+    std::vector<int> fFlexiParticlesInMissingParticleFit;
+
     int fVerbose = 0;
 
     int fNExclusive = -1;
     int fNumMassFits = 0;
     int fNumVtxFits = 0;
-
+    int fNumMissingParticleFits = 0;
+    
     TMatrixD calcMissingMom(const TMatrixD &m_iter);
 
 public:
@@ -180,6 +183,13 @@ public:
     void setUseCandInVtxFit(int number)
     {
         fFlexiParticlesInVtxFit.push_back(number);
+    };
+    // For missing particle fit
+    // Measured particles
+    // Unmeasured particle set by adding the constraint
+    void setUseCandsInMissingParticleFit(int number)
+    {
+        fFlexiParticlesInMissingParticleFit.push_back(number);
     };
     /** @brief Set maximum number of iterations, default = 20
      */

@@ -74,7 +74,7 @@ public:
     
     /**  Constructor 
     */
-    KFitVertexFinder(std::vector<KFitParticle> &);
+    KFitVertexFinder(std::vector<KFitParticle> &cands);
 
     /** Default Destructor **/
     ~KFitVertexFinder(){};

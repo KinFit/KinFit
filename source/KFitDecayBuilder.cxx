@@ -140,7 +140,7 @@ Bool_t KFitDecayBuilder::doFit()
             fBestChi2 = Fitter.getChi2();
             if (fOutputCands.size() != 0)
                 fOutputCands.clear();
-            Fitter.getDaughters(fOutputCands);
+            Fitter.getDecayProducts(fOutputCands);
         }
         return kTRUE;
     }

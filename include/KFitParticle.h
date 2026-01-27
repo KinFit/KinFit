@@ -43,8 +43,8 @@ private:
     double fMomentum; // Momentum [MeV/c]
     double fTheta; // Polar angle [rad]
     double fPhi; // Azimuthal angle [rad]
-    double fR; // Closest distance to beamline [mm]
-    double fZ; // Point along beamline where track is closest to it [mm]
+    double fR = 9.0; // Closest distance to beamline [mm]
+    double fZ = 9.0; // Point along beamline where track is closest to it [mm]
 
     double fGenMomentum;
     double fGenTheta;

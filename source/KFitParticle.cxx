@@ -65,8 +65,8 @@ KFitParticle::KFitParticle()
     : TLorentzVector()
 {
     cand.SetXYZM(0,0,0,0);
-    fR = 0;
-    fZ = 0;
+    fR = 9.0;
+    fZ = 9.0;
     fPid = -1;
     fTrackId = -1;
     fCov.ResizeTo(5, 5);

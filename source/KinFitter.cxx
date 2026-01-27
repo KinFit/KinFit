@@ -20,6 +20,9 @@
 const size_t cov_dim = 5;
 
 // KinFitter constructor
+KinFitter::KinFitter() {
+    
+}
 KinFitter::KinFitter(const std::vector<KFitParticle> &cands) : fCands(cands)
 {
     if (fVerbose > 0)
@@ -317,11 +320,14 @@ void KinFitter::addMissingParticleConstraint(TLorentzVector lv, double mass)
     x.Zero();
     Vx.Zero();
 
-    if (!fMissingParticleConstraint)
-    {
-        fM.push_back(fMassMissingParticle);
-        fNdf += 1;
-    }
+    //if (!fMissingParticleConstraint) // Needs to be removed so more particles can be added
+    //{
+
+    fNumMissingParticleFits++;
+
+    fM.push_back(fMassMissingParticle);
+    fNdf += 1;
+    //}
 
     fMissingParticleConstraint = true;
 }
@@ -577,6 +583,33 @@ TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
             d(1, 0) += 1. / m_iter(0 + q * cov_dim, 0) * sin(m_iter(1 + q * cov_dim, 0)) * sin(m_iter(2 + q * cov_dim, 0));
             d(2, 0) += 1. / m_iter(0 + q * cov_dim, 0) * cos(m_iter(1 + q * cov_dim, 0));
             d(3, 0) += sqrt(pow((1. / m_iter(0 + q * cov_dim, 0)), 2) + pow(fM[q], 2));
+        }
+// 
+        // The mass of the nissing particle will have been added to a vector, fM, for each missing particle constraint, this vector contains the mass of the particle that is missing
+        if ((int)fFlexiParticlesInMissingParticleFit.size()>1)
+        {
+
+            int cof = d.GetNrows();
+            d.ResizeTo(cof + 4, 1);
+            
+            for(int numMissingParticleFits = 0; numMissingParticleFits < fNumMissingParticleFits; numMissingParticleFits++){
+
+            d(cof + 0, 0) = -fInit.Px() + xi_iter(0, 0);
+            d(cof + 1, 0) = -fInit.Py() + xi_iter(1, 0);
+            d(cof + 2, 0) = -fInit.Pz() + xi_iter(2, 0);
+            d(cof + 3, 0) = -fInit.E() + sqrt(pow(xi_iter(0, 0), 2) + pow(xi_iter(1, 0), 2) + pow(xi_iter(2, 0), 2) + pow(fM[fN], 2));
+
+            for (int numParticles = 0; numParticles < fFlexiParticlesInMissingParticleFit.size(); numParticles++)
+            {
+
+                int particle = fFlexiParticlesInMissingParticleFit[numParticles];
+
+                d(cof + 0, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * sin(m_iter(1 + particle * cov_dim, 0)) * cos(m_iter(2 + particle * cov_dim, 0));
+                d(cof + 1, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * sin(m_iter(1 + particle * cov_dim, 0)) * sin(m_iter(2 + particle * cov_dim, 0));
+                d(cof + 2, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * cos(m_iter(1 + particle * cov_dim, 0));
+                d(cof + 3, 0) += sqrt(pow((1. / m_iter(0 + particle * cov_dim, 0)), 2) + pow(fM[numMissingParticleFits], 2));
+            }
+        }
         }
     }
 
@@ -1407,7 +1440,7 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                         std::cos(m_iter(2 + q * cov_dim, 0)) * Py;
 
                 H(0, 3 + q * cov_dim) = 0.;
-                H(0, 4 + q * 4) = 0.;
+                H(0, 4 + q * cov_dim) = 0.;
             }
         }
     }
