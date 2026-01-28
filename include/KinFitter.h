@@ -94,6 +94,7 @@ private:
     int fNdf = 0;                          // Number of degrees of freedom
     std::vector<double> fM;                // Vector of particle masses
     TLorentzVector fInit;                  // 4-vector used for constraint
+    std::vector<TLorentzVector> fInitVec;  // Vector of initial TLorentzVectors if several particles are missing
     double fMass = 99999.9;                // Mass used for constraint
     double fMassMissingParticle = 99999.9; // Mass used for constraint
 

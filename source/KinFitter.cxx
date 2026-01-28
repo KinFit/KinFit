@@ -312,7 +312,9 @@ void KinFitter::addMissingParticleConstraint(TLorentzVector lv, double mass)
         std::cout << "--------------- KinFitter::addMissingParticleConstraint() -----------------" << std::endl;
     }
 
-    fInit = lv;
+    // Use a vector of initial TLorentzVectors 
+    //fInit = lv;
+    fInitVec.push_back(lv);
     fMassMissingParticle = mass;
 
     x.ResizeTo(3, 1);
@@ -339,6 +341,8 @@ TMatrixD KinFitter::calcMissingMom(const TMatrixD &m_iter)
         std::cout << "--------------- KinFitter::calcMissingMom() -----------------" << std::endl;
     }
 
+    // Function that is called once before the iterations
+
     TMatrix xi(3, 1);
 
     xi(0, 0) = fInit.Px();
@@ -350,6 +354,28 @@ TMatrixD KinFitter::calcMissingMom(const TMatrixD &m_iter)
         xi(0, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
         xi(1, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
         xi(2, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0));
+    }
+
+    if ((int)fFlexiParticlesInMissingParticleFit.size() > 1)
+    {
+        // For each initial vector, set px, py, pz
+
+        TMatrix xi(3 * fNumMissingParticleFits, 1);
+
+        for (int numFits = 0; numFits < fNumMissingParticleFits; numFits++)
+        {
+
+            xi(0 + numFits, 0) = fInitVec[numFits].Px();
+            xi(1 + numFits, 0) = fInitVec[numFits].Py();
+            xi(2 + numFits, 0) = fInitVec[numFits].Pz();    
+            
+            for (int q = 0; q < fFlexiParticlesInMissingParticleFit.size(); q++)
+            {
+                xi(0, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
+                xi(1, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
+                xi(2, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0));
+            }
+        }
     }
 
     return xi;
@@ -584,32 +610,35 @@ TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
             d(2, 0) += 1. / m_iter(0 + q * cov_dim, 0) * cos(m_iter(1 + q * cov_dim, 0));
             d(3, 0) += sqrt(pow((1. / m_iter(0 + q * cov_dim, 0)), 2) + pow(fM[q], 2));
         }
-// 
+
         // The mass of the nissing particle will have been added to a vector, fM, for each missing particle constraint, this vector contains the mass of the particle that is missing
-        if ((int)fFlexiParticlesInMissingParticleFit.size()>1)
+        if ((int)fFlexiParticlesInMissingParticleFit.size() > 1)
         {
 
             int cof = d.GetNrows();
             d.ResizeTo(cof + 4, 1);
-            
-            for(int numMissingParticleFits = 0; numMissingParticleFits < fNumMissingParticleFits; numMissingParticleFits++){
 
-            d(cof + 0, 0) = -fInit.Px() + xi_iter(0, 0);
-            d(cof + 1, 0) = -fInit.Py() + xi_iter(1, 0);
-            d(cof + 2, 0) = -fInit.Pz() + xi_iter(2, 0);
-            d(cof + 3, 0) = -fInit.E() + sqrt(pow(xi_iter(0, 0), 2) + pow(xi_iter(1, 0), 2) + pow(xi_iter(2, 0), 2) + pow(fM[fN], 2));
-
-            for (int numParticles = 0; numParticles < fFlexiParticlesInMissingParticleFit.size(); numParticles++)
+            for (int numMissingParticleFits = 0; numMissingParticleFits < fNumMissingParticleFits; numMissingParticleFits++)
             {
+                // xi_iter is for the unmeasured particle
+                d(cof + 0, 0) = -fInit.Px() + xi_iter(cof + 0, 0);
+                d(cof + 1, 0) = -fInit.Py() + xi_iter(cof + 1, 0);
+                d(cof + 2, 0) = -fInit.Pz() + xi_iter(cof + 2, 0);
+                d(cof + 3, 0) = -fInit.E() + sqrt(pow(xi_iter(0, 0), 2) + pow(xi_iter(1, 0), 2) + pow(xi_iter(2, 0), 2) + pow(fM[numMissingParticleFits], 2));
 
-                int particle = fFlexiParticlesInMissingParticleFit[numParticles];
+                // Iterate over the particle in the vector
+                for (int numParticles = 0; numParticles < fFlexiParticlesInMissingParticleFit.size(); numParticles++)
+                {
 
-                d(cof + 0, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * sin(m_iter(1 + particle * cov_dim, 0)) * cos(m_iter(2 + particle * cov_dim, 0));
-                d(cof + 1, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * sin(m_iter(1 + particle * cov_dim, 0)) * sin(m_iter(2 + particle * cov_dim, 0));
-                d(cof + 2, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * cos(m_iter(1 + particle * cov_dim, 0));
-                d(cof + 3, 0) += sqrt(pow((1. / m_iter(0 + particle * cov_dim, 0)), 2) + pow(fM[numMissingParticleFits], 2));
+                    int particle = fFlexiParticlesInMissingParticleFit[numParticles];
+
+                    // 0, 1, 2 and 3 are for which parameter is used for the particle indexed by "particle"
+                    d(cof + 0, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * sin(m_iter(1 + particle * cov_dim, 0)) * cos(m_iter(2 + particle * cov_dim, 0));
+                    d(cof + 1, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * sin(m_iter(1 + particle * cov_dim, 0)) * sin(m_iter(2 + particle * cov_dim, 0));
+                    d(cof + 2, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * cos(m_iter(1 + particle * cov_dim, 0));
+                    d(cof + 3, 0) += sqrt(pow((1. / m_iter(0 + particle * cov_dim, 0)), 2) + pow(fM[numMissingParticleFits], 2));
+                }
             }
-        }
         }
     }
 
