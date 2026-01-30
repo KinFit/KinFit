@@ -331,6 +331,8 @@ void KinFitter::addMissingParticleConstraint(TLorentzVector lv, double mass)
     fNdf += 1;
     //}
 
+    fMissingParticleFitPairs.push_back(fFlexiParticlesInMissingParticleFit);
+
     fMissingParticleConstraint = true;
 }
 
@@ -341,20 +343,9 @@ TMatrixD KinFitter::calcMissingMom(const TMatrixD &m_iter)
         std::cout << "--------------- KinFitter::calcMissingMom() -----------------" << std::endl;
     }
 
-    // Function that is called once before the iterations
-
     TMatrix xi(3, 1);
 
-    xi(0, 0) = fInit.Px();
-    xi(1, 0) = fInit.Py();
-    xi(2, 0) = fInit.Pz();
-
-    for (int q = 0; q < fN; q++)
-    {
-        xi(0, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
-        xi(1, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
-        xi(2, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0));
-    }
+    // Function that is called once before the iterations
 
     if ((int)fFlexiParticlesInMissingParticleFit.size() > 1)
     {
@@ -365,16 +356,34 @@ TMatrixD KinFitter::calcMissingMom(const TMatrixD &m_iter)
         for (int numFits = 0; numFits < fNumMissingParticleFits; numFits++)
         {
 
-            xi(0 + numFits, 0) = fInitVec[numFits].Px();
-            xi(1 + numFits, 0) = fInitVec[numFits].Py();
-            xi(2 + numFits, 0) = fInitVec[numFits].Pz();    
-            
-            for (int q = 0; q < fFlexiParticlesInMissingParticleFit.size(); q++)
+            xi(0 + (3*numFits), 0) = fInitVec[numFits].Px();
+            xi(1 + (3*numFits), 0) = fInitVec[numFits].Py();
+            xi(2 + (3*numFits), 0) = fInitVec[numFits].Pz();
+
+            for (int q = 0; q < (int)fMissingParticleFitPairs[numFits].size(); q++)
             {
-                xi(0, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
-                xi(1, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
-                xi(2, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0));
+                int particle = fMissingParticleFitPairs[numFits][q];
+                
+                xi(0 + (3*numFits), 0) -= 1. / m_iter(0 + particle * cov_dim, 0) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::cos(m_iter(2 + particle * cov_dim, 0));
+                xi(1 + (3*numFits), 0) -= 1. / m_iter(0 + particle * cov_dim, 0) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::sin(m_iter(2 + particle * cov_dim, 0));
+                xi(2 + (3*numFits), 0) -= 1. / m_iter(0 + particle * cov_dim, 0) * std::cos(m_iter(1 + particle * cov_dim, 0));
             }
+        }
+    }
+    else
+    {
+
+        // The matrix xi is defined in the beginningof the function TMatrixD KinFitter::calcMissingMom(const TMatrixD &m_iter)
+
+        xi(0, 0) = fInit.Px();
+        xi(1, 0) = fInit.Py();
+        xi(2, 0) = fInit.Pz();
+
+        for (int q = 0; q < fN; q++)
+        {
+            xi(0, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
+            xi(1, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
+            xi(2, 0) -= 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0));
         }
     }
 
@@ -626,11 +635,11 @@ TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
                 d(cof + 2, 0) = -fInit.Pz() + xi_iter(cof + 2, 0);
                 d(cof + 3, 0) = -fInit.E() + sqrt(pow(xi_iter(0, 0), 2) + pow(xi_iter(1, 0), 2) + pow(xi_iter(2, 0), 2) + pow(fM[numMissingParticleFits], 2));
 
-                // Iterate over the particle in the vector
-                for (int numParticles = 0; numParticles < fFlexiParticlesInMissingParticleFit.size(); numParticles++)
+                // Iterate over the particles in the vector
+                for (int q = 0; q < (int)fMassFitPair[numMissingParticleFits].size(); q++)
                 {
 
-                    int particle = fFlexiParticlesInMissingParticleFit[numParticles];
+                    int particle = fMassFitPair[numMissingParticleFits][q];
 
                     // 0, 1, 2 and 3 are for which parameter is used for the particle indexed by "particle"
                     d(cof + 0, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * sin(m_iter(1 + particle * cov_dim, 0)) * cos(m_iter(2 + particle * cov_dim, 0));
@@ -1258,31 +1267,76 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
     if (f4Constraint || fMissingParticleConstraint)
     {
 
-        H.ResizeTo(4, fyDim);
-        H.Zero();
-
-        for (int q = 0; q < fN; q++)
+        if (fMissingParticleConstraint && fNumMissingParticleFits > 1)
         {
+            int numEntries = 0;
+            for (int numMissingParticleFits = 0; numMissingParticleFits < fNumMissingParticleFits; numMissingParticleFits++)
+            {
 
-            // d(1/p)
-            H(0, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 2) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
-            H(1, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 2) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
-            H(2, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 2) * std::cos(m_iter(1 + q * cov_dim, 0));
-            H(3, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 3) * 1. / sqrt(pow(1. / (m_iter(0 + q * cov_dim, 0)), 2) + std::pow(fM[q], 2));
+                for (int q = 0; q < (int)fMassFitPair[numMissingParticleFits].size(); q++)
+                {
+                    numEntries++;
+                }
 
-            // dtht
-            H(0, 1 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
-            H(1, 1 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
-            H(2, 1 + q * cov_dim) = -1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0));
+            }
 
-            // dphi
-            H(0, 2 + q * cov_dim) = -1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
-            H(1, 2 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
-        
-            //std::cout << "H in 4C: "  << std::endl;
+            H.ResizeTo(4, numEntries * cov_dim);
+            // H.Zero();
 
-            //H.Print();
-        
+            for (int numMissingParticleFits = 0; numMissingParticleFits < fNumMissingParticleFits; numMissingParticleFits++)
+            {
+
+                // Iterate over the particles in the vector
+                for (int q = 0; q < (int)fMassFitPair[numMissingParticleFits].size(); q++)
+                {
+
+                    int particle = fMassFitPair[numMissingParticleFits][q];
+
+                    // d(1/p)
+                    H(0, 0 + particle * cov_dim) = -1. / std::pow(m_iter(0 + particle * cov_dim, 0), 2) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::cos(m_iter(2 + particle * cov_dim, 0));
+                    H(1, 0 + particle * cov_dim) = -1. / std::pow(m_iter(0 + particle * cov_dim, 0), 2) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::sin(m_iter(2 + particle * cov_dim, 0));
+                    H(2, 0 + particle * cov_dim) = -1. / std::pow(m_iter(0 + particle * cov_dim, 0), 2) * std::cos(m_iter(1 + particle * cov_dim, 0));
+                    H(3, 0 + particle * cov_dim) = -1. / std::pow(m_iter(0 + particle * cov_dim, 0), 3) * 1. / sqrt(pow(1. / (m_iter(0 + particle * cov_dim, 0)), 2) + std::pow(fM[numMissingParticleFits], 2));
+
+                    // dtht
+                    H(0, 1 + particle * cov_dim) = 1. / m_iter(0 + particle * cov_dim, 0) * std::cos(m_iter(1 + particle * cov_dim, 0)) * std::cos(m_iter(2 + particle * cov_dim, 0));
+                    H(1, 1 + particle * cov_dim) = 1. / m_iter(0 + particle * cov_dim, 0) * std::cos(m_iter(1 + particle * cov_dim, 0)) * std::sin(m_iter(2 + particle * cov_dim, 0));
+                    H(2, 1 + particle * cov_dim) = -1. / m_iter(0 + particle * cov_dim, 0) * std::sin(m_iter(1 + particle * cov_dim, 0));
+
+                    // dphi
+                    H(0, 2 + particle * cov_dim) = -1. / m_iter(0 + particle * cov_dim, 0) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::sin(m_iter(2 + particle * cov_dim, 0));
+                    H(1, 2 + particle * cov_dim) = 1. / m_iter(0 + particle * cov_dim, 0) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::cos(m_iter(2 + particle * cov_dim, 0));
+                }
+            }
+        }
+        else
+        {        
+            
+            H.ResizeTo(4, fyDim);
+            H.Zero();
+            
+            for (int q = 0; q < fN; q++)
+            {
+
+                // d(1/p)
+                H(0, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 2) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
+                H(1, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 2) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
+                H(2, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 2) * std::cos(m_iter(1 + q * cov_dim, 0));
+                H(3, q * cov_dim) = -1. / std::pow(m_iter(0 + q * cov_dim, 0), 3) * 1. / sqrt(pow(1. / (m_iter(0 + q * cov_dim, 0)), 2) + std::pow(fM[q], 2));
+
+                // dtht
+                H(0, 1 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
+                H(1, 1 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * std::cos(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
+                H(2, 1 + q * cov_dim) = -1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0));
+
+                // dphi
+                H(0, 2 + q * cov_dim) = -1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::sin(m_iter(2 + q * cov_dim, 0));
+                H(1, 2 + q * cov_dim) = 1. / m_iter(0 + q * cov_dim, 0) * std::sin(m_iter(1 + q * cov_dim, 0)) * std::cos(m_iter(2 + q * cov_dim, 0));
+
+                // std::cout << "H in 4C: "  << std::endl;
+
+                // H.Print();
+            }
         }
     }
 

@@ -122,7 +122,8 @@ private:
     std::vector<std::vector<int>> fVtxFitPair;
 
     std::vector<int> fFlexiParticlesInMissingParticleFit;
-
+    std::vector<std::vector<int>> fMissingParticleFitPairs;
+    
     int fVerbose = 0;
 
     int fNExclusive = -1;
