@@ -74,8 +74,10 @@ class KinFitter : public TObject
 {
 private:
     TMatrixD y;                       // Vector of measured variables
+    TMatrixD yflexi;                  // Vector of measured variables if a subset of cand vector is used in fit
     TMatrixD x;                       // Vector of unmeasured variables
     TMatrixD V;                       // Covariance matrix of measured variables
+    TMatrixD Vflexi;                  // Covariance matrix of measured variables if a subset of cand vector is used in fit
     TMatrixD Vx;                      // Covariance matrix of unmeasured variables
     TMatrixD fPull;                   // Pull value for all measured variables
     double fChi2 = 1e6;               // Chi2 of fit
@@ -88,11 +90,14 @@ private:
     std::vector<KFitParticle> fCands; // Vector of input candidates
     KFitParticle fDecayingParticle;   // Decaying particle
     TLorentzVector fMissDecayProduct; // Missing decay product
+    std::vector<TLorentzVector> fMissDecayProducts; // Missing decay products if more than one missing particle fit was performed
     std::vector<double> fMassVec;     // Vector of masses that is used if several mass fits are used
 
     // Data members for constraints
     int fNdf = 0;                          // Number of degrees of freedom
     std::vector<double> fM;                // Vector of particle masses
+    std::vector<double> fMflexi;           // Vector of particle masses if a subset of cand vector is used in fit
+    std::vector<double> fMissingMasses;    // Vector of masses of missing particles if more than one is used
     TLorentzVector fInit;                  // 4-vector used for constraint
     std::vector<TLorentzVector> fInitVec;  // Vector of initial TLorentzVectors if several particles are missing
     double fMass = 99999.9;                // Mass used for constraint
@@ -189,7 +194,7 @@ public:
     // For missing particle fit
     // Measured particles
     // Unmeasured particle set by adding the constraint
-    void setUseCandsInMissingParticleFit(int number)
+    void setUseCandInMissingParticleFit(int number)
     {
         fFlexiParticlesInMissingParticleFit.push_back(number);
     };
@@ -253,10 +258,17 @@ public:
      */
     KFitParticle getDecayingParticle() { return fDecayingParticle; }
     /** @brief Returns TLorentzVector fitted missing particle if existing
+     * Suitable to use if only one missing particle fit is performed
+     * If more than one fit is performed the function will return the missing particle
+     * of the last added constraint
      */
     TLorentzVector getMissingDecayProduct() { return fMissDecayProduct; }
+    /** @brief Returns TLorentzVectors of fitted missing particles if existing
+    * @param i - index of particle that should be retrieved if more than one is used in the fit
+    */
+    TLorentzVector getMissingDecayProducts(int i) { return fMissDecayProducts[i]; }
 
-private:
+    private:
     void setCovariance();
     void updateDecayProducts();
     void updateDecayingParticle();

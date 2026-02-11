@@ -99,57 +99,130 @@ void KinFitter::setCovariance()
     // push back the flexible candidates into the fCands vector?
     // fN = fN_Flexible;
 
-    fN = fCands.size();
-    fyDim = fN * cov_dim;
-    fMassVec.clear();
+    // fN = fCands.size();
+    // fyDim = fN * cov_dim;
+    // fMassVec.clear();
 
-    y.ResizeTo(fyDim, 1);
-    x.ResizeTo(1, 1);
-    V.ResizeTo(fyDim, fyDim);
-    Vx.ResizeTo(1, 1);
+    // y.ResizeTo(fyDim, 1);
+    // x.ResizeTo(1, 1);
+    // V.ResizeTo(fyDim, fyDim);
+    // Vx.ResizeTo(1, 1);
 
-    y.Zero();
-    x.Zero();
-    V.Zero();
-    Vx.Zero();
+    // y.Zero();
+    // x.Zero();
+    // V.Zero();
+    // Vx.Zero();
 
-    for (int ix = 0; ix < fN; ix++)
+    // for (int ix = 0; ix < fN; ix++)
+    // {
+    //     KFitParticle cand = fCands[ix];
+    //     y(0 + ix * cov_dim, 0) = 1. / cand.P();
+    //     y(1 + ix * cov_dim, 0) = cand.Theta();
+    //     y(2 + ix * cov_dim, 0) = cand.Phi();
+    //     y(3 + ix * cov_dim, 0) = cand.getR();
+    //     y(4 + ix * cov_dim, 0) = cand.getZ();
+    //     fM.push_back(cand.M());
+
+    //     TMatrixD covariance = cand.getCovariance();
+    //     V(0 + ix * cov_dim, 0 + ix * cov_dim) = covariance(0, 0);
+    //     V(1 + ix * cov_dim, 0 + ix * cov_dim) = covariance(1, 0);
+    //     V(2 + ix * cov_dim, 0 + ix * cov_dim) = covariance(2, 0);
+    //     V(3 + ix * cov_dim, 0 + ix * cov_dim) = covariance(3, 0);
+    //     V(4 + ix * cov_dim, 0 + ix * cov_dim) = covariance(4, 0);
+    //     V(0 + ix * cov_dim, 1 + ix * cov_dim) = covariance(0, 1);
+    //     V(1 + ix * cov_dim, 1 + ix * cov_dim) = covariance(1, 1);
+    //     V(2 + ix * cov_dim, 1 + ix * cov_dim) = covariance(2, 1);
+    //     V(3 + ix * cov_dim, 1 + ix * cov_dim) = covariance(3, 1);
+    //     V(4 + ix * cov_dim, 1 + ix * cov_dim) = covariance(4, 1);
+    //     V(0 + ix * cov_dim, 2 + ix * cov_dim) = covariance(0, 2);
+    //     V(1 + ix * cov_dim, 2 + ix * cov_dim) = covariance(1, 2);
+    //     V(2 + ix * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
+    //     V(3 + ix * cov_dim, 2 + ix * cov_dim) = covariance(3, 2);
+    //     V(4 + ix * cov_dim, 2 + ix * cov_dim) = covariance(4, 2);
+    //     V(0 + ix * cov_dim, 3 + ix * cov_dim) = covariance(0, 3);
+    //     V(1 + ix * cov_dim, 3 + ix * cov_dim) = covariance(1, 3);
+    //     V(2 + ix * cov_dim, 3 + ix * cov_dim) = covariance(2, 3);
+    //     V(3 + ix * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
+    //     V(4 + ix * cov_dim, 3 + ix * cov_dim) = covariance(4, 3);
+    //     V(0 + ix * cov_dim, 4 + ix * cov_dim) = covariance(0, 4);
+    //     V(1 + ix * cov_dim, 4 + ix * cov_dim) = covariance(1, 4);
+    //     V(2 + ix * cov_dim, 4 + ix * cov_dim) = covariance(2, 4);
+    //     V(3 + ix * cov_dim, 4 + ix * cov_dim) = covariance(3, 4);
+    //     V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
+    // }
+
+    // Get the number of individual particles that were added to the fit
+    int index = -1; 
+    std::vector<int> indexVec;
+
+    if (fMissingParticleConstraint == true && fNumMissingParticleFits > 1)
     {
-        KFitParticle cand = fCands[ix];
-        y(0 + ix * cov_dim, 0) = 1. / cand.P();
-        y(1 + ix * cov_dim, 0) = cand.Theta();
-        y(2 + ix * cov_dim, 0) = cand.Phi();
-        y(3 + ix * cov_dim, 0) = cand.getR();
-        y(4 + ix * cov_dim, 0) = cand.getZ();
-        fM.push_back(cand.M());
+        // If a certain number of particles only have been added in the fit, add them to another covariance matrix
+
+        for (int numMissingParticleFits = 0; numMissingParticleFits < fNumMissingParticleFits; numMissingParticleFits++)
+        {
+
+            // Iterate over the particles in the vector
+            for (int q = 0; q < (int)fMissingParticleFitPairs[numMissingParticleFits].size(); q++)
+            {
+
+                index = fMissingParticleFitPairs[numMissingParticleFits][q];
+                indexVec.push_back(index);
+
+            }
+        }
+
+        std::sort(indexVec.begin(), indexVec.end());                     // sort first
+        indexVec.erase(std::unique(indexVec.begin(), indexVec.end()), indexVec.end()); // remove duplicates
+    
+    }
+
+    // Vflexi is the covariance containing the covariance entries of the particles added to the fit
+    Vflexi.ResizeTo(indexVec.size()*cov_dim,indexVec.size()*cov_dim);
+    
+
+    for(int ix = 0; ix < (int)indexVec.size(); ix ++){
+
+        int candIndex = indexVec[ix];
+
+        KFitParticle cand = fCands[candIndex];
+        yflexi(0 + ix * cov_dim, 0) = 1. / cand.P();
+        yflexi(1 + ix * cov_dim, 0) = cand.Theta();
+        yflexi(2 + ix * cov_dim, 0) = cand.Phi();
+        yflexi(3 + ix * cov_dim, 0) = cand.getR();
+        yflexi(4 + ix * cov_dim, 0) = cand.getZ();
+        fMflexi.push_back(cand.M());
 
         TMatrixD covariance = cand.getCovariance();
-        V(0 + ix * cov_dim, 0 + ix * cov_dim) = covariance(0, 0);
-        V(1 + ix * cov_dim, 0 + ix * cov_dim) = covariance(1, 0);
-        V(2 + ix * cov_dim, 0 + ix * cov_dim) = covariance(2, 0);
-        V(3 + ix * cov_dim, 0 + ix * cov_dim) = covariance(3, 0);
-        V(4 + ix * cov_dim, 0 + ix * cov_dim) = covariance(4, 0);
-        V(0 + ix * cov_dim, 1 + ix * cov_dim) = covariance(0, 1);
-        V(1 + ix * cov_dim, 1 + ix * cov_dim) = covariance(1, 1);
-        V(2 + ix * cov_dim, 1 + ix * cov_dim) = covariance(2, 1);
-        V(3 + ix * cov_dim, 1 + ix * cov_dim) = covariance(3, 1);
-        V(4 + ix * cov_dim, 1 + ix * cov_dim) = covariance(4, 1);
-        V(0 + ix * cov_dim, 2 + ix * cov_dim) = covariance(0, 2);
-        V(1 + ix * cov_dim, 2 + ix * cov_dim) = covariance(1, 2);
-        V(2 + ix * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
-        V(3 + ix * cov_dim, 2 + ix * cov_dim) = covariance(3, 2);
-        V(4 + ix * cov_dim, 2 + ix * cov_dim) = covariance(4, 2);
-        V(0 + ix * cov_dim, 3 + ix * cov_dim) = covariance(0, 3);
-        V(1 + ix * cov_dim, 3 + ix * cov_dim) = covariance(1, 3);
-        V(2 + ix * cov_dim, 3 + ix * cov_dim) = covariance(2, 3);
-        V(3 + ix * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
-        V(4 + ix * cov_dim, 3 + ix * cov_dim) = covariance(4, 3);
-        V(0 + ix * cov_dim, 4 + ix * cov_dim) = covariance(0, 4);
-        V(1 + ix * cov_dim, 4 + ix * cov_dim) = covariance(1, 4);
-        V(2 + ix * cov_dim, 4 + ix * cov_dim) = covariance(2, 4);
-        V(3 + ix * cov_dim, 4 + ix * cov_dim) = covariance(3, 4);
-        V(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
+        Vflexi(0 + ix * cov_dim, 0 + ix * cov_dim) = covariance(0, 0);
+        Vflexi(1 + ix * cov_dim, 0 + ix * cov_dim) = covariance(1, 0);
+        Vflexi(2 + ix * cov_dim, 0 + ix * cov_dim) = covariance(2, 0);
+        Vflexi(3 + ix * cov_dim, 0 + ix * cov_dim) = covariance(3, 0);
+        Vflexi(4 + ix * cov_dim, 0 + ix * cov_dim) = covariance(4, 0);
+        Vflexi(0 + ix * cov_dim, 1 + ix * cov_dim) = covariance(0, 1);
+        Vflexi(1 + ix * cov_dim, 1 + ix * cov_dim) = covariance(1, 1);
+        Vflexi(2 + ix * cov_dim, 1 + ix * cov_dim) = covariance(2, 1);
+        Vflexi(3 + ix * cov_dim, 1 + ix * cov_dim) = covariance(3, 1);
+        Vflexi(4 + ix * cov_dim, 1 + ix * cov_dim) = covariance(4, 1);
+        Vflexi(0 + ix * cov_dim, 2 + ix * cov_dim) = covariance(0, 2);
+        Vflexi(1 + ix * cov_dim, 2 + ix * cov_dim) = covariance(1, 2);
+        Vflexi(2 + ix * cov_dim, 2 + ix * cov_dim) = covariance(2, 2);
+        Vflexi(3 + ix * cov_dim, 2 + ix * cov_dim) = covariance(3, 2);
+        Vflexi(4 + ix * cov_dim, 2 + ix * cov_dim) = covariance(4, 2);
+        Vflexi(0 + ix * cov_dim, 3 + ix * cov_dim) = covariance(0, 3);
+        Vflexi(1 + ix * cov_dim, 3 + ix * cov_dim) = covariance(1, 3);
+        Vflexi(2 + ix * cov_dim, 3 + ix * cov_dim) = covariance(2, 3);
+        Vflexi(3 + ix * cov_dim, 3 + ix * cov_dim) = covariance(3, 3);
+        Vflexi(4 + ix * cov_dim, 3 + ix * cov_dim) = covariance(4, 3);
+        Vflexi(0 + ix * cov_dim, 4 + ix * cov_dim) = covariance(0, 4);
+        Vflexi(1 + ix * cov_dim, 4 + ix * cov_dim) = covariance(1, 4);
+        Vflexi(2 + ix * cov_dim, 4 + ix * cov_dim) = covariance(2, 4);
+        Vflexi(3 + ix * cov_dim, 4 + ix * cov_dim) = covariance(3, 4);
+        Vflexi(4 + ix * cov_dim, 4 + ix * cov_dim) = covariance(4, 4);
     }
+    
+    indexVec.clear();
+
 }
 
 void KinFitter::addMassConstraint(double mass)
@@ -167,6 +240,7 @@ void KinFitter::addMassConstraint(double mass)
     fFlexiParticlesInMassFit.clear();
     fMass = mass;
     fMassVec.push_back(mass);
+    fFlexiParticlesInMassFit.clear();
     // if (!fMassConstraint)
     fNdf += 1;
     fMassConstraint = true;
@@ -327,12 +401,13 @@ void KinFitter::addMissingParticleConstraint(TLorentzVector lv, double mass)
 
     fNumMissingParticleFits++;
 
-    fM.push_back(fMassMissingParticle);
+    fMissingMasses.push_back(fMassMissingParticle);
     fNdf += 1;
     //}
 
     fMissingParticleFitPairs.push_back(fFlexiParticlesInMissingParticleFit);
-
+    fFlexiParticlesInMissingParticleFit.clear();
+    
     fMissingParticleConstraint = true;
 }
 
@@ -347,28 +422,30 @@ TMatrixD KinFitter::calcMissingMom(const TMatrixD &m_iter)
 
     // Function that is called once before the iterations
 
-    if ((int)fFlexiParticlesInMissingParticleFit.size() > 1)
+    if (fNumMissingParticleFits > 1)
     {
         // For each initial vector, set px, py, pz
 
-        TMatrix xi(3 * fNumMissingParticleFits, 1);
+        xi.ResizeTo(3 * fNumMissingParticleFits, 1);
 
-        for (int numFits = 0; numFits < fNumMissingParticleFits; numFits++)
+        for (int numParticles = 0; numParticles < fNumMissingParticleFits; numParticles++)
         {
 
-            xi(0 + (3*numFits), 0) = fInitVec[numFits].Px();
-            xi(1 + (3*numFits), 0) = fInitVec[numFits].Py();
-            xi(2 + (3*numFits), 0) = fInitVec[numFits].Pz();
+            xi(0 + (3*numParticles), 0) = fInitVec[numParticles].Px();
+            xi(1 + (3*numParticles), 0) = fInitVec[numParticles].Py();
+            xi(2 + (3*numParticles), 0) = fInitVec[numParticles].Pz();
 
-            for (int q = 0; q < (int)fMissingParticleFitPairs[numFits].size(); q++)
+            for (int q = 0; q < (int)fMissingParticleFitPairs[numParticles].size(); q++)
             {
-                int particle = fMissingParticleFitPairs[numFits][q];
+                int particle = fMissingParticleFitPairs[numParticles][q];
                 
-                xi(0 + (3*numFits), 0) -= 1. / m_iter(0 + particle * cov_dim, 0) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::cos(m_iter(2 + particle * cov_dim, 0));
-                xi(1 + (3*numFits), 0) -= 1. / m_iter(0 + particle * cov_dim, 0) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::sin(m_iter(2 + particle * cov_dim, 0));
-                xi(2 + (3*numFits), 0) -= 1. / m_iter(0 + particle * cov_dim, 0) * std::cos(m_iter(1 + particle * cov_dim, 0));
+                xi(0 + (3*numParticles), 0) -= 1. / m_iter(0 + particle * cov_dim, 0) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::cos(m_iter(2 + particle * cov_dim, 0));
+                xi(1 + (3*numParticles), 0) -= 1. / m_iter(0 + particle * cov_dim, 0) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::sin(m_iter(2 + particle * cov_dim, 0));
+                xi(2 + (3*numParticles), 0) -= 1. / m_iter(0 + particle * cov_dim, 0) * std::cos(m_iter(1 + particle * cov_dim, 0));
             }
         }
+
+        //xi.Print();
     }
     else
     {
@@ -387,6 +464,9 @@ TMatrixD KinFitter::calcMissingMom(const TMatrixD &m_iter)
         }
     }
 
+    //std::cout << "After iter " << std::endl;
+    //xi.Print();
+    
     return xi;
 }
 
@@ -610,7 +690,7 @@ TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         d(0, 0) = -fInit.Px() + xi_iter(0, 0);
         d(1, 0) = -fInit.Py() + xi_iter(1, 0);
         d(2, 0) = -fInit.Pz() + xi_iter(2, 0);
-        d(3, 0) = -fInit.E() + sqrt(pow(xi_iter(0, 0), 2) + pow(xi_iter(1, 0), 2) + pow(xi_iter(2, 0), 2) + pow(fM[fN], 2));
+        d(3, 0) = -fInit.E() + sqrt(pow(xi_iter(0, 0), 2) + pow(xi_iter(1, 0), 2) + pow(xi_iter(2, 0), 2) + pow(fMissingMasses[0], 2));
 
         for (int q = 0; q < fN; q++)
         {
@@ -621,7 +701,7 @@ TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         }
 
         // The mass of the nissing particle will have been added to a vector, fM, for each missing particle constraint, this vector contains the mass of the particle that is missing
-        if ((int)fFlexiParticlesInMissingParticleFit.size() > 1)
+        if (fNumMissingParticleFits > 1)
         {
 
             int cof = d.GetNrows();
@@ -629,23 +709,29 @@ TMatrixD KinFitter::f_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 
             for (int numMissingParticleFits = 0; numMissingParticleFits < fNumMissingParticleFits; numMissingParticleFits++)
             {
+                // std::cout << "xi_iter" << std::endl; 
+                // std::cout << xi_iter(numMissingParticleFits + 0, 0) << std::endl;
+                // std::cout << xi_iter(numMissingParticleFits + 1, 0) << std::endl;
+                // std::cout << xi_iter(numMissingParticleFits + 2, 0) << std::endl;
+
                 // xi_iter is for the unmeasured particle
-                d(cof + 0, 0) = -fInit.Px() + xi_iter(cof + 0, 0);
-                d(cof + 1, 0) = -fInit.Py() + xi_iter(cof + 1, 0);
-                d(cof + 2, 0) = -fInit.Pz() + xi_iter(cof + 2, 0);
-                d(cof + 3, 0) = -fInit.E() + sqrt(pow(xi_iter(0, 0), 2) + pow(xi_iter(1, 0), 2) + pow(xi_iter(2, 0), 2) + pow(fM[numMissingParticleFits], 2));
+                // *4 is for rhe number of unmeasured parameters
+                d(numMissingParticleFits*4 + 0, 0) = -fInitVec[numMissingParticleFits].Px() + xi_iter(numMissingParticleFits + 0, 0);
+                d(numMissingParticleFits*4 + 1, 0) = -fInitVec[numMissingParticleFits].Py() + xi_iter(numMissingParticleFits + 1, 0);
+                d(numMissingParticleFits*4 + 2, 0) = -fInitVec[numMissingParticleFits].Pz() + xi_iter(numMissingParticleFits + 2, 0);
+                d(numMissingParticleFits*4 + 3, 0) = -fInitVec[numMissingParticleFits].E() + sqrt(pow(xi_iter(numMissingParticleFits + 0, 0), 2) + pow(xi_iter(numMissingParticleFits + 1, 0), 2) + pow(xi_iter(numMissingParticleFits + 2, 0), 2) + pow(fMissingMasses[numMissingParticleFits], 2));
 
                 // Iterate over the particles in the vector
-                for (int q = 0; q < (int)fMassFitPair[numMissingParticleFits].size(); q++)
+                for (int q = 0; q < (int)fMissingParticleFitPairs[numMissingParticleFits].size(); q++)
                 {
 
-                    int particle = fMassFitPair[numMissingParticleFits][q];
+                    int particle = fMissingParticleFitPairs[numMissingParticleFits][q];
 
                     // 0, 1, 2 and 3 are for which parameter is used for the particle indexed by "particle"
-                    d(cof + 0, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * sin(m_iter(1 + particle * cov_dim, 0)) * cos(m_iter(2 + particle * cov_dim, 0));
-                    d(cof + 1, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * sin(m_iter(1 + particle * cov_dim, 0)) * sin(m_iter(2 + particle * cov_dim, 0));
-                    d(cof + 2, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * cos(m_iter(1 + particle * cov_dim, 0));
-                    d(cof + 3, 0) += sqrt(pow((1. / m_iter(0 + particle * cov_dim, 0)), 2) + pow(fM[numMissingParticleFits], 2));
+                    d(numMissingParticleFits*4 + 0, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * sin(m_iter(1 + particle * cov_dim, 0)) * cos(m_iter(2 + particle * cov_dim, 0));
+                    d(numMissingParticleFits*4 + 1, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * sin(m_iter(1 + particle * cov_dim, 0)) * sin(m_iter(2 + particle * cov_dim, 0));
+                    d(numMissingParticleFits*4 + 2, 0) += 1. / m_iter(0 + particle * cov_dim, 0) * cos(m_iter(1 + particle * cov_dim, 0));
+                    d(numMissingParticleFits*4 + 3, 0) += sqrt(pow((1. / m_iter(0 + particle * cov_dim, 0)), 2) + pow(fM[numMissingParticleFits], 2));
                 }
             }
         }
@@ -1273,39 +1359,48 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
             for (int numMissingParticleFits = 0; numMissingParticleFits < fNumMissingParticleFits; numMissingParticleFits++)
             {
 
-                for (int q = 0; q < (int)fMassFitPair[numMissingParticleFits].size(); q++)
+                for (int q = 0; q < (int)fMissingParticleFitPairs[numMissingParticleFits].size(); q++)
                 {
+                    
                     numEntries++;
                 }
 
             }
 
-            H.ResizeTo(4, numEntries * cov_dim);
+            //std::cout << "Numentries: " << numEntries << std::endl;
+            numEntries = 4;
+
+            // H.ResizeTo(4, numEntries * cov_dim); // Var detta tidigare
+            H.ResizeTo(4 * fNumMissingParticleFits, numEntries * cov_dim);
             // H.Zero();
 
+            //std::cout << "////////////////  WHERE H IS SET /////////////////////////////////" << std::endl;
             for (int numMissingParticleFits = 0; numMissingParticleFits < fNumMissingParticleFits; numMissingParticleFits++)
             {
 
                 // Iterate over the particles in the vector
-                for (int q = 0; q < (int)fMassFitPair[numMissingParticleFits].size(); q++)
+                for (int q = 0; q < (int)fMissingParticleFitPairs[numMissingParticleFits].size(); q++)
                 {
 
-                    int particle = fMassFitPair[numMissingParticleFits][q];
+                    int particle = fMissingParticleFitPairs[numMissingParticleFits][q];
 
                     // d(1/p)
-                    H(0, 0 + particle * cov_dim) = -1. / std::pow(m_iter(0 + particle * cov_dim, 0), 2) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::cos(m_iter(2 + particle * cov_dim, 0));
-                    H(1, 0 + particle * cov_dim) = -1. / std::pow(m_iter(0 + particle * cov_dim, 0), 2) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::sin(m_iter(2 + particle * cov_dim, 0));
-                    H(2, 0 + particle * cov_dim) = -1. / std::pow(m_iter(0 + particle * cov_dim, 0), 2) * std::cos(m_iter(1 + particle * cov_dim, 0));
-                    H(3, 0 + particle * cov_dim) = -1. / std::pow(m_iter(0 + particle * cov_dim, 0), 3) * 1. / sqrt(pow(1. / (m_iter(0 + particle * cov_dim, 0)), 2) + std::pow(fM[numMissingParticleFits], 2));
+                    H(0 + 4 * numMissingParticleFits, 0 + particle * cov_dim) = -1. / std::pow(m_iter(0 + particle * cov_dim, 0), 2) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::cos(m_iter(2 + particle * cov_dim, 0));
+                    H(1 + 4 * numMissingParticleFits, 0 + particle * cov_dim) = -1. / std::pow(m_iter(0 + particle * cov_dim, 0), 2) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::sin(m_iter(2 + particle * cov_dim, 0));
+                    H(2 + 4 * numMissingParticleFits, 0 + particle * cov_dim) = -1. / std::pow(m_iter(0 + particle * cov_dim, 0), 2) * std::cos(m_iter(1 + particle * cov_dim, 0));
+                    H(3 + 4 * numMissingParticleFits, 0 + particle * cov_dim) = -1. / std::pow(m_iter(0 + particle * cov_dim, 0), 3) * 1. / sqrt(pow(1. / (m_iter(0 + particle * cov_dim, 0)), 2) + std::pow(fM[numMissingParticleFits], 2));
 
                     // dtht
-                    H(0, 1 + particle * cov_dim) = 1. / m_iter(0 + particle * cov_dim, 0) * std::cos(m_iter(1 + particle * cov_dim, 0)) * std::cos(m_iter(2 + particle * cov_dim, 0));
-                    H(1, 1 + particle * cov_dim) = 1. / m_iter(0 + particle * cov_dim, 0) * std::cos(m_iter(1 + particle * cov_dim, 0)) * std::sin(m_iter(2 + particle * cov_dim, 0));
-                    H(2, 1 + particle * cov_dim) = -1. / m_iter(0 + particle * cov_dim, 0) * std::sin(m_iter(1 + particle * cov_dim, 0));
+                    H(0 + 4 * numMissingParticleFits, 1 + particle * cov_dim) = 1. / m_iter(0 + particle * cov_dim, 0) * std::cos(m_iter(1 + particle * cov_dim, 0)) * std::cos(m_iter(2 + particle * cov_dim, 0));
+                    H(1 + 4 * numMissingParticleFits, 1 + particle * cov_dim) = 1. / m_iter(0 + particle * cov_dim, 0) * std::cos(m_iter(1 + particle * cov_dim, 0)) * std::sin(m_iter(2 + particle * cov_dim, 0));
+                    H(2 + 4 * numMissingParticleFits, 1 + particle * cov_dim) = -1. / m_iter(0 + particle * cov_dim, 0) * std::sin(m_iter(1 + particle * cov_dim, 0));
 
                     // dphi
-                    H(0, 2 + particle * cov_dim) = -1. / m_iter(0 + particle * cov_dim, 0) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::sin(m_iter(2 + particle * cov_dim, 0));
-                    H(1, 2 + particle * cov_dim) = 1. / m_iter(0 + particle * cov_dim, 0) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::cos(m_iter(2 + particle * cov_dim, 0));
+                    H(0 + 4 * numMissingParticleFits, 2 + particle * cov_dim) = -1. / m_iter(0 + particle * cov_dim, 0) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::sin(m_iter(2 + particle * cov_dim, 0));
+                    H(1 + 4 * numMissingParticleFits, 2 + particle * cov_dim) = 1. / m_iter(0 + particle * cov_dim, 0) * std::sin(m_iter(1 + particle * cov_dim, 0)) * std::cos(m_iter(2 + particle * cov_dim, 0));
+               
+                    //std::cout << particle << std::endl;
+
                 }
             }
         }
@@ -1335,11 +1430,14 @@ TMatrixD KinFitter::Feta_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
 
                 // std::cout << "H in 4C: "  << std::endl;
 
-                // H.Print();
+                // 
             }
         }
     }
 
+    //std::cout << "----------------------------------- H --------------------------------------" << std::endl;
+    //H.Print();
+    
     // Mass constraint
     if (fMassConstraint)
     {
@@ -1549,6 +1647,7 @@ TMatrixD KinFitter::Fxi_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
     // std::cout << "CovDim: " << cov_dim << std::endl;
     // std::cout << "fN: " << fN << std::endl;
 
+    
     TMatrixD H;
 
     if (f3Constraint)
@@ -1563,7 +1662,7 @@ TMatrixD KinFitter::Fxi_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         H(3, 0) = 1. / std::pow(xi_iter(0, 0), 3) * 1. / sqrt(pow(1. / xi_iter(0, 0), 2) + std::pow(fM[fN], 2));
     }
 
-    if (fMissingParticleConstraint)
+    if (fMissingParticleConstraint && fNumMissingParticleFits == 1)
     {
         // std::cout << "xi_iter: " << xi_iter(0, 0) << " " << xi_iter(1, 0) << " " << xi_iter(2, 0) << std::endl;
 
@@ -1574,10 +1673,78 @@ TMatrixD KinFitter::Fxi_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
         H(1, 1) = 1;
         H(2, 2) = 1;
 
-        H(3, 0) = xi_iter(0, 0) / sqrt(pow(xi_iter(0, 0), 2) + std::pow(xi_iter(1, 0), 2) + std::pow(xi_iter(2, 0), 2) + std::pow(fM[fN], 2));
-        H(3, 1) = xi_iter(1, 0) / sqrt(pow(xi_iter(0, 0), 2) + std::pow(xi_iter(1, 0), 2) + std::pow(xi_iter(2, 0), 2) + std::pow(fM[fN], 2));
-        H(3, 2) = xi_iter(2, 0) / sqrt(pow(xi_iter(0, 0), 2) + std::pow(xi_iter(1, 0), 2) + std::pow(xi_iter(2, 0), 2) + std::pow(fM[fN], 2));
+        H(3, 0) = xi_iter(0, 0) / sqrt(pow(xi_iter(0, 0), 2) + std::pow(xi_iter(1, 0), 2) + std::pow(xi_iter(2, 0), 2) + std::pow(fMassMissingParticle, 2));
+        H(3, 1) = xi_iter(1, 0) / sqrt(pow(xi_iter(0, 0), 2) + std::pow(xi_iter(1, 0), 2) + std::pow(xi_iter(2, 0), 2) + std::pow(fMassMissingParticle, 2));
+        H(3, 2) = xi_iter(2, 0) / sqrt(pow(xi_iter(0, 0), 2) + std::pow(xi_iter(1, 0), 2) + std::pow(xi_iter(2, 0), 2) + std::pow(fMassMissingParticle, 2));
+   
+        //H.Print();
+    }    
+
+    if (fMissingParticleConstraint && fNumMissingParticleFits > 1)
+    {
+
+        // Column: column i is the derivative wrt. unmeasured variable i
+        // Rows: row i is the constraint equaion i of which the derivative is taken
+
+        // Number of constraint equations, number of parameters
+        // The matrix is ordered so that each row represents .......... and each column is the variable with which the ................
+
+        H.ResizeTo(4 * fNumMissingParticleFits, 3);  
+        //H.ResizeTo(4, 3);
+        H.Zero();
+
+        // Xi(0, 0) is Px
+        // Xi(1, 0) is Py
+        // Xi(2, 0) is Pz
+
+        // Rows are the derivative of the variable in question, ordering Px_1, Py_1, Pz_1, E_1, Px_2, Py_2, Pz_2, E_2, .... where 1, 2 etc. denotes the particle 
+        // Columns are 
+
+        for (int numMissingParticleFits = 0; numMissingParticleFits < fNumMissingParticleFits; numMissingParticleFits ++)
+        {
+            //std::cout << numMissingParticleFits << std::endl;
+
+            // The different particles are the same as number of fits since there is a missing particle in every constraint
+           
+            // 
+            H(0 + (4 * numMissingParticleFits), 0) = 1;
+            H(1 + (4 * numMissingParticleFits), 1) = 1;
+            H(2 + (4 * numMissingParticleFits), 2) = 1;
+
+            H(3 + (4 * numMissingParticleFits), 0) = xi_iter(0 + (3 * numMissingParticleFits), 0) / sqrt(pow(xi_iter(0 + (3 * numMissingParticleFits), 0), 2) + std::pow(xi_iter(1 + (3 * numMissingParticleFits), 0), 2) + std::pow(xi_iter(2 + (3 * numMissingParticleFits), 0), 2) + std::pow(fMissingMasses[numMissingParticleFits], 2));
+            H(3 + (4 * numMissingParticleFits), 1) = xi_iter(1 + (3 * numMissingParticleFits), 0) / sqrt(pow(xi_iter(0 + (3 * numMissingParticleFits), 0), 2) + std::pow(xi_iter(1 + (3 * numMissingParticleFits), 0), 2) + std::pow(xi_iter(2 + (3 * numMissingParticleFits), 0), 2) + std::pow(fMissingMasses[numMissingParticleFits], 2));
+            H(3 + (4 * numMissingParticleFits), 2) = xi_iter(2 + (3 * numMissingParticleFits), 0) / sqrt(pow(xi_iter(0 + (3 * numMissingParticleFits), 0), 2) + std::pow(xi_iter(1 + (3 * numMissingParticleFits), 0), 2) + std::pow(xi_iter(2 + (3 * numMissingParticleFits), 0), 2) + std::pow(fMissingMasses[numMissingParticleFits], 2));
+
+            // std::cout << "Xi: " << std::endl;
+            // std::cout << xi_iter(0 + (3 * numEntries), 0) << std::endl;
+            // std::cout << xi_iter(1 + (3 * numEntries), 0) << std::endl;
+            // std::cout << xi_iter(2 + (3 * numEntries), 0) << std::endl;
+            // std::cout << xi_iter(0 + 3 * 0, 0) << std::endl;
+            // std::cout << xi_iter(1 + 3 * 0, 0) << std::endl;
+            // std::cout << xi_iter(2 + 3 * 0, 0) << std::endl;
+            // std::cout << xi_iter(0, 0) << std::endl;
+            // std::cout << xi_iter(1, 0) << std::endl;
+            // std::cout << xi_iter(2, 0) << std::endl;
+
+
+            //H.Print();
+        }
+
+        // H.ResizeTo(4, 3);
+        // H.Zero();
+
+        // H(0, 0) = 1;
+        // H(1, 1) = 1;
+        // H(2, 2) = 1;
+
+        // H(3, 0) = xi_iter(0, 0) / sqrt(pow(xi_iter(0, 0), 2) + std::pow(xi_iter(1, 0), 2) + std::pow(xi_iter(2, 0), 2) + std::pow(fMassMissingParticle, 2));
+        // H(3, 1) = xi_iter(1, 0) / sqrt(pow(xi_iter(0, 0), 2) + std::pow(xi_iter(1, 0), 2) + std::pow(xi_iter(2, 0), 2) + std::pow(fMassMissingParticle, 2));
+        // H(3, 2) = xi_iter(2, 0) / sqrt(pow(xi_iter(0, 0), 2) + std::pow(xi_iter(1, 0), 2) + std::pow(xi_iter(2, 0), 2) + std::pow(fMassMissingParticle, 2));
+   
+        // H.Print();
+
     }
+
     if (fMissingParticleConstraint && fMassConstraint)
     {
         // std::cout << "xi_iter: " << xi_iter(0, 0) << " " << xi_iter(1, 0) << " " << xi_iter(2, 0) << std::endl;
@@ -1663,7 +1830,7 @@ TMatrixD KinFitter::Fxi_eval(const TMatrixD &m_iter, const TMatrixD &xi_iter)
     // }
 
     // std::cout << "H: " << std::endl;
-    // H.Print();
+    //H.Print();
 
     return H;
 }
@@ -1684,24 +1851,54 @@ Bool_t KinFitter::fit()
         std::cout << "" << std::endl;
     }
 
-    // setCovariance();
+    // Include a flexible way of setting the covariance here after the sizes of all matrices have been set
+    setCovariance();
+    
+    // alpha0 is starting values of measured variables and alpha is the values used in the iterations
 
-    TMatrixD alpha0(fyDim, 1), alpha(fyDim, 1);
+    TMatrixD alpha0(fyDim, 1), alpha(fyDim, 1); 
+
     TMatrixD xi0(x), xi(x), neu_xi(x);
-    TMatrixD A0(y), V0(V);
+    TMatrixD A0(y);
+    TMatrixD V0;
+
+    if (fMissingParticleConstraint && fNumMissingParticleFits > 1)
+    {
+    //    y.ResizeTo(fyDim*fNumMissingParticleFits,0);
+        V0.ResizeTo(Vflexi.GetNrows(),Vflexi.GetNcols());
+        V0=Vflexi;
+        // Create new covariance matrix that contain only the selected particles
+    }else{
+        V0.ResizeTo(V);
+        V0=V;
+    }
+
     alpha0 = y;
     alpha = alpha0;
     double chi2 = 1e6;
     double determinant = 0.;
 
+    //std::cout << "xi0" << std::endl;
+    //xi0.Print();
+    
+    //std::cout << "xi" << std::endl;
+    //xi.Print();
+
+    //std::cout << "neu_xi" << std::endl;
+    //neu_xi.Print();
+    
     // Calculating the inverse of the original covariance matrix that is not changed in the iterations
-    if (fVerbose > 2)
-    {
+    //if (fVerbose > 2)
+    //{
         // std::cout<<"Original Covariance - "<<std::flush;
         // V.Print();
-    }
+    //}
     TMatrixD V0_inv(V);
     V0_inv.Invert(&determinant);
+
+    //std::cout << "V0_inv" << std::endl;
+    //V0_inv.Print();
+
     std::cerr << std::flush;
     if (determinant == 0.)
         return kFALSE; // protect against failed matrix inversion
@@ -1726,32 +1923,75 @@ Bool_t KinFitter::fit()
 
     if (fMissingParticleConstraint)
     {
+        xi0.ResizeTo(3 * fNumMissingParticleFits, 1);
+        xi.ResizeTo(3 * fNumMissingParticleFits, 1);
+        neu_xi.ResizeTo(3 * fNumMissingParticleFits, 1);
+        
+        // Instead of resizing throughout the iterations, resize in the function setCovariance
+        // Alpha should be the size of all MEASURED variables, since alpha is set to 
+        // alpha0 which in turn is set to y which is the set of measured variables: fyDim = fN * cov_dim;
+        // alpha.ResizeTo(fNumMissingParticleFits*y.Size(), 1);
+        
         xi0 = calcMissingMom(alpha0);
-        xi = xi0;
+        xi = xi0;    
+        
+        //std::cout << "After xi has been set inside if statement" << std::endl;
+
+        //std::cout << "xi0" << std::endl;
+        //xi0.Print();
     }
 
+    //std::cout << "xi" << std::endl;
+    //xi.Print();
+
+    //std::cout << "neu_xi" << std::endl;
+    //neu_xi.Print();
+    
     if (fVerbose > 1)
     {
         // cout << " Calculate Feta" << endl;
     }
     TMatrixD D = Feta_eval(alpha, xi);
+
+    //std::cout << "D:" << std::endl;
+    //D.Print();
+
     TMatrixD DT(D.GetNcols(), D.GetNrows());
     if (fVerbose > 1)
     {
         // cout << " Calculate f" << endl;
     }
-    TMatrixD d = f_eval(alpha, xi);
-    TMatrixD D_xi(d.GetNrows(), 1), DT_xi(1, d.GetNrows());
-    if (d.GetNrows() - fNdf > 0)
-        D_xi.ResizeTo(d.GetNrows(), d.GetNrows() - fNdf);
-    DT_xi.ResizeTo(d.GetNrows() - fNdf, d.GetNrows()); // check dimension if other fitters are added
-    D_xi.Zero();
-    DT_xi.Zero();
 
+    // std::cout << "Before f_eval(alpha, xi): " << std::endl;
+    // std::cout << "xi: " << std::endl;
+    // xi.Print();
+
+    TMatrixD d = f_eval(alpha, xi);
+
+    // std::cout << "Before iterations: " << std::endl;
+    // std::cout << "d: " << std::endl;
+    // d.Print();
+
+    TMatrixD D_xi(d.GetNrows(), 1), DT_xi(1, d.GetNrows());
+
+    if (d.GetNrows() - fNdf > 0)
+    {
+        D_xi.ResizeTo(d.GetNrows(), d.GetNrows() - fNdf);
+        DT_xi.ResizeTo(d.GetNrows() - fNdf, d.GetNrows()); // check dimension if other constraints are added
+        D_xi.Zero();
+        DT_xi.Zero();
+    }
+
+    if(fMissingMassConstraint && fNumMissingParticleFits > 1){
+
+        D_xi.ResizeTo(4 * fNumMissingParticleFits, 3); 
+        DT_xi.ResizeTo(3, 4 * fNumMissingParticleFits); 
+    }
+    
     // if (fVerbose > -7)
     //{
-    // std::cout<<" D_xi after initialization"<<std::flush;
-    // D_xi.Print();
+    //std::cout<<" D_xi after initialization"<<std::flush;
+    //D_xi.Print();
 
     //}
 
@@ -1761,19 +2001,33 @@ Bool_t KinFitter::fit()
         {
             // cout << " Calculate Fxi" << endl;
         }
+        //std::cout << " ------------------------ Before Fxi_eval-------------------------------------------" << std::endl;
+        //xi.Print();        
+        //std::cout << "D_xi:" << std::endl;
+        //D_xi.Print();         
+        D_xi.ResizeTo(4, 3); 
+        DT_xi.ResizeTo(3, 4);
+        if (fMissingParticleConstraint && fNumMissingParticleFits > 1)
+        {
+            D_xi.ResizeTo(4 * fNumMissingParticleFits, 3);
+            DT_xi.ResizeTo(3, 4 * fNumMissingParticleFits);
+        }
         D_xi = Fxi_eval(alpha, xi);
-
+        //std::cout << "D_xi:" << std::endl;
+        //D_xi.Print();
+        //std::cout << " ------------------------ After Fxi_eval-------------------------------------------" << std::endl;
         if (fVerbose > 1)
         {
-            // cout << "alpha" << endl;
-            // alpha.Print();
-            // cout << "xi" << endl;
-            // xi.Print();
-            std::cout << " ------------------------ After Fxi_eval-------------------------------------------" << std::endl;
+            cout << "alpha" << endl;
+            alpha.Print();
+            cout << "xi" << endl;
+            xi.Print();
+            
             cout << " D_xi" << endl;
             D_xi.Print();
         }
     }
+
     TMatrixD VD(D.GetNrows(), D.GetNrows());
     VD.Zero();
     TMatrixD VDD(D_xi.GetNcols(), D_xi.GetNcols());
@@ -1781,6 +2035,10 @@ Bool_t KinFitter::fit()
 
     for (int iteration = 0; iteration < fNumIterations; iteration++)
     {
+
+        //std::cout << "///////////////////////// GOT INTO ITERATIONS! //////////////////////////////" << std::endl;
+        //std::cout << "Iter: " << iteration << std::endl;
+
         if (fVerbose > 0)
         {
             std::cout << "Number of iterations: " << iteration << std::endl;
@@ -1793,38 +2051,42 @@ Bool_t KinFitter::fit()
             cout << " Calculate r" << endl;
         }
         TMatrixD r = d + D * delta_alpha;
-        if (fVerbose > 2)
-        {
-            // std::cout<<"delta_alpha - "<<std::flush;
-            // delta_alpha.Print();
-            // std::cout<<"r = f_eta + F_eta*delta_alpha- "<<std::flush;
-            // r.Print();
-        }
-        DT.Transpose(D);
+        //if (fVerbose > 2)
+        //{
+            //std::cout<<"delta_alpha - "<<std::flush;
+            //delta_alpha.Print();
+            //std::cout<<"r = f_eta + F_eta*delta_alpha- "<<std::flush;
+            //r.Print();
+        //}
+        DT.Transpose(D); // Set matrix DT to the transpose of matrix D
         // Calculate S
         if (fVerbose > 1)
         {
             cout << " Calculate S" << endl;
         }
         VD = D * V0 * DT;
-        // std::cout << "VD: " << std::endl;
-        // VD.Print();
-        // std::cout << "D: " << std::endl;
-        // D.Print();
-        // std::cout << "V0: " << std::endl;
-        // V0.Print();
-        // std::cout << "DT: " << std::endl;
-        // DT.Print();
+        //  std::cout << "--------- Matrices used to compute VDD ----------" << std::endl;
+        //  std::cout << "VD: " << std::endl;
+        //  VD.Print();
+        //  std::cout << "D: " << std::endl;
+        //  D.Print();
+        //  std::cout << "V0: " << std::endl;
+        //  V0.Print();
+        //  std::cout << "DT: " << std::endl;
+        //  DT.Print();
+        // std::cout << "------------------- End of matrices used to compute VDD --------------" << std::endl;
 
         VD.Invert(&determinant);
         std::cerr << std::flush;
         if (determinant == 0.)
         {
+            //std::cout << "/////////////////////// DETERMINANT 0 ////////////////////" << std::endl;
             if (iteration == 0)
                 return kFALSE; // protect against failed matrix inversion
             else
                 break; // we had a good iteration?
         }
+        //std::cout << "/////////////////////// DETERMINANT NOT 0 ////////////////////" << std::endl;
         if (fVerbose > 2)
         {
             std::cout << "(D*V0*Dt)^-1 - " << std::flush;
@@ -1837,19 +2099,23 @@ Bool_t KinFitter::fit()
             {
                 // cout << " Calculate Sxi" << endl;
             }
-            VDD = DT_xi * VD * D_xi; ///-----------------------VDD ends up zero, D_xi is zero
+            VDD = DT_xi * VD * D_xi;
+            //VDD = D_xi * VD * DT_xi;
 
-            if (fVerbose > 1)
-            {
-                std::cout << "DT_xi:" << std::endl;
-                DT_xi.Print();
-                std::cout << "VD:" << std::endl;
-                VD.Print();
-                std::cout << "D_xi:" << std::endl;
-                D_xi.Print();
-                std::cout << "VDD:" << std::endl;
-                VDD.Print();
-            }
+            //if (fVerbose > 1)
+            //{
+
+                // std::cout << "---------------  After DT_xi.Transpose(D_xi); -------------------------" << std::endl;
+                // std::cout << "DT_xi:" << std::endl;
+                // DT_xi.Print();
+                // std::cout << "VD:" << std::endl;
+                // VD.Print();
+                // std::cout << "D_xi:" << std::endl;
+                // D_xi.Print();
+                // std::cout << "VDD:" << std::endl;
+                // VDD.Print();
+                // std::cout << "---------------  After matrices of DT_xi.Transpose(D_xi); -------------------------" << std::endl;
+            //}
             if (fVerbose > 1)
             {
                 std::cout << " ------------------------ Before  VDD.Invert(&determinant);-------------------------------------------" << std::endl;
@@ -1888,14 +2154,32 @@ Bool_t KinFitter::fit()
             {
                 // cout << " Calculate neuxi" << endl;
             }
-            neu_xi = xi - VDD * DT_xi * VD * r;
+            // std::cout<< "----------- For calculating neu_xi --------" <<std::endl;
+            // neu_xi = xi - VDD * DT_xi * VD * r;            
+            // //neu_xi = xi - VDD * D_xi * VD * r; 
+            // std::cout<<"xi - "<<std::flush;
+            // xi.Print();
+            // std::cout<<"neu_xi - "<<std::flush;
+            // neu_xi.Print();
+            // std::cout<<"VDD * DT_xi * VD * r"<<std::flush;
+            // (VDD * DT_xi * VD * r).Print();
+            // std::cout<<"VDD "<<std::flush;
+            // (VDD).Print();
+            // std::cout<<"DT_Xi"<<std::flush;
+            // (DT_xi).Print();
+            // std::cout<<"VD"<<std::flush;
+            // (VD).Print();
+            // std::cout<<"r"<<std::flush;
+            // (r).Print();
         }
         TMatrixD delta_xi = neu_xi - xi;
-        if (fVerbose > 2)
-        {
-            // std::cout<<"delta_xi - "<<std::flush;
-            // delta_xi.Print();
-        }
+        //if (fVerbose > 2)
+        //{
+            //  std::cout<<"delta_xi - "<<std::flush;
+            //  delta_xi.Print();             
+            //  std::cout<<"neu_xi - "<<std::flush;
+            //  neu_xi.Print();
+        //}
         if (fVerbose > 1)
         {
             cout << " Calculate lambda" << endl;
@@ -1903,11 +2187,13 @@ Bool_t KinFitter::fit()
         lambda = VD * (r + D_xi * delta_xi);
         TMatrixD lambdaT(lambda.GetNcols(), lambda.GetNrows());
         lambdaT.Transpose(lambda);
-        if (fVerbose > 2)
-        {
+        //if (fVerbose > 2)
+        //{
             // std::cout<<"Lambda - "<<std::flush;
-            // lambda.Print();
-        }
+            // lambda.Print();            
+            // std::cout<<"d "<<std::flush;
+            // d.Print();
+        //}
 
         if (fVerbose > 1)
         {
@@ -2010,8 +2296,19 @@ Bool_t KinFitter::fit()
     }
     y = alpha;
     x = xi;
-    if (fMissingParticleConstraint)
+    if (fMissingParticleConstraint){
+        if(fNumMissingParticleFits >1){
+
+            for(int numMissingParticles = 0; numMissingParticles < fNumMissingParticleFits; numMissingParticles++)
+
+            fMissDecayProduct.SetXYZM(x(0+3*numMissingParticles, 0), x(1+3*numMissingParticles, 0), x(2+3*numMissingParticles, 0), fMissingMasses[numMissingParticles]);
+            fMissDecayProducts.push_back(fMissDecayProduct);
+
+        }else{
         fMissDecayProduct.SetXYZM(x(0, 0), x(1, 0), x(2, 0), fM[fN]);
+        }
+        
+    }
     fChi2 = chi2;
     fProb = TMath::Prob(chi2, fNdf);
 
