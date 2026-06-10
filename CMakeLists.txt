@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(
   KinFit
   VERSION 0.0.1
@@ -10,7 +10,7 @@ set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 # Locate the ROOT package and define a number of useful targets and variables.
-find_package(ROOT REQUIRED Core)
+find_package(ROOT REQUIRED Core MathCore Matrix Physics RIO Tree) # GenVector GenVectorCore
 if(NOT ROOT_FOUND)
   message(FATAL_ERROR "ROOT is required but missing !")
 endif(NOT ROOT_FOUND)
@@ -31,7 +31,7 @@ root_generate_dictionary(KinFitDict ${HFILES}
 # cmake-format: on
 add_library(KinFit SHARED ${SRCFILES} KinFitDict.cxx)
 add_library(KinFit::KinFit ALIAS KinFit)
-target_link_libraries(KinFit ROOT::Core )
+target_link_libraries(KinFit ROOT::Core ROOT::MathCore ROOT::Matrix ROOT::Physics ROOT::RIO ROOT::Tree)
 target_include_directories(
   KinFit
   PUBLIC $<INSTALL_INTERFACE:include>
