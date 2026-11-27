@@ -16,21 +16,22 @@
 
 #include "KFitVertexFinder.h"
 
+#include <cmath>
+
 /**
  * @file KFitVertexFinder.cxx
  * @brief Implementation of least-squares vertex finding from track lines.
  */
 
-KFitVertexFinder::KFitVertexFinder(std::vector<KinFitParticle> &cands)
-    : fVerbose(0), fCands(cands) {
+KFitVertexFinder::KFitVertexFinder(const std::vector<KinFitParticle> &cands)
+    : fVerbose(0) {
 
   fM.ResizeTo(3, 3);
   fSys.ResizeTo(3, 3);
 
   reset();
 
-  for (int i_cand = 0; i_cand < fCands.size(); i_cand++) {
-    KinFitParticle cand = cands[i_cand];
+  for (const KinFitParticle &cand : cands) { // no copies of the tracks
 
     double param_theta = cand.Theta();
     double param_phi = cand.Phi();
@@ -114,7 +115,10 @@ void KFitVertexFinder::findVertex() {
   fM(2, 0) = fM(0, 2);
   fM(2, 1) = fM(1, 2);
 
-  if (det == 0) {
+  // Relative threshold: (nearly) parallel lines give a tiny but non-zero
+  // determinant and a meaningless vertex far away.
+  const double scale = (fSys(0, 0) + fSys(1, 1) + fSys(2, 2)) / 3.;
+  if (!(std::abs(det) > 1e-12 * scale * scale * scale)) {
     fVertex.SetXYZ(-1000., -1000., -1000.);
 
   } else {

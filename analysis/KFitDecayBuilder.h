@@ -98,7 +98,7 @@ public:
   /** @brief Set input candidates
    * @param cands Vector of vector of particle candidates for each PID
    */
-  void setInputCands(std::vector<std::vector<KinFitParticle>> cands) {
+  void setInputCands(const std::vector<std::vector<KinFitParticle>> &cands) {
     fCands = cands;
   }
 

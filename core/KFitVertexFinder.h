@@ -43,8 +43,6 @@ class KFitVertexFinder {
 private:
   int fVerbose; // Verbosity level
 
-  std::vector<KinFitParticle> fCands;
-
   TVector3 fVertex; // Vertex after finding
 
   TMatrixD fM; // Temporal matrix for calculations
@@ -72,7 +70,7 @@ public:
   /** @brief Constructor.
    * @param cands Input track candidates.
    */
-  KFitVertexFinder(std::vector<KinFitParticle> &);
+  KFitVertexFinder(const std::vector<KinFitParticle> &cands);
 
   /** @brief Default destructor. */
   ~KFitVertexFinder() {};

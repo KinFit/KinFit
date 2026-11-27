@@ -88,6 +88,19 @@ KF_TEST(lines_parallel_tracks_fail_cleanly) {
   KF_CHECK(isFailureMarker(finder.getVertex()));
 }
 
+// Nearly parallel tracks (not exactly along z): the determinant is tiny but
+// not exactly 0, which used to give a vertex far outside the detector.
+KF_TEST(lines_nearly_parallel_fail_cleanly) {
+  std::vector<KinFitParticle> cands;
+  for (int k = 0; k < 2; ++k) {
+    TLorentzVector lv;
+    lv.SetXYZM(200, 100 + 1e-7 * k, 500, toy::kMassPion);
+    cands.emplace_back(lv, 1.0 + k, 3.0);
+  }
+  KFitVertexFinder finder(cands);
+  KF_CHECK(isFailureMarker(finder.getVertex()));
+}
+
 // ---------------------------------------------------------------------------
 // KFitVertexFinderConstB
 // ---------------------------------------------------------------------------

@@ -34,6 +34,7 @@ kinfit_add_test(test_particle
 kinfit_add_test(test_vertexfinder
   LABELS core vertex
   CASES lines_exact_intersection lines_parallel_tracks_fail_cleanly
+        lines_nearly_parallel_fail_cleanly
         helix_exact_vertex helix_low_pt_loopers helix_negative_field
         helix_zero_field_equals_lines helix_neutral_tracks_are_lines
         helix_refit_after_setters helix_parallel_tracks_fail_cleanly)
