@@ -35,9 +35,12 @@ The order of the particles in the input vector matters for some constraints
 
 ## Constraints
 
-Use **one constraint type per `KinFitter` object**. The constraint flags are
-evaluated independently and each overwrites the constraint vector, so
-combining types (for example 4C + mass) silently gives wrong results.
+Use **at most one** of 4C, Vertex, MassVtx, MissingMass, MissingParticle and
+3C per `KinFitter` object; `fit()` returns `false` (with a message) if two of
+them are set. Mass constraints (`addMassConstraint`) can be added on top of
+any of them, e.g. 4C + mass or Vertex + mass: their equations are appended.
+The NDF is the number of equations minus the number of unknowns
+(`getNDF()`).
 
 | Method | Equations | Unknowns | NDF | Particles used | Status* |
 | --- | --- | --- | --- | --- | --- |
@@ -46,21 +49,15 @@ combining types (for example 4C + mass) silently gives wrong results.
 | `addVertexConstraint()` | (d₁ × d₂)·(B₁ − B₂) = 0 (1) | – | 1 | **first two** | ✅ verified |
 | `addMissingParticleConstraint(lv, m)` | P_init − Σpᵢ − p_miss = 0 with E_miss = √(p⃗²_miss + m²) (4) | p⃗_miss (3) | 1 | all, **at least two** | ✅ verified with 2 tracks |
 | `add3Constraint(mother)` | Σpᵢ − p_mother = 0 (4) | \|p_mother\| (1) | 3 | all daughters + mother | ✅ verified |
-| `addMassVtxConstraint(m)` | mass (1) + vertex of first two (1) | – | 2 | all / first two | ❌ broken (converges only with exact input) |
-| `addMissingMassConstraint(lv, m)` | (P_init − Σpᵢ)² − m² = 0 (1) | – | 1 | all | ❌ broken |
+| `addMassVtxConstraint(m)` | mass (1) + vertex of first two (1) | – | 2 | all / first two | ✅ verified |
+| `addMissingMassConstraint(lv, m)` | (P_init − Σpᵢ)² − m² = 0 (1) | – | 1 | all | ✅ verified |
 
 \* Status from the QA suite ([QA/](../QA/README.md), `test_kinfitter`):
 ✅ means that, with smeared Λ → pπ⁻ tracks, the fit converges, fulfils the
 constraint, gives pulls distributed as N(0, 1) and a flat probability, and
-that its analytic derivatives agree with finite differences. The open issues
-are listed in [TODO.md](../TODO.md):
+that its analytic derivatives agree with finite differences. Open issues are
+listed in [TODO.md](../TODO.md):
 
-- **MissingMass:** the constraint function adds the measured momenta to the
-  initial state instead of subtracting them, while its derivative subtracts
-  them. The fit never converges.
-- **MassVtx:** the derivative of the vertex equation has the wrong sign
-  (f uses B₂ − B₁, the Jacobian B₁ − B₂). The fit converges for exact input
-  only.
 - **MissingParticle with a single measured track:** the matrix D·V·Dᵀ is
   singular (rank ≤ 3 for a 4×4 matrix), so the fit returns `false`.
 
@@ -81,10 +78,18 @@ are listed in [TODO.md](../TODO.md):
 - `setNumberOfExclusiveCandidates(n)`: the mass constraint uses only the
   first *n* particles of the input vector. The others are still in the fit
   but are not constrained.
-- `setUseCandInFit(i)` is meant to select particles for several mass
-  constraints, but this path is currently not reached (see TODO.md). Call
-  `addMassConstraint()` **once** per fitter: each call increases the NDF,
-  even though only one equation is evaluated.
+- Several mass constraints on different subsets: select the particles of
+  one constraint with `setUseCandInFit(i)` (once per particle), then call
+  `addMassConstraint(m)`; repeat for the next subset. Each call adds one
+  equation. Without a selection a mass constraint uses all particles (or
+  the first *n*, see above).
+
+```cpp
+fitter.setUseCandInFit(0); fitter.setUseCandInFit(2);
+fitter.addMassConstraint(mLambda);              // (p0 + p2)^2 = mLambda^2
+fitter.setUseCandInFit(1); fitter.setUseCandInFit(3);
+fitter.addMassConstraint(mLambda);              // (p1 + p3)^2 = mLambda^2
+```
 
 ### The vertex constraint
 
@@ -107,16 +112,13 @@ The fit has converged when, between two iterations, **all three** hold:
 
 1. |Δχ²| < c1
 2. ‖f‖ (norm of the constraint vector before the update) < c2
-3. √Σ((Δηᵢ/η₀,ᵢ)²) (relative change of the parameters, plus ξ) < c3
+3. √(Σ(Δηᵢ/σᵢ)² + Σ(Δξⱼ/ξ₀,ⱼ)²) < c3: change of the measured parameters
+   in units of their uncertainty σᵢ = √V₀,ᵢᵢ, plus the relative change of
+   the unknowns
 
-With the defaults only the χ² criterion is effective.
-
-> **Pitfall: parameters exactly 0.** Criterion 3 divides by the measured
-> values. If any measured parameter is exactly zero (typically R = 0 or
-> Z = 0 for simulated tracks from the origin), it becomes NaN, so the fit
-> **never reports convergence**. `fit()` then returns `false` even though χ²
-> and the fitted tracks are fine. Until this is fixed (TODO.md, phase 3),
-> avoid exact zeros, e.g. by smearing R and Z.
+With the defaults only the χ² criterion is effective. (Criterion 3 used to
+divide by the measured values, so a parameter exactly 0 made the fit never
+converge; fixed.)
 
 ## Results
 
@@ -124,14 +126,15 @@ With the defaults only the χ² criterion is effective.
 | --- | --- |
 | `fit()` | `true` if converged. With `setNumberOfIterations(1)` it is always `true` unless a matrix inversion failed |
 | `isConverged()`, `getIteration()` | convergence flag and the index of the last iteration |
-| `getChi2()`, `getProb()` | χ² and `TMath::Prob(χ², NDF)` |
-| `getDaughter(i)`, `getDaughters(vec)` | fitted tracks: updated four-vector (same mass), R, Z and the **diagonal** of the fitted covariance |
-| `getMother()` | 3C only: fitted mother with fitted \|p\| |
+| `getChi2()`, `getProb()`, `getNDF()` | χ², `TMath::Prob(χ², NDF)` and NDF |
+| `getDaughter(i)`, `getDaughters(vec)` | fitted tracks: updated four-vector (same mass), R, Z and the full 5×5 fitted covariance |
+| `getMother()` | 3C only: fitted mother with fitted \|p\| and 5×5 covariance (incl. 1/p correlations) |
 | `getMissingDaughter()` | MissingParticle only: fitted four-vector of the missing particle |
 | `getPull(k)` | pull of parameter k, see below |
 
-> **Warning:** `fit()` calls `abort()`, terminating the program, if no
-> constraint was added.
+`fit()` returns `false` if no constraint was added, the constraint
+configuration is invalid or a matrix inversion fails. It can be called again
+(the measured values are kept); the result is the same.
 
 ### Pulls
 
@@ -152,9 +155,9 @@ checks for a fit setup (see the expected output in [README.md](README.md)).
 
 | Member | Content |
 | --- | --- |
-| `y` | measured parameters η (5 per track; for 3C plus θ, φ, R, Z of the mother) |
-| `x` | unmeasured parameters ξ (3C: 1/\|p_mother\|; MissingParticle: p⃗_miss) |
-| `V`, `Vx` | covariance of η and ξ; updated after the fit |
+| `y`, `V` | measured parameters η (5 per track; for 3C plus θ, φ, R, Z of the mother) and their covariance; not changed by the fit |
+| `fYFit`, `fVFit` | fitted η and its covariance |
+| `x`, `Vx` | unmeasured parameters ξ (3C: 1/\|p_mother\|; MissingParticle: p⃗_miss) and their fitted covariance |
 | `f_eval`, `Feta_eval`, `Fxi_eval` | constraint vector and its Jacobians ∂f/∂η, ∂f/∂ξ |
 
 The iteration follows the standard linearised Lagrange-multiplier method
@@ -166,5 +169,8 @@ S      = (D V₀ Dᵀ)⁻¹
 ξ'     = ξ − (Eᵀ S E)⁻¹ Eᵀ S r                 (E = ∂f/∂ξ)
 λ      = S (r + E (ξ' − ξ))
 η'     = η₀ − V₀ Dᵀ λ
-V'     = V₀ − V₀ Dᵀ S D V₀ (+ term for ξ)
+V'     = V₀ − V₀ Dᵀ S D V₀ + G Vξ Gᵀ           (G = V₀ Dᵀ S E)
+Vξ     = (Eᵀ S E)⁻¹,  cov(ξ, η) = −Vξ Gᵀ
 ```
+
+The covariance is evaluated with D, E linearised at the final η, ξ.

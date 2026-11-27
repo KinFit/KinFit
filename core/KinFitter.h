@@ -69,10 +69,13 @@ template <typename T> void Print(T const &matrix) {
 
 class KinFitter : public TObject {
 private:
-  TMatrixD y;              // Vector of measured variables
-  TMatrixD x;              // Vector of unmeasured variables
-  TMatrixD V;              // Covariance matrix of measured variables
+  TMatrixD y;              // Vector of measured variables (input, kept)
+  TMatrixD x;              // Vector of unmeasured variables (fitted)
+  TMatrixD V;              // Covariance matrix of measured variables (input)
   TMatrixD Vx;             // Covariance matrix of unmeasured variables
+  TMatrixD fYFit;          //! Fitted measured variables
+  TMatrixD fVFit;          //! Fitted covariance of the measured variables
+  TMatrixD fVxy;           //! Fitted covariance unmeasured x measured
   TMatrixD fPull;          // Pull value for all measured variables
   double fChi2 = 1e6;      // Chi2 of fit
   double fProb = 1e6;      // Probability of fit
@@ -83,8 +86,7 @@ private:
   std::vector<KinFitParticle> fCands; // Vector of input candidates
   KinFitParticle fMother;             // Decaying particle
   TLorentzVector fMissDaughter;       // Missing decay product
-  std::vector<double>
-      fMassVec; // Vector of masses that is used if several mass fits are used
+  std::vector<double> fMassVec; // One mass per addMassConstraint() call
 
   // Data members for constraints
   int fNdf = 0;                          // Number of degrees of freedom
@@ -111,15 +113,21 @@ private:
   double fConvergenceCriterionD = 1e6;
   double fConvergenceCriterionAlpha = 1e6;
 
-  std::vector<int> fFlexiParticlesInFit;
-  std::vector<std::vector<int>> fMassFitPair;
+  std::vector<int> fFlexiParticlesInFit; // selection for the next mass constraint
+  std::vector<std::vector<int>> fMassFitPair; // particles per mass constraint,
+                                              // empty = default selection
 
   int fVerbose = 0;
 
   int fNExclusive = -1;
-  int fNumMassFits = 0;
 
   TMatrixD calcMissingMom(const TMatrixD &m_iter);
+
+  /** Particles entering mass constraint k (explicit selection, else the
+   * first fNExclusive particles, else all). */
+  std::vector<int> massParticles(size_t k) const;
+  /** Number of unmeasured parameters (rows of x) used by the fit. */
+  int nUnmeasured() const;
 
 public:
   /** @brief Constructor
@@ -179,7 +187,12 @@ public:
       double mass); // Constrains all particles to a common vertex and a mass,
                     // m, of a decaying particle
 
+  /** @brief Mass constraints without explicit selection use only the first
+   * `number` particles. */
   void setNumberOfExclusiveCandidates(int number) { fNExclusive = number; }
+  /** @brief Select particle `number` for the *next* addMassConstraint() call.
+   * Call once per particle, then addMassConstraint(); repeat for further
+   * mass constraints on other particle subsets. */
   void setUseCandInFit(int number) { fFlexiParticlesInFit.push_back(number); };
 
   /** @brief Set maximum number of iterations, default = 20
@@ -212,6 +225,10 @@ public:
    * @return Fit probability.
    */
   double getProb() const { return fProb; }
+
+  /** @brief Number of degrees of freedom (constraints - unmeasured
+   * parameters), set by fit(). */
+  int getNDF() const { return fNdf; }
 
   /** @brief Return pull value for one fit parameter.
    * val = 0 + 5 * n : 1/p

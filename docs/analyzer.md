@@ -38,11 +38,9 @@ call it **once** per `KFitAnalyzer` object.
 | `"MassVtx"` | `addMassVtxConstraint(mass)` | `mass` |
 
 Check the constraint status in [kinfitter.md](kinfitter.md#constraints)
-first; `MissingMass` and `MassVtx` currently do not work. A 3C fit is not
-available here, and the `mother` argument of `doFitterTask` is not used.
-
-> **Warning:** an unknown task name prints "Task not available" and then
-> **aborts the program**, because the fitter has no constraint.
+first. A 3C fit is not available here, and the `mother` argument of
+`doFitterTask` is not used. An unknown task name is reported on stderr and
+no fit is done (no output entries).
 
 ## Input file
 
@@ -98,7 +96,7 @@ quickly with multiplicity.
 | --- | --- |
 | Tree name | `data_fitted` |
 | `Event` (int) | entry number in the input tree |
-| `KinFitParticle` (`TClonesArray`) | fitted tracks of the best combination, in `pids` order, with PID, track id, R, Z and fitted (diagonal) covariance |
+| `KinFitParticle` (`TClonesArray`) | fitted tracks of the best combination, in `pids` order, with all particle fields (PID, track id, charge, MC truth, ...), fitted R, Z and 5×5 covariance |
 | `Chi2`, `Prob` (double) | χ² and probability of the best combination |
 
 Only events with a successful fit (probability > 0) are written.
@@ -107,14 +105,10 @@ Only events with a successful fit (probability > 0) are written.
 
 These are tracked in [TODO.md](../TODO.md) (phase 4):
 
-- The event loop starts at entry 1: **the first event is never analysed**.
-- Tracks with R or Z exactly 0 never converge, so such events are dropped
-  (see [kinfitter.md](kinfitter.md#settings)).
 - Writing `KinFitParticle` in split mode gives the ROOT warning "Using split
   mode on a class … with a custom Streamer" (inherited from
   `TLorentzVector`). Reading back works.
-- Input and output files are opened without checks, and the input file is
-  never closed.
 - Despite the constructor documentation, file lists (`TChain`) are not
   supported; only one file is read.
-- `doFitterTask` cannot be called twice (`finish()` closes the output file).
+- `doFitterTask` can be called only once per analyzer (`finish()` writes and
+  closes the output file); a second call prints an error and returns.

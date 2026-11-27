@@ -48,13 +48,11 @@ kinfit_add_test(test_kinfitter
         pull_of_unconstrained_parameter mass_exclusive_candidates
         missing_particle_single_track_fails_cleanly
         single_iteration_returns_true
-  DISABLED
-        # MissingMass: f uses P_init + sum p_i, the Jacobian P_init - sum p_i
         exact_MissingMass pulls_MissingMass jacobian_MissingMass
-        # MassVtx: vertex row of f has the opposite sign of its Jacobian
-        pulls_MassVtx jacobian_MassVtx
-        # relative convergence criterion divides by measured values (R=0)
-        converges_with_zero_parameters)
+        pulls_MassVtx jacobian_MassVtx converges_with_zero_parameters
+        jacobian_Mass_three_particles two_mass_constraints_on_subsets
+        vertex_plus_mass invalid_configuration_returns_false ndf_per_constraint
+        covariance_symmetric_and_refit_stable)
 
 kinfit_add_test(test_decaycandfinder
   LABELS core vertex

@@ -468,8 +468,8 @@ KF_TEST(missing_particle_single_track_fails_cleanly) {
 }
 
 // A measured parameter that is exactly zero (R = 0 for a track from the
-// origin) must not prevent convergence. Known bug: the relative convergence
-// criterion divides by it (TODO.md phase 3).
+// origin) must not prevent convergence (the relative convergence criterion
+// used to divide by it).
 KF_TEST(converges_with_zero_parameters) {
   TRandom3 rnd(700);
   int nConverged = 0;
@@ -495,6 +495,129 @@ KF_TEST(single_iteration_returns_true) {
   f.addMassConstraint(s.mass);
   f.setNumberOfIterations(1);
   KF_CHECK(f.fit());
+}
+
+// Mass constraint with three particles: the Jacobian used to zero
+// H(row, 4 + 4q), i.e. the phi derivative of particle 2.
+KF_TEST(jacobian_Mass_three_particles) {
+  TRandom3 rnd(900);
+  for (int ev = 0; ev < 5; ++ev) {
+    Scenario s = makeScenario(C::Mass, true, rnd);
+    TLorentzVector extra;
+    extra.SetXYZM(120, -60, 350, toy::kMassPion);
+    s.cands.push_back(
+        toy::smearedTrack(extra, TVector3(1, 1, 1), kTrackRes, rnd));
+    KinFitter fitter(s.cands);
+    fitter.addMassConstraint(1500.);
+    TMatrixD y, xi;
+    fitterVectors(C::Mass, s, y, xi);
+    compareJacobian("Feta", fitter.Feta_eval(y, xi),
+                    [&](const TMatrixD &yy) { return fitter.f_eval(yy, xi); },
+                    y);
+  }
+}
+
+// Two mass constraints on particle subsets via setUseCandInFit(): the path
+// used to be unreachable (selection cleared before it was tested).
+KF_TEST(two_mass_constraints_on_subsets) {
+  TRandom3 rnd(901);
+  int nConverged = 0;
+  for (int ev = 0; ev < 20; ++ev) {
+    const toy::LambdaEvent l1 = toy::lambdaEvent(rnd);
+    const toy::LambdaEvent l2 = toy::lambdaEvent(rnd);
+    std::vector<KinFitParticle> cands = {
+        toy::smearedTrack(l1.proton, l1.decayVertex, kTrackRes, rnd),
+        toy::smearedTrack(l2.proton, l2.decayVertex, kTrackRes, rnd),
+        toy::smearedTrack(l1.pion, l1.decayVertex, kTrackRes, rnd),
+        toy::smearedTrack(l2.pion, l2.decayVertex, kTrackRes, rnd)};
+    KinFitter f(cands);
+    f.setUseCandInFit(0);
+    f.setUseCandInFit(2);
+    f.addMassConstraint(toy::kMassLambda);
+    f.setUseCandInFit(1);
+    f.setUseCandInFit(3);
+    f.addMassConstraint(toy::kMassLambda);
+    if (!f.fit())
+      continue;
+    ++nConverged;
+    KF_CHECK(f.getNDF() == 2);
+    KF_CHECK_NEAR((f.getDaughter(0) + f.getDaughter(2)).M(), toy::kMassLambda,
+                  1e-2);
+    KF_CHECK_NEAR((f.getDaughter(1) + f.getDaughter(3)).M(), toy::kMassLambda,
+                  1e-2);
+  }
+  KF_CHECK(nConverged == 20);
+}
+
+// A mass constraint is appended to another constraint (used to replace it).
+KF_TEST(vertex_plus_mass) {
+  TRandom3 rnd(902);
+  int nConverged = 0;
+  for (int ev = 0; ev < 20; ++ev) {
+    Scenario s = makeScenario(C::Vertex, true, rnd);
+    KinFitter f(s.cands);
+    f.addVertexConstraint();
+    f.addMassConstraint(toy::kMassLambda);
+    if (!f.fit())
+      continue;
+    ++nConverged;
+    KF_CHECK(f.getNDF() == 2);
+    KF_CHECK_NEAR((f.getDaughter(0) + f.getDaughter(1)).M(), toy::kMassLambda,
+                  1e-2);
+    KF_CHECK_NEAR(lineDistance(f.getDaughter(0), f.getDaughter(1)), 0, 1e-3);
+  }
+  KF_CHECK(nConverged == 20);
+}
+
+// No constraint / two exclusive constraint types: fit() returns false
+// (used to abort() resp. silently use only the last one).
+KF_TEST(invalid_configuration_returns_false) {
+  TRandom3 rnd(903);
+  Scenario s = makeScenario(C::FourC, true, rnd);
+  KinFitter none(s.cands);
+  KF_CHECK(!none.fit());
+  KinFitter both(s.cands);
+  both.add4Constraint(s.init);
+  both.addVertexConstraint();
+  KF_CHECK(!both.fit());
+}
+
+// NDF = number of equations - number of unmeasured parameters.
+KF_TEST(ndf_per_constraint) {
+  TRandom3 rnd(904);
+  const std::pair<C, int> expected[] = {
+      {C::FourC, 4}, {C::Mass, 1},   {C::Vertex, 1},         {C::MassVtx, 2},
+      {C::ThreeC, 3}, {C::MissingMass, 1}, {C::MissingParticle, 1}};
+  for (const auto &e : expected) {
+    Scenario s = makeScenario(e.first, true, rnd);
+    KinFitter f(s.cands);
+    addConstraint(f, e.first, s);
+    f.fit();
+    KF_CHECK(f.getNDF() == e.second);
+  }
+}
+
+// The fitted covariance of each daughter is a symmetric 5x5 block with
+// correlations, and fitting twice gives the same result (fit() used to
+// overwrite the measurements with the fitted values).
+KF_TEST(covariance_symmetric_and_refit_stable) {
+  TRandom3 rnd(905);
+  Scenario s = makeScenario(C::FourC, true, rnd);
+  KinFitter f(s.cands);
+  f.add4Constraint(s.init);
+  KF_CHECK(f.fit());
+  const double chi2 = f.getChi2();
+  const TMatrixD cov = f.getDaughter(0).getCovariance();
+  double offDiag = 0;
+  for (int i = 0; i < 5; ++i)
+    for (int j = 0; j < 5; ++j) {
+      KF_CHECK_NEAR(cov(i, j), cov(j, i), 1e-9 * std::abs(cov(i, i)));
+      if (i != j)
+        offDiag = std::max(offDiag, std::abs(cov(i, j)));
+    }
+  KF_CHECK(offDiag > 0);
+  KF_CHECK(f.fit());
+  KF_CHECK_NEAR(f.getChi2(), chi2, 1e-9 * std::max(1., chi2));
 }
 
 KF_TEST_MAIN()

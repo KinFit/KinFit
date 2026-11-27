@@ -89,9 +89,10 @@ the helix (see [vertexing.md](vertexing.md)).
   (px, py, pz, x, y, z) input is announced in the code but not implemented.
 - If the momentum resolution is known as σ(p)/p, use σ(1/p) = (σ(p)/p) · (1/p).
 
-`KinFitter` uses the full 5×5 matrix of each input track (the 3C fit uses only
-the diagonal). The covariance of a **fitted** track contains only the diagonal
-of the updated matrix; correlations are not returned.
+`KinFitter` uses the full 5×5 matrix of each input track (also in the 3C fit,
+and the full θ, φ, R, Z block of the mother). The covariance of a **fitted**
+track is the full 5×5 block of the updated matrix; correlations between
+different tracks are not returned.
 
 ## Magnetic field
 
