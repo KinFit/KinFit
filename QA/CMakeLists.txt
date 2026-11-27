@@ -58,10 +58,8 @@ kinfit_add_test(test_decaycandfinder
   LABELS core vertex
   CASES momentum_from_daughter_energies direction_from_vertices
         covariance_accessors_agree covariance_symmetric_positive
-        usable_as_3C_mother
-  DISABLED
-        # flight line anchored at (decay - primary) instead of decay vertex
-        R_Z_of_flight_line)
+        usable_as_3C_mother R_Z_of_flight_line
+        covariance_matches_vertex_smearing)
 
 kinfit_add_test(test_coordinateconversion
   LABELS core

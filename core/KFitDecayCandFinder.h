@@ -130,6 +130,7 @@ public:
    * @param valDecXY x-y correlation of decay-vertex uncertainties.
    * @param valDecXZ x-z correlation of decay-vertex uncertainties.
    * @param valDecYZ y-z correlation of decay-vertex uncertainties.
+   * Correlation coefficients in [-1, 1]; the candidate is recomputed.
    */
   void setVertexCorrelations(double valPrimXY, double valPrimXZ,
                              double valPrimYZ, double valDecXY, double valDecXZ,
@@ -142,6 +143,8 @@ public:
     fCorrDecXY = valDecXY;
     fCorrDecXZ = valDecXZ;
     fCorrDecYZ = valDecYZ;
+
+    calculateDecayCand(); // used to have no effect after construction
   }
 
   /** @brief Return the calculated decay candidate.

@@ -105,9 +105,9 @@ resolutions.
 What it computes:
 
 - **Momentum:** |p| = √((Σ Eᵢ)² − m²), from the daughter energies and the
-  mass hypothesis.
+  mass hypothesis (|Σ p⃗ᵢ| if Σ Eᵢ < m).
 - **Direction:** θ, φ of the vector from the primary to the decay vertex.
-- **R, Z:** of the line along that flight direction.
+- **R, Z:** of the flight line through the decay vertex along that direction.
 - **Covariance:** σ(1/p) is set to a very large value (the momentum is a free
   parameter in the 3C fit); θ, φ, R and Z come from the two vertex
   resolutions.
@@ -121,17 +121,11 @@ p, π⁻  ──► KFitVertexFinder (decay)    ├─► KFitDecayCandFinder �
 KinFitter({p, π⁻}).add3Constraint(Λ) ──► fitted p, π⁻ and Λ
 ```
 
-> **Status:** the R, Z and covariance calculation in `KFitDecayCandFinder`
-> has known problems:
->
-> - The flight line is anchored at the vertex difference vector instead of
->   the decay vertex, so R and Z come out as ≈ 0.
-> - The covariance is built with inconsistent signs and square roots of
->   correlations.
-> - The sign of R is taken from the primary vertex y coordinate.
->
-> It is listed for review in [TODO.md](../TODO.md) (phase 3). Check its
-> output before relying on it.
+The covariance of (θ, φ, R, Z) is propagated linearly from both vertex
+covariances (resolutions and the correlation coefficients of
+`setVertexCorrelations`, which recomputes the candidate). It is checked
+against vertex smearing in `test_decaycandfinder`. It is singular for a
+flight direction exactly along z (θ = 0).
 
 ### Vertex finders as input for KinFitter
 

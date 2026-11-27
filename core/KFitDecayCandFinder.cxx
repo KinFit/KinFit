@@ -59,223 +59,120 @@ KFitDecayCandFinder::KFitDecayCandFinder(
 }
 
 void KFitDecayCandFinder::calculateDecayCand() {
-
-  // For any number of particles
-  double fMomentumBeforeDecay = 0;
-  double energyCand = 0;
-  double totalEnergy = 0;
-  KinFitParticle cand;
-
-  for (int i_cands = 0; i_cands < fCands.size(); i_cands++) {
-
-    cand = fCands[i_cands];
-
-    energyCand = std::sqrt(cand.P() * cand.P() + cand.M() * cand.M());
-
-    totalEnergy = totalEnergy + energyCand;
-  }
-
-  fMomentumBeforeDecay =
-      sqrt(totalEnergy * totalEnergy - fDecayCandMass * fDecayCandMass);
-
-  TVector3 primaryVertex = fPrimaryVertex;
-  TVector3 decayVertex = fDecayVertex;
-
   if (fVerbose > 0) {
     std::cout
         << " ----------- KFitDecayCandFinder::calculateDecayCand() -----------"
         << std::endl;
-    std::cout << "" << std::endl;
   }
 
-  TVector3 vecPrimToDecayVertex = decayVertex - primaryVertex;
-
-  TVector3 geom_dir_Z, vtx_geom_dir, geom_base_Z, vtx_geom_base;
-
-  vtx_geom_base.SetX(vecPrimToDecayVertex.X());
-  vtx_geom_base.SetY(vecPrimToDecayVertex.Y());
-  vtx_geom_base.SetZ(vecPrimToDecayVertex.Z());
-
-  vtx_geom_dir.SetX(std::sin(vecPrimToDecayVertex.Theta()) *
-                    std::cos(vecPrimToDecayVertex.Phi()));
-  vtx_geom_dir.SetY(std::sin(vecPrimToDecayVertex.Theta()) *
-                    std::sin(vecPrimToDecayVertex.Phi()));
-  vtx_geom_dir.SetZ(std::cos(vecPrimToDecayVertex.Theta()));
-
-  geom_dir_Z.SetX(0);
-  geom_dir_Z.SetY(0);
-  geom_dir_Z.SetZ(1);
-
-  geom_base_Z.SetX(0);
-  geom_base_Z.SetY(0);
-  geom_base_Z.SetZ(1);
-
-  double a = geom_base_Z.Dot(geom_dir_Z);
-  double b = geom_dir_Z.Dot(geom_dir_Z);
-  double c = vtx_geom_base.Dot(geom_dir_Z);
-  double d = (geom_base_Z.Dot(vtx_geom_dir)) * (vtx_geom_dir.Dot(geom_dir_Z)) /
-             vtx_geom_dir.Dot(vtx_geom_dir);
-  double e = (geom_dir_Z.Dot(vtx_geom_dir)) * (vtx_geom_dir.Dot(geom_dir_Z)) /
-             vtx_geom_dir.Dot(vtx_geom_dir);
-  double f = (vtx_geom_base.Dot(vtx_geom_dir)) *
-             (vtx_geom_dir.Dot(geom_dir_Z)) / vtx_geom_dir.Dot(vtx_geom_dir);
-
-  double u1 = (-a + c + d - f) / (b - e);
-
-  double valZ = geom_base_Z.Z() + geom_dir_Z.Z() * u1;
-
-  TVector3 cross = vtx_geom_dir.Cross(geom_dir_Z);
-  TVector3 diff = vtx_geom_base - geom_base_Z;
-
-  double valR = std::abs(diff.Dot(cross) / (cross.Mag()));
-
-  if (primaryVertex.Y() < 0) {
-    valR = -1 * valR;
+  // --- Momentum: |p| = sqrt((sum E_i)^2 - m^2) with the mass hypothesis. ---
+  // (A local variable used to shadow fMomentumBeforeDecay, which stayed -1.)
+  double totalEnergy = 0;
+  TVector3 sumP;
+  for (const KinFitParticle &cand : fCands) {
+    totalEnergy += cand.E();
+    sumP += cand.Vect();
   }
+  const double p2 = totalEnergy * totalEnergy - fDecayCandMass * fDecayCandMass;
+  // Below threshold (sum E < m) fall back to |sum p| instead of NaN.
+  fMomentumBeforeDecay = p2 > 0 ? std::sqrt(p2) : sumP.Mag();
 
-  double thetaPrimaryToSecondaryVertex, phiPrimaryToSecondaryVertex;
+  // --- Direction: primary -> decay vertex ---
+  const TVector3 &D = fDecayVertex;
+  const TVector3 v = fDecayVertex - fPrimaryVertex;
+  const double theta = v.Theta();
+  const double phi = v.Phi();
+  const double st = std::sin(theta), ct = std::cos(theta);
+  const double sp = std::sin(phi), cp = std::cos(phi);
 
-  thetaPrimaryToSecondaryVertex = vecPrimToDecayVertex.Theta();
-  phiPrimaryToSecondaryVertex = vecPrimToDecayVertex.Phi();
+  // --- R, Z of the flight line through the decay vertex ---
+  // Same convention as KinFitParticle: the point of closest approach to the
+  // z axis is (-R sin(phi), R cos(phi), Z). With L = D.(cos phi, sin phi):
+  //   R = -sin(phi) Dx + cos(phi) Dy,   Z = Dz - cot(theta) L.
+  // (The line used to be anchored at D - P, and the sign of R was taken from
+  // the primary vertex y.)
+  const double cotTheta = ct / st;
+  const double L = cp * D.X() + sp * D.Y();
+  const double valR = -sp * D.X() + cp * D.Y();
+  const double valZ = D.Z() - cotTheta * L;
 
+  fDecayCand.SetXYZM(fMomentumBeforeDecay * st * cp,
+                     fMomentumBeforeDecay * st * sp, fMomentumBeforeDecay * ct,
+                     fDecayCandMass);
+  fDecayCand.setMomentum(fMomentumBeforeDecay);
+  fDecayCand.setThetaRad(theta);
+  fDecayCand.setPhiRad(phi);
   fDecayCand.setR(valR);
   fDecayCand.setZ(valZ);
 
-  double Px = (fMomentumBeforeDecay * std::sin(thetaPrimaryToSecondaryVertex) *
-               std::cos(phiPrimaryToSecondaryVertex));
-  double Py = (fMomentumBeforeDecay * std::sin(thetaPrimaryToSecondaryVertex) *
-               std::sin(phiPrimaryToSecondaryVertex));
-  double Pz = (fMomentumBeforeDecay * std::cos(thetaPrimaryToSecondaryVertex));
-  double M = fDecayCandMass;
+  // --- Covariance of (theta, phi, R, Z) ---
+  // Linear propagation from the primary (P) and decay (D) vertex covariances:
+  //   J_P = -J_v,  J_D = J_v + J_direct,  C = J_P C_P J_P^T + J_D C_D J_D^T
+  // where J_v is the derivative w.r.t. v = D - P through (theta, phi) and
+  // J_direct the explicit dependence of R, Z on D. The old code mixed sqrt
+  // of correlations, asymmetric signs and wrong derivatives (dtheta/dx used
+  // z/r^2, dphi had |x|).
+  const double rho2 = v.Perp2();
+  const double rho = std::sqrt(rho2);
+  const double r2 = v.Mag2();
+  TMatrixD dAngles(2, 3); // d(theta, phi) / d(vx, vy, vz)
+  dAngles(0, 0) = v.X() * v.Z() / (r2 * rho);
+  dAngles(0, 1) = v.Y() * v.Z() / (r2 * rho);
+  dAngles(0, 2) = -rho / r2;
+  dAngles(1, 0) = -v.Y() / rho2;
+  dAngles(1, 1) = v.X() / rho2;
+  dAngles(1, 2) = 0;
 
-  fDecayCand.SetXYZM(Px, Py, Pz, M);
+  // d(R, Z)/d(theta, phi) at fixed D
+  const double dR_dphi = -L;
+  const double dZ_dtheta = L / (st * st);
+  const double dZ_dphi = -cotTheta * valR;
+
+  TMatrixD Jv(4, 3); // d(theta, phi, R, Z) / dv
+  for (int k = 0; k < 3; ++k) {
+    Jv(0, k) = dAngles(0, k);
+    Jv(1, k) = dAngles(1, k);
+    Jv(2, k) = dR_dphi * dAngles(1, k);
+    Jv(3, k) = dZ_dtheta * dAngles(0, k) + dZ_dphi * dAngles(1, k);
+  }
+  TMatrixD JD(Jv); // + explicit dependence on D
+  JD(2, 0) += -sp;
+  JD(2, 1) += cp;
+  JD(3, 0) += -cotTheta * cp;
+  JD(3, 1) += -cotTheta * sp;
+  JD(3, 2) += 1.;
+  const TMatrixD JP = -1. * Jv;
+
+  auto vertexCov = [](double sx, double sy, double sz, double cxy, double cxz,
+                      double cyz) {
+    TMatrixD c(3, 3);
+    c(0, 0) = sx * sx;
+    c(1, 1) = sy * sy;
+    c(2, 2) = sz * sz;
+    c(0, 1) = c(1, 0) = cxy * sx * sy;
+    c(0, 2) = c(2, 0) = cxz * sx * sz;
+    c(1, 2) = c(2, 1) = cyz * sy * sz;
+    return c;
+  };
+  const TMatrixD CP = vertexCov(fPrimVtxResX, fPrimVtxResY, fPrimVtxResZ,
+                                fCorrPrimXY, fCorrPrimXZ, fCorrPrimYZ);
+  const TMatrixD CD = vertexCov(fDecVtxResX, fDecVtxResY, fDecVtxResZ,
+                                fCorrDecXY, fCorrDecXZ, fCorrDecYZ);
+  const TMatrixD C = JP * CP * TMatrixD(TMatrixD::kTransposed, JP) +
+                     JD * CD * TMatrixD(TMatrixD::kTransposed, JD);
+
+  fCovarianceDecayCand.ResizeTo(5, 5);
+  fCovarianceDecayCand.Zero();
+  fCovarianceDecayCand(0, 0) = 9999999; // 1/p: free parameter in the 3C fit
+  for (int i = 0; i < 4; ++i)
+    for (int j = 0; j < 4; ++j)
+      fCovarianceDecayCand(i + 1, j + 1) = 0.5 * (C(i, j) + C(j, i));
+
+  fDecayCand.setCovariance(fCovarianceDecayCand);
 
   if (fVerbose > 0) {
     std::cout << "calculateDecayCandidate, fDecayCand: theta= "
-              << fDecayCand.Theta() << " and phi = " << fDecayCand.Phi()
-              << std::endl;
+              << fDecayCand.Theta() << " phi= " << fDecayCand.Phi()
+              << " R= " << valR << " Z= " << valZ << std::endl;
   }
-
-  double x_vertex = vecPrimToDecayVertex.X();
-  double y_vertex = vecPrimToDecayVertex.Y();
-  double z_vertex = vecPrimToDecayVertex.Z();
-
-  double sigma_x =
-      sqrt(fPrimVtxResX * fPrimVtxResX + fDecVtxResX * fDecVtxResX);
-  double sigma_y =
-      sqrt(fPrimVtxResY * fPrimVtxResY + fDecVtxResY * fDecVtxResY);
-  double sigma_z =
-      sqrt(fPrimVtxResZ * fPrimVtxResZ + fDecVtxResZ * fDecVtxResZ);
-
-  double sigma_xy = sqrt(fCorrPrimXY * fPrimVtxResX * fPrimVtxResY +
-                         fCorrDecXY * fDecVtxResX * fDecVtxResY);
-  double sigma_xz = sqrt(fCorrPrimXZ * fPrimVtxResX * fPrimVtxResZ +
-                         fCorrDecXZ * fDecVtxResX * fDecVtxResZ);
-  double sigma_yz = sqrt(fCorrPrimYZ * fPrimVtxResY * fPrimVtxResZ +
-                         fCorrDecYZ * fDecVtxResY * fDecVtxResZ);
-  // Use Cartesian -> polar coordinate transformation to estimate errors in
-  // theta and phi.
-
-  // Calculate the error in theta
-  double r = std::sqrt(x_vertex * x_vertex + y_vertex * y_vertex +
-                       z_vertex * z_vertex + sigma_xy * sigma_xy +
-                       sigma_xz * sigma_xz + sigma_yz * sigma_yz);
-
-  double dr_dx = x_vertex / r;
-  double dr_dy = y_vertex / r;
-  double dr_dz = z_vertex / r;
-
-  double dtheta_dx = x_vertex * z_vertex /
-                     (r * r * r * std::sqrt(std::abs(1 - z_vertex / (r * r))));
-  double dtheta_dy = y_vertex * z_vertex /
-                     (r * r * r * std::sqrt(std::abs(1 - z_vertex / (r * r))));
-  double dtheta_dz = (1 / r - z_vertex * z_vertex / (r * r * r)) /
-                     std::sqrt(std::abs(1 - z_vertex * z_vertex / (r * r)));
-
-  // double sigma_theta =std::sqrt(dtheta_dx * dtheta_dx * sigma_x * sigma_x +
-  // dtheta_dy * dtheta_dy * sigma_y * sigma_y + dtheta_dz * dtheta_dz * sigma_z
-  // * sigma_z);
-
-  // Calculate the error in phi
-  double r_2D = std::sqrt(x_vertex * x_vertex + y_vertex * y_vertex);
-
-  double dphi_dx =
-      -x_vertex * y_vertex /
-      (sqrt(x_vertex * x_vertex / (r_2D * r_2D)) * r_2D * r_2D * r_2D);
-  double dphi_dy = std::sqrt(x_vertex * x_vertex / (r_2D * r_2D)) / r_2D;
-
-  double dphi_dz = 0;
-
-  // double sigma_phi =std::sqrt(dphi_dx * dphi_dx * sigma_x * sigma_x + dphi_dy
-  // * dphi_dy * sigma_y * sigma_y);
-
-  // Calculate the error in R
-  double dR_dx = x_vertex / r_2D;
-  double dR_dy = y_vertex / r_2D;
-
-  double sigma_R = std::sqrt(dR_dx * dR_dx * sigma_x * sigma_x +
-                             dR_dy * dR_dy * sigma_y * sigma_y);
-
-  TMatrixD covarianceDetectorSystem;
-  covarianceDetectorSystem.ResizeTo(3, 3);
-  covarianceDetectorSystem.Zero();
-
-  covarianceDetectorSystem(0, 0) = sigma_x * sigma_x;
-  covarianceDetectorSystem(1, 1) = sigma_y * sigma_y;
-  covarianceDetectorSystem(2, 2) = sigma_z * sigma_z;
-
-  covarianceDetectorSystem(0, 1) = sigma_xy * sigma_xy;
-  covarianceDetectorSystem(0, 2) = sigma_xz * sigma_xz;
-  covarianceDetectorSystem(1, 2) = sigma_yz * sigma_yz;
-  covarianceDetectorSystem(1, 0) = -covarianceDetectorSystem(0, 1);
-  covarianceDetectorSystem(2, 0) = -covarianceDetectorSystem(0, 2);
-  covarianceDetectorSystem(1, 2) = -covarianceDetectorSystem(2, 1);
-
-  TMatrixD derivativeMatrix;
-  derivativeMatrix.ResizeTo(3, 3);
-  derivativeMatrix.Zero();
-
-  // First row derivatives of r
-  derivativeMatrix(0, 0) = dr_dx;
-  derivativeMatrix(0, 1) = dr_dy;
-  derivativeMatrix(0, 2) = dr_dz;
-
-  // Second row derivative of theta
-  derivativeMatrix(1, 0) = dtheta_dx;
-  derivativeMatrix(1, 1) = dtheta_dy;
-  derivativeMatrix(1, 2) = dtheta_dz;
-
-  // Last row: derivatives of phi.
-  derivativeMatrix(2, 0) = dphi_dx;
-  derivativeMatrix(2, 1) = dphi_dy;
-  derivativeMatrix(2, 2) = dphi_dz;
-
-  TMatrixD derivativeMatrixTranspose;
-  derivativeMatrixTranspose.ResizeTo(3, 3);
-  derivativeMatrixTranspose.Zero();
-  derivativeMatrixTranspose.Transpose(derivativeMatrix);
-
-  TMatrixD covarianceDecayCand;
-  covarianceDecayCand.ResizeTo(3, 3);
-  covarianceDecayCand =
-      derivativeMatrix * covarianceDetectorSystem * derivativeMatrixTranspose;
-
-  fCovarianceDecayCand.ResizeTo(5, 5);
-  fCovarianceDecayCand(0, 0) = 9999999;
-  fCovarianceDecayCand(1, 1) = covarianceDecayCand(1, 1);
-  fCovarianceDecayCand(2, 2) = covarianceDecayCand(2, 2);
-  fCovarianceDecayCand(1, 2) = covarianceDecayCand(1, 2);
-  fCovarianceDecayCand(2, 1) = covarianceDecayCand(2, 1);
-  fCovarianceDecayCand(3, 3) = sigma_R * sigma_R;
-  fCovarianceDecayCand(4, 4) = sigma_z * sigma_z;
-
-  // Set covariance of the decay candidate
-  fDecayCand.setCovariance(fCovarianceDecayCand);
-
-  // Set momentum of the candidate
-  fDecayCand.setMomentum(fMomentumBeforeDecay);
-
-  // Set angles of the candidate
-  fDecayCand.setThetaRad(thetaPrimaryToSecondaryVertex);
-  fDecayCand.setPhiRad(phiPrimaryToSecondaryVertex);
 }
