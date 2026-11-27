@@ -55,8 +55,9 @@ stays visible. To fix such a bug:
 2. Run it and see it fail: `./build/QA/<exe> <case>`.
 3. Fix the code until it passes, then run the whole suite.
 
-The disabled cases correspond to the open items in [TODO.md](../TODO.md),
-phases 3 and 4.
+Currently no case is disabled: all known bugs covered by tests have been
+fixed (see [TODO.md](../TODO.md), section 3). Use the mechanism for new
+findings.
 
 ## AddressSanitizer
 

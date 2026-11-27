@@ -103,7 +103,7 @@ Only events with a successful fit (probability > 0) are written.
 
 ## Known issues
 
-These are tracked in [TODO.md](../TODO.md) (phase 4):
+These are tracked in [TODO.md](../TODO.md) (section 3, open items):
 
 - Writing `KinFitParticle` in split mode gives the ROOT warning "Using split
   mode on a class … with a custom Streamer" (inherited from
