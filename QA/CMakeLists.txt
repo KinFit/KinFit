@@ -28,7 +28,8 @@ endfunction()
 kinfit_add_test(test_particle
   LABELS core io
   CASES construct_from_R_Z construct_from_point_gives_PCA sign_of_R
-        covariance_5x5 covariance_wrong_size_ignored io_roundtrip_tclonesarray)
+        covariance_5x5 covariance_wrong_size_ignored io_roundtrip_tclonesarray
+        construct_from_point_has_5x5_covariance setters_store_values)
 
 kinfit_add_test(test_vertexfinder
   LABELS core vertex

@@ -34,21 +34,21 @@
 
 class KinFitParticle : public TLorentzVector {
 
-  ClassDef(KinFitParticle, 2);
+  ClassDef(KinFitParticle, 3);
 
 private:
   TLorentzVector cand; // TLorentzVector the KinFitParticle inherits from
-  double fMomentum;    // Momentum [MeV/c]
-  double fTheta;       // Polar angle [rad]
-  double fPhi;         // Azimuthal angle [rad]
-  double fR;           // Closest distance to beamline [mm]
-  double fZ;           // Point along beamline where track is closest to it [mm]
+  double fMomentum = 0; // Momentum [MeV/c]
+  double fTheta = 0;    // Polar angle [rad]
+  double fPhi = 0;      // Azimuthal angle [rad]
+  double fR = 0;        // Closest distance to beamline [mm]
+  double fZ = 0; // Point along beamline where track is closest to it [mm]
 
-  double fGenMomentum;
-  double fGenTheta;
-  double fGenPhi;
-  double fGenR;
-  double fGenZ;
+  double fGenMomentum = -999999999.9;
+  double fGenTheta = -999999999.9;
+  double fGenPhi = -999999999.9;
+  double fGenR = -999999999.9;
+  double fGenZ = -999999999.9;
 
   double fVtxX = -999999999.9;
   double fVtxY = -999999999.9;
@@ -57,7 +57,7 @@ private:
   double fGenVtxY = -999999999.9;
   double fGenVtxZ = -999999999.9;
 
-  double fSector; // HADES sector 0-5
+  int fSector = -1; // HADES sector 0-5
 
   double fRapidity = -9999999999.9;
   double fPt = -9999999999.9;
@@ -75,8 +75,8 @@ private:
 
   int fCharge = 0;
 
-  int fPid;     // PID code for the particle species
-  int fTrackId; // Track id, can be used to differentiate different track types,
+  int fPid = -1;     // PID code for the particle species
+  int fTrackId = -1; // Track id, can be used to differentiate different track types,
                 // e.g. reconstructed in different parts of the detector
 
   /** Covariance matrix of the KinFitParticle
@@ -125,7 +125,7 @@ public:
   } // Sets the polar angle [radians]
   void setPhiRad(double val) {
     fPhi = val;
-    cand.SetTheta(val);
+    cand.SetPhi(val);
   } // Sets the azimuthal angle [radians]
   void setThetaDeg(double val) {
     fTheta = val * TMath::DegToRad();
@@ -133,7 +133,7 @@ public:
   } // Sets the polar angle [deg]
   void setPhiDeg(double val) {
     fPhi = val * TMath::DegToRad();
-    cand.SetTheta(val * TMath::DegToRad());
+    cand.SetPhi(val * TMath::DegToRad());
   }                                   // Sets the azimuthal angle [deg]
   void setR(double val) { fR = val; } // Sets R [mm]
   void setZ(double val) { fZ = val; } // Sets Z [mm]
@@ -145,8 +145,8 @@ public:
     fPid = val;
   } // Sets the PID of the particle (user defined)
   void setTrackId(int val) { fTrackId = val; }   // Sets the track id
-  void setTOF(int val) { fTOF = val; }           // Sets the tof
-  void setRapidity(int val) { fRapidity = val; } // Sets the rapidity
+  void setTOF(double val) { fTOF = val; }           // Sets the tof
+  void setRapidity(double val) { fRapidity = val; } // Sets the rapidity
   void setPt(double val) { fPt = val; } // Sets the transverse momentum [MeV/c]
   void setPx(double val) { fPx = val; } // Sets the x momentum [MeV/c]
   void setPy(double val) { fPy = val; } // Sets the y momentum [MeV/c]
@@ -209,14 +209,14 @@ public:
   double getCharge() const { return fCharge; } // Returns  Charge
   double getBeta() const { return fBeta; }     // Returns Beta
   double getChi2() const { return fChi2; }     // Returns Chi2
-  TMatrixD getCovariance() const {
+  const TMatrixD &getCovariance() const {
     return fCov;
-  } // Returns the covariance matrix
+  } // Returns the covariance matrix (no copy)
   int getPid() const {
     return fPid;
   } // Returns the PID of the particle (user defined)
   int getTrackId() const { return fTrackId; } // Returns the track id
-  int getTOF() const { return fTOF; }         // Returns the TOF
+  double getTOF() const { return fTOF; }      // Returns the TOF
   double getPt() const {
     return fPt;
   } // Returns the transverse momentum [MeV/c]

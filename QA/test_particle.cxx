@@ -104,6 +104,30 @@ KF_TEST(covariance_wrong_size_ignored) {
 }
 
 // Write a TClonesArray of KinFitParticles to a tree and read it back.
+// The (x, y, z) constructor used to leave the covariance 0x0.
+KF_TEST(construct_from_point_has_5x5_covariance) {
+  TLorentzVector lv;
+  lv.SetXYZM(100, 200, 300, 938.272);
+  const KinFitParticle p(lv, 1., 2., 3.);
+  KF_CHECK(p.getCovariance().GetNrows() == 5);
+  KF_CHECK(p.getCovariance().GetNcols() == 5);
+}
+
+// setPhiRad/Deg used to overwrite theta of the internal vector.
+KF_TEST(setters_store_values) {
+  KinFitParticle p;
+  p.setThetaRad(0.3);
+  p.setPhiRad(1.2);
+  KF_CHECK_NEAR(p.getThetaRad(), 0.3, 0);
+  KF_CHECK_NEAR(p.getPhiRad(), 1.2, 0);
+  p.setPhiDeg(45.);
+  KF_CHECK_NEAR(p.getPhiDeg(), 45., 1e-12);
+  p.setTOF(12.5); // used to be truncated to int
+  p.setRapidity(0.75);
+  KF_CHECK_NEAR(p.getTOF(), 12.5, 0);
+  KF_CHECK_NEAR(p.getRapidity(), 0.75, 0);
+}
+
 KF_TEST(io_roundtrip_tclonesarray) {
   const char *fname = "test_particle_io.root";
   TRandom3 rnd(2);

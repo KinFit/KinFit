@@ -26,8 +26,6 @@
 KinFitParticle::KinFitParticle(TLorentzVector cand, double R, double Z)
     : TLorentzVector(cand), cand(cand), fMomentum(cand.P()),
       fTheta(cand.Theta()), fPhi(cand.Phi()), fR(R), fZ(Z) {
-  fPid = -1;
-  fTrackId = -1;
   fCov.ResizeTo(5, 5);
 }
 
@@ -35,7 +33,8 @@ KinFitParticle::KinFitParticle(TLorentzVector cand, double X, double Y,
                                double Z)
     : TLorentzVector(cand), cand(cand), fMomentum(cand.P()),
       fTheta(cand.Theta()), fPhi(cand.Phi()) {
-  double deg2rad = TMath::DegToRad();
+  // The covariance was left 0x0 here, so KinFitter read out of bounds.
+  fCov.ResizeTo(5, 5);
 
   // Base and direction vector of particle candidate.
   TVector3 base(X, Y, Z);
@@ -61,19 +60,10 @@ KinFitParticle::KinFitParticle(TLorentzVector cand, double X, double Y,
   double u1 = (-a + c + d - f) / (b - e);
 
   fZ = beam_base.Z() + beam_dir.Z() * u1;
-
-  double y = beam_base.Y() + dir.Y() * u1;
-
-  fPid = -1;
-  fTrackId = -1;
 }
 
 KinFitParticle::KinFitParticle() : TLorentzVector() {
   cand.SetXYZM(0, 0, 0, 0);
-  fR = 0;
-  fZ = 0;
-  fPid = -1;
-  fTrackId = -1;
   fCov.ResizeTo(5, 5);
 }
 
