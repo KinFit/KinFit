@@ -147,7 +147,7 @@ void KFitAnalyzer::doFitterTask(TString task, std::vector<int> pids,
   if (fVerbose > 1) {
     std::cout << "Start of event loop" << std::endl;
   }
-  for (int i = 1; i < entries; i++) {
+  for (int i = 0; i < entries; i++) {
     fTree->GetEntry(i);
     Event = i;
 
@@ -184,12 +184,8 @@ void KFitAnalyzer::doFitterTask(TString task, std::vector<int> pids,
       fitted_cands->Clear();
     if (Prob > 0) {
       for (int k = 0; k < result.size(); k++) {
-        KinFitParticle *fitted_cand = new (fit_arrayRef[ii])
-            KinFitParticle(result[k], result[k].getR(), result[k].getZ());
-        fitted_cand->setPid(result[k].getPid());
-        fitted_cand->setTrackId(result[k].getTrackId());
-        fitted_cand->setCovariance(result[k].getCovariance());
-
+        // Copy everything (charge, MC truth, ...), not only p, R, Z, cov.
+        new (fit_arrayRef[ii]) KinFitParticle(result[k]);
         ii++;
       }
 

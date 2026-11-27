@@ -124,8 +124,11 @@ Bool_t KFitDecayBuilder::doFit() {
     cout << "proton momentum error = " << cov_p(0,0) << endl;
     cout << "pion momentum error = " << cov_pi(0,0) << endl;
     */
-  } else
-    cout << "Task not available" << endl;
+  } else {
+    std::cerr << "KFitDecayBuilder: task \"" << fTask << "\" not available"
+              << std::endl;
+    return kFALSE;
+  }
 
   if (Fitter.fit()) {
     if (fVerbose > 1) {

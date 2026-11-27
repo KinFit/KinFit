@@ -76,9 +76,8 @@ kinfit_add_test(test_coordinateconversion
 kinfit_add_test(test_analyzer
   LABELS analysis io
   CASES builder_selects_true_combination builder_no_double_use
+        builder_unknown_task_no_abort
         analyzer_mass_fit_output analyzer_event_limit
-  DISABLED
-        # event loop starts at entry 1
         analyzer_processes_first_event)
 
 # The self-contained examples double as smoke tests.

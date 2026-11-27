@@ -185,8 +185,7 @@ KF_TEST(analyzer_mass_fit_output) {
   KF_CHECK(s.nBadProb == 0);
 }
 
-// Every input event must be analysed. Known bug: the event loop starts at
-// entry 1 (TODO.md phase 4).
+// Every input event must be analysed (the event loop used to start at 1).
 KF_TEST(analyzer_processes_first_event) {
   const int nEvents = 10;
   writeLambdaFile("test_analyzer_first_in.root", nEvents, 11);
@@ -209,8 +208,22 @@ KF_TEST(analyzer_event_limit) {
     analyzer.doFitterTask("Mass", {kPidProton, kPidPion}, toy::kMassLambda);
   }
   const OutputSummary s = readOutput("test_analyzer_limit_out.root");
-  KF_CHECK(s.entries <= 5);
-  KF_CHECK(s.entries >= 4);
+  KF_CHECK(s.entries == 5);
+}
+
+// An unknown task is reported and skipped; it used to reach
+// KinFitter::fit() without a constraint, which called abort().
+KF_TEST(builder_unknown_task_no_abort) {
+  TRandom3 rnd(13);
+  const auto ev = toy::lambdaEvent(rnd);
+  std::vector<std::vector<KinFitParticle>> cands = {
+      {toy::exactTrack(ev.proton, ev.decayVertex, toy::Resolution())},
+      {toy::exactTrack(ev.pion, ev.decayVertex, toy::Resolution())}};
+  KFitDecayBuilder builder("NoSuchTask", {kPidProton, kPidPion});
+  builder.setInputCands(cands);
+  builder.countCombis();
+  builder.buildDecay();
+  KF_CHECK_NEAR(builder.getProbability(), 0, 0);
 }
 
 KF_TEST_MAIN()
