@@ -136,6 +136,7 @@ cc.setvarsCart();                // fills Px, Py, Pz, X, Y
 double px = cc.getPx();
 ```
 
-It is not part of the ROOT dictionary, and its error propagation is under
-review (see [TODO.md](../TODO.md), phase 3). Do not rely on it for
-covariances yet.
+`setvarsSpher()` takes (X, Y, Z) as any point on the track and returns R, Z
+of its point of closest approach to the z axis. Errors are propagated
+assuming uncorrelated inputs; for correlated inputs propagate the full
+covariance yourself.

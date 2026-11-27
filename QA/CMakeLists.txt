@@ -63,11 +63,7 @@ kinfit_add_test(test_decaycandfinder
 
 kinfit_add_test(test_coordinateconversion
   LABELS core
-  CASES sph_to_cart cart_to_sph_forward
-  DISABLED
-        # theta = atan(pT/pz) and sign of R wrong for pz < 0
-        cart_to_sph_backward
-        # cross terms added as if the inputs were fully correlated
+  CASES sph_to_cart cart_to_sph_forward cart_to_sph_backward
         errors_sph_to_cart)
 
 kinfit_add_test(test_analyzer

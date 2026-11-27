@@ -28,28 +28,26 @@
 #include <cmath>
 
 // root includes
-#include <TLorentzVector.h>
 #include <TMath.h>
-#include <TMatrixD.h>
-#include <TVector3.h>
 
-// using std::cout;
-// using std::endl;
-
-using namespace std;
-
+/**
+ * Track parameters: spherical (p, theta, phi, R, Z) with the point of
+ * closest approach (PCA) to the z axis at (-R sin(phi), R cos(phi), Z), and
+ * Cartesian (X, Y, Z, Px, Py, Pz) with (X, Y, Z) a point on the track
+ * (the PCA after setvarsCart()).
+ *
+ * Errors are propagated to first order assuming *uncorrelated* inputs (only
+ * the uncertainties are known to this class). The old formulas added
+ * cross terms 2 (df/da)(df/db) sigma_a sigma_b, i.e. assumed full
+ * correlation.
+ */
 class CoordinateConversion {
 
 public:
-  double mom = (9 * 10 ^ (-999)), theta = (9 * 10 ^ (-999)),
-         phi = (9 * 10 ^ (-999)), R = (9 * 10 ^ (-999)), Z = (9 * 10 ^ (-999)),
-         Px = (9 * 10 ^ (-999)), Py = (9 * 10 ^ (-999)), Pz = (9 * 10 ^ (-999)),
-         X = (9 * 10 ^ (-999)), Y = (9 * 10 ^ (-999)),
-         errmom = (9 * 10 ^ (-999)), errtheta = (9 * 10 ^ (-999)),
-         errphi = (9 * 10 ^ (-999)), errR = (9 * 10 ^ (-999)),
-         errZ = (9 * 10 ^ (-999)), errPx = (9 * 10 ^ (-999)),
-         errPy = (9 * 10 ^ (-999)), errPz = (9 * 10 ^ (-999)),
-         errX = (9 * 10 ^ (-999)), errY = (9 * 10 ^ (-999)), Rtest, Rtemp;
+  // (The old defaults were 9 * 10 ^ (-999), an integer XOR, not 9e-999.)
+  double mom = 0, theta = 0, phi = 0, R = 0, Z = 0, Px = 0, Py = 0, Pz = 0,
+         X = 0, Y = 0, errmom = 0, errtheta = 0, errphi = 0, errR = 0,
+         errZ = 0, errPx = 0, errPy = 0, errPz = 0, errX = 0, errY = 0;
 
   void setmom(double val, double errval) {
     mom = val;
@@ -88,12 +86,12 @@ public:
     Y = val;
     errY = errval;
   }
-  void setZ(float val, double errval) {
+  void setZ(double val, double errval) { // was float
     Z = val;
     errZ = errval;
   }
 
-  void setparametersCart(double CartParameters[]) {
+  void setparametersCart(const double CartParameters[]) {
     X = CartParameters[0];
     Y = CartParameters[1];
     Z = CartParameters[2];
@@ -101,7 +99,7 @@ public:
     Py = CartParameters[4];
     Pz = CartParameters[5];
   }
-  void setparametererrorsCart(double CartErrorParameters[]) {
+  void setparametererrorsCart(const double CartErrorParameters[]) {
     errX = CartErrorParameters[0];
     errY = CartErrorParameters[1];
     errZ = CartErrorParameters[2];
@@ -110,14 +108,14 @@ public:
     errPz = CartErrorParameters[5];
   }
 
-  void setparametersSpher(double SpherParameters[]) {
+  void setparametersSpher(const double SpherParameters[]) {
     mom = SpherParameters[0];
     theta = SpherParameters[1];
     phi = SpherParameters[2];
     R = SpherParameters[3];
     Z = SpherParameters[4];
   }
-  void setparametererrorsSpher(double SpherErrorParameters[]) {
+  void setparametererrorsSpher(const double SpherErrorParameters[]) {
     errmom = SpherErrorParameters[0];
     errtheta = SpherErrorParameters[1];
     errphi = SpherErrorParameters[2];
@@ -135,264 +133,65 @@ public:
   double getPz() const { return Pz; }
   double getX() const { return X; }
   double getY() const { return Y; }
-  float getZ() const { return Z; }
+  double getZ() const { return Z; } // was float
 
+  /** Spherical -> Cartesian: momentum components and the PCA. */
   void setvarsCart() {
-    // Spherical -> Cartesian momentum components.
-    Px = (mom * (sin(theta)) * (cos(phi)));
-    Py = (mom * sin(theta) * sin(phi));
-    Pz = (mom * cos(theta));
-    // Transverse impact radius R is represented in the xy-plane with a +pi/2
-    // phase.
-    X = (R * cos((phi) + (3.14159265 / 2)));
-    Y = (R * sin((phi) + (3.14159265 / 2)));
+    const double st = std::sin(theta), ct = std::cos(theta);
+    const double sp = std::sin(phi), cp = std::cos(phi);
+    Px = mom * st * cp;
+    Py = mom * st * sp;
+    Pz = mom * ct;
+    X = -R * sp;
+    Y = R * cp;
   }
 
+  /** Errors of setvarsCart() outputs from errmom, errtheta, errphi, errR. */
   void seterrorsCart() {
-    // Gaussian error propagation from (mom, theta, phi, R) to Cartesian
-    // variables, including pairwise covariance terms encoded as errA*errB
-    // products.
-    errPx = sqrt(pow((mom * cos(theta) * cos(phi) * errtheta), 2) +
-                 pow((mom * sin(theta) * sin(phi) * errphi), 2) +
-                 pow((sin(theta) * cos(phi) * errmom), 2) +
-                 2 * (mom * cos(theta) * cos(phi)) *
-                     ((mom * sin(theta) * sin(phi))) * (errtheta * errphi) +
-                 2 * (mom * cos(theta) * cos(phi)) * (sin(theta) * cos(phi)) *
-                     (errtheta * errmom) +
-                 2 * ((mom * sin(theta) * sin(phi)) *
-                      ((sin(theta) * cos(phi)) * (errmom * errphi))));
-    //        errPx = sqrt(pow((mom*cos(theta)*cos(phi)*errtheta),
-    //        2)+pow((mom*sin(theta)*sin(phi)*errphi),
-    //        2)+pow((sin(theta)*cos(phi)*errmom), 2));
-    errPy = sqrt(
-        pow((mom * cos(theta) * sin(phi) * errtheta), 2) +
-        pow((mom * sin(theta) * cos(phi) * errphi), 2) +
-        pow((sin(theta) * sin(phi) * errmom), 2) +
-        2 * (mom * cos(theta) * sin(phi) * ((mom * sin(theta) * cos(phi)))) *
-            (errtheta * errphi) +
-        2 * (mom * cos(theta) * sin(phi)) * (sin(theta) * sin(phi)) *
-            (errtheta * errmom) +
-        2 * (mom * sin(theta) * cos(phi)) * (sin(theta) * sin(phi)) *
-            (errphi * errmom));
-    //        errPy = sqrt(pow((mom*cos(theta)*sin(phi)*errtheta),
-    //        2)+pow((mom*sin(theta)*cos(phi)*errphi),
-    //        2)+pow((sin(theta)*sin(phi)*errmom), 2));
-    errPz = sqrt(pow((mom * sin(theta) * errtheta), 2) +
-                 pow((cos(theta) * errmom), 2) +
-                 2 * (mom * sin(theta)) * (cos(theta) * (errtheta * errmom)));
-    //        errPz = sqrt(pow((mom*sin(theta)*errtheta),
-    //        2)+pow((cos(theta)*errmom), 2));
-    errX = sqrt((pow((R * sin(phi + (3.14159265 / 2)) * errphi), 2) +
-                 pow((cos(phi + (3.14159265 / 2)) * errR), 2)) +
-                2 * (R * sin(phi + (3.14159265 / 2))) *
-                    (cos(phi + (3.14159265 / 2))) * (errphi * errR));
-    //        errX = sqrt((pow((R*sin(phi+(3.14159265/2))*errphi),
-    //        2)+pow((cos(phi+(3.14159265/2))*errR), 2)));
-    errY = sqrt((pow((R * cos(phi + (3.14159265 / 2)) * errphi), 2) +
-                 pow((sin(phi + (3.14159265 / 2)) * errR), 2)) +
-                2 * (R * cos(phi + (3.14159265 / 2))) *
-                    (sin(phi + (3.14159265 / 2))) * (errphi * errR));
-    //        errY = sqrt((pow((R*cos(phi+(3.14159265/2))*errphi),
-    //        2)+pow((sin(phi+(3.14159265/2))*errR), 2)));
-
-    ;
+    const double st = std::sin(theta), ct = std::cos(theta);
+    const double sp = std::sin(phi), cp = std::cos(phi);
+    errPx = quad(st * cp * errmom, mom * ct * cp * errtheta,
+                 mom * st * sp * errphi);
+    errPy = quad(st * sp * errmom, mom * ct * sp * errtheta,
+                 mom * st * cp * errphi);
+    errPz = quad(ct * errmom, mom * st * errtheta, 0);
+    errX = quad(sp * errR, R * cp * errphi, 0);
+    errY = quad(cp * errR, R * sp * errphi, 0);
   }
 
+  /** Cartesian -> spherical: (p, theta, phi) from the momentum, (R, Z) of
+   * the PCA of the line through (X, Y, Z). */
   void setvarsSpher() {
-
-    // Cartesian -> spherical momentum coordinates.
-    mom = sqrt(pow(Px, 2) + pow(Py, 2) + pow(Pz, 2));
-    theta = atan((sqrt((pow(Px, 2)) + (pow(Py, 2)))) / Pz);
-    phi = atan2(Py, Px);
-    //        phi = acos(Px/(sqrt((pow(Px, 2))+(pow(Py, 2)))));
-    // phi = asin(Py/(sqrt((pow(Px, 2))+(pow(Py, 2)))));
-
-    TVector3 trackdist;
-    TVector3 trackbase;
-    TVector3 beamdist;
-    TVector3 beambase;
-
-    trackdist.SetXYZ((sin(theta)) * (cos(phi)), (sin(theta)) * (sin(phi)),
-                     (cos(theta)));
-    trackbase.SetXYZ(X, Y, Z);
-    beamdist.SetXYZ(0, 0, 1);
-    beambase.SetXYZ(0, 0, 1);
-
-    TVector3 cross = trackdist.Cross(beamdist);
-    TVector3 diff = trackbase - beambase;
-
-    // Signed distance of closest approach of track to beam axis.
-    R = -(((cross.Dot(diff))) / (cross.Mag()));
-
-    // R and Y - same sign
-    /*
-    if(Px > 0){
-        R = ((std::abs((cross.Dot(diff))))/(cross.Mag()));
-    }
-    else if(Px < 0){
-        R = -((std::abs((cross.Dot(diff))))/(cross.Mag()));
-    }
-    */
-
-    //        R = ((abs((cross.Dot(diff))))/(cross.Mag()));
-    //        Rtest =
-    //        (abs(((X*sin(theta)*sin(phi))-(Y*sin(theta)*cos(phi)))))/(sqrt(pow((sin(theta)*sin(phi)),
-    //        2)+pow((sin(theta)*cos(phi)), 2)));
-    // Analytic equivalent expression used as a cross-check quantity.
-    Rtest = (((X * sin(theta) * sin(phi)) - (Y * sin(theta) * cos(phi)))) /
-            (sqrt(pow((sin(theta) * sin(phi)), 2) +
-                  pow((sin(theta) * cos(phi)), 2)));
-    /*
-    if(Y < 0){
-        if(Rtemp > 0){
-        R = -Rtest;}
-        else if(Rtemp > 0){
-            R = Rtest;
-        }
-    }
-    else if(Y > 0){
-        if (Rtemp < 0){
-            R = -Rtest;}
-        else if (Rtemp > 0){
-            R = Rtest;
-        }
-    }
-    */
-    ;
+    const double pT2 = Px * Px + Py * Py;
+    mom = std::sqrt(pT2 + Pz * Pz);
+    theta = std::atan2(std::sqrt(pT2), Pz); // was atan(pT/pz): < 0 backwards
+    phi = std::atan2(Py, Px);
+    const double sp = std::sin(phi), cp = std::cos(phi);
+    R = -X * sp + Y * cp;
+    if (pT2 > 0) // move (X, Y, Z) along the track to the PCA
+      Z += -(X * Px + Y * Py) / pT2 * Pz;
   }
 
+  /** Errors of setvarsSpher() outputs from errPx, errPy, errPz, errX, errY.
+   * errZ is not propagated. */
   void seterrorsSpher() {
-
-    // Propagate (Px, Py, Pz, X, Y) uncertainties to spherical variables with
-    // first-order derivatives; mixed terms model correlated uncertainties.
-    errmom = sqrt((pow((Px / (sqrt(pow(Px, 2) + pow(Py, 2) + pow(Pz, 2)))), 2) *
-                   (pow(errPx, 2))) +
-                  (pow((Py / (sqrt(pow(Px, 2) + pow(Py, 2) + pow(Pz, 2)))), 2) *
-                   (pow(errPy, 2))) +
-                  (pow((Pz / (sqrt(pow(Px, 2) + pow(Py, 2) + pow(Pz, 2)))), 2) *
-                   (pow(errPz, 2))) +
-                  2 * ((Px / (sqrt(pow(Px, 2) + pow(Py, 2) + pow(Pz, 2))))) *
-                      ((Py / (sqrt(pow(Px, 2) + pow(Py, 2) + pow(Pz, 2))))) *
-                      (errPx * errPy) +
-                  2 * ((Px / (sqrt(pow(Px, 2) + pow(Py, 2) + pow(Pz, 2))))) *
-                      ((Pz / (sqrt(pow(Px, 2) + pow(Py, 2) + pow(Pz, 2))))) *
-                      (errPx * errPz) +
-                  2 * ((Pz / (sqrt(pow(Px, 2) + pow(Py, 2) + pow(Pz, 2))))) *
-                      ((Py / (sqrt(pow(Px, 2) + pow(Py, 2) + pow(Pz, 2))))) *
-                      (errPy * errPz));
-    //        errmom = sqrt((pow((Px/(sqrt(pow(Px, 2)+pow(Py, 2)+pow(Pz, 2)))),
-    //        2)*(pow(errPx, 2)))+(pow((Py/(sqrt(pow(Px, 2)+pow(Py, 2)+pow(Pz,
-    //        2)))), 2)*(pow(errPy, 2)))+(pow((Pz/(sqrt(pow(Px, 2)+pow(Py,
-    //        2)+pow(Pz, 2)))), 2)*(pow(errPz, 2)))); errtheta =
-    //        sqrt(pow(((Pz*Px)/(sqrt(pow(Px, 2)+pow(Py, 2))*(pow(Px, 2)+pow(Pz,
-    //        2)+pow(Py, 2)))), 2)*(pow(errPx, 2))+pow(((Pz*Py)/(sqrt(pow(Px,
-    //        2)+pow(Py, 2))*(pow(Px, 2)+pow(Pz, 2)+pow(Py, 2)))),
-    //        2)*(pow(errPy, 2))+pow(((sqrt(((pow(Px, 2))+(pow(Py,
-    //        2)))))/(((pow(Px, 2))+(pow(Py, 2)))+(pow(Pz, 2)))), 2)*(pow(errPz,
-    //        2)));
-    errtheta = sqrt(
-        pow(((Pz * Px) / (sqrt(pow(Px, 2) + pow(Py, 2)) *
-                          (pow(Px, 2) + pow(Pz, 2) + pow(Py, 2)))),
-            2) *
-            (pow(errPx, 2)) +
-        pow(((Pz * Py) / (sqrt(pow(Px, 2) + pow(Py, 2)) *
-                          (pow(Px, 2) + pow(Pz, 2) + pow(Py, 2)))),
-            2) *
-            (pow(errPy, 2)) +
-        pow(((sqrt(((pow(Px, 2)) + (pow(Py, 2))))) /
-             (((pow(Px, 2)) + (pow(Py, 2))) + (pow(Pz, 2)))),
-            2) *
-            (pow(errPz, 2)) +
-        2 *
-            (((Pz * Px) / (sqrt(pow(Px, 2) + pow(Py, 2)) *
-                           (pow(Px, 2) + pow(Pz, 2) + pow(Py, 2))))) *
-            (((Pz * Py) / (sqrt(pow(Px, 2) + pow(Py, 2)) *
-                           (pow(Px, 2) + pow(Pz, 2) + pow(Py, 2))))) *
-            (errPx * errPy) +
-        2 *
-            (((Pz * Px) / (sqrt(pow(Px, 2) + pow(Py, 2)) *
-                           (pow(Px, 2) + pow(Pz, 2) + pow(Py, 2))))) *
-            ((sqrt(((pow(Px, 2)) + (pow(Py, 2))))) /
-             (((pow(Px, 2)) + (pow(Py, 2))) + (pow(Pz, 2)))) *
-            (errPx * errPz) +
-        2 * (((Pz * Py) / (sqrt(pow(Px, 2) + pow(Py, 2)) * (pow(Px, 2) + pow(Pz, 2) + pow(Py, 2))))) *
-            (((sqrt(((pow(Px, 2)) + (pow(Py, 2))))) /
-              (((pow(Px, 2)) + (pow(Py, 2))) + (pow(Pz, 2))))) *
-            (errPz * errPy)); // with correlation
-    errphi =
-        sqrt((pow((Py / ((pow(Px, 2)) + (pow(Py, 2)))), 2)) * (pow(errPx, 2)) +
-             (pow((Px / ((pow(Px, 2)) + (pow(Py, 2)))), 2) * (pow(errPy, 2))) +
-             2 * (Py / ((pow(Px, 2)) + (pow(Py, 2)))) *
-                 (Px / ((pow(Px, 2)) + (pow(Py, 2)))) *
-                 (errPx * errPy)); // with correlation
-    //        errphi = sqrt((pow((Py/((pow(Px, 2))+(pow(Py, 2)))),
-    //        2))*(pow(errPx, 2))+(pow((Px/((pow(Px, 2))+(pow(Py, 2)))),
-    //        2)*(pow(errPy, 2))));
-
-    //        errphi = sqrt((pow((Py/((pow(Px, 2))+(pow(Py, 2)))),
-    //        2))*(pow(errPx, 2))+(pow((Px/((pow(Px, 2))+(pow(Py, 2)))),
-    //        2)*(pow(errPy, 2)))+pow((errPx/Px), 2)+pow((errPy/Py),
-    //        2)+2*(errPx/Px)*(errPy/Py)*(-0.000752836/(errPx*errPy)));
-    // wrong        double dRdX = ((pow((sin(phi)*sin(theta)),
-    // 2)*(X-Y))/((sqrt((pow((sin(phi)*sin(theta)),
-    // 2)+pow((cos(phi)*sin(theta)), 2))))*abs((sin(phi)*sin(theta))*(X-Y))));
-    // 2nd it.        double dRdX =
-    // (((sin(phi)*sin(theta))*(sin(phi)*sin(theta)*X-cos(phi)*sin(theta)*Y))/((sqrt(pow((sin(phi)*sin(theta)),
-    // 2)+pow((cos(phi)*sin(theta)),
-    // 2)))*abs((sin(phi)*sin(theta)*X)-(cos(phi)*sin(theta)*Y))));
-    double dRdX =
-        (((sin(phi)) * (sin(theta))) / (sqrt(pow((sin(phi) * sin(theta)), 2) +
-                                             pow((cos(phi) * sin(theta)), 2))));
-    // wrong       double dRdY = ((pow((sin(phi)*sin(theta)),
-    // 2)*(Y-X))/((sqrt((pow((sin(phi)*sin(theta)),
-    // 2)+pow((cos(phi)*sin(theta)), 2))))*abs((sin(phi)*sin(theta))*(Y-X))));
-    // 2nd it.        double dRdY =
-    // (((cos(phi)*sin(theta))*(cos(phi)*sin(theta)*Y-sin(phi)*sin(theta)*X))/((sqrt(pow((sin(phi)*sin(theta)),
-    // 2)+pow((cos(phi)*sin(theta)),
-    // 2)))*abs((cos(phi)*sin(theta)*Y)-(sin(phi)*sin(theta)*X))));
-    double dRdY =
-        (-(cos(phi) * sin(theta)) / (sqrt(pow((sin(phi) * sin(theta)), 2) +
-                                          pow((cos(phi) * sin(theta)), 2))));
-    // 2nd it.        double dRdphi = ((pow((sin(theta)),
-    // 2))*(X*sin(phi)-Y*cos(phi))*(Y*sin(phi)+X*cos(phi)))/((sqrt(pow((sin(phi)*sin(theta)),
-    // 2)+pow((cos(phi)*sin(theta)),
-    // 2)))*(abs((sin(phi)*sin(theta)*X)-(cos(phi)*sin(theta)*Y)))); wrong
-    // double dRdphi = (pow((sin(theta)*(Y-X)),
-    // 2)*cos(phi)*sin(phi))/((sqrt(pow((sin(theta)*sin(phi)),
-    // 2)+pow((sin(theta)*cos(phi)), 2)))*abs((sin(theta)*sin(phi)*(Y-X))));
-    double dRdphi = ((sin(theta)) * (Y * sin(phi) + X * cos(phi))) /
-                    (sqrt(pow((sin(phi) * sin(theta)), 2) +
-                          pow((cos(phi) * sin(theta)), 2)));
-
-    // Error of R from derivatives dR/dX, dR/dY, dR/dphi with covariance terms.
-    errR =
-        (sqrt(pow((dRdX * errX), 2) + pow((dRdY * errY), 2) +
-              pow((dRdphi * errphi), 2) + 2 * (dRdX) * (dRdY) * (errX * errY) +
-              2 * (dRdX) * (dRdphi) * (errX * errphi) +
-              2 * (dRdY) * (dRdphi) * (errY * errphi)));
-    //        errR = (sqrt(pow((dRdX*errX), 2)+pow((dRdY*errY),
-    //        2)+pow((dRdphi*errphi), 2)));
-
-    ;
+    const double pT2 = Px * Px + Py * Py;
+    const double pT = std::sqrt(pT2);
+    const double p2 = pT2 + Pz * Pz;
+    const double p = std::sqrt(p2);
+    errmom = quad(Px / p * errPx, Py / p * errPy, Pz / p * errPz);
+    errtheta = quad(Px * Pz / (pT * p2) * errPx, Py * Pz / (pT * p2) * errPy,
+                    pT / p2 * errPz);
+    errphi = quad(Py / pT2 * errPx, Px / pT2 * errPy, 0);
+    // R = -X sin(phi) + Y cos(phi); phi depends only on the momentum.
+    const double sp = std::sin(phi), cp = std::cos(phi);
+    const double dRdphi = -X * cp - Y * sp;
+    errR = std::sqrt(sq(sp * errX) + sq(cp * errY) + sq(dRdphi * errphi));
   }
 
-  /*
-      void setvectors(){
-
-  TVector3 trackdist;
-  TVector3 trackbase;
-  TVector3 beamdist;
-  TVector3 beambase;
-
-  trackdist.SetXYZ((sin(theta))*(cos(phi)), (sin(theta))*(sin(phi)),
-  (cos(theta))); trackbase.SetXYZ(X, Y, Z); beamdist.SetXYZ(0, 0, 1);
-  beambase.SetXYZ(0, 0, 1);
-
-  TVector3 cross = trackdist.Cross(beamdist);
-  TVector3 diff = trackbase-beambase;
-
-  R = ((std::abs((cross.Dot(diff))))/(cross.Mag()));
-
-      ;}
-  */
+private:
+  static double sq(double v) { return v * v; }
+  static double quad(double a, double b, double c) {
+    return std::sqrt(a * a + b * b + c * c);
+  }
 };

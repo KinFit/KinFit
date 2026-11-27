@@ -50,6 +50,7 @@ void checkCartToSph(double thetaMin, double thetaMax, unsigned seed) {
     KF_CHECK_NEAR(cc.gettheta(), t.theta, 1e-9);
     KF_CHECK_NEAR(cc.getphi(), t.phi, 1e-9);
     KF_CHECK_NEAR(cc.getR(), t.R, 1e-6);
+    KF_CHECK_NEAR(cc.getZ(), t.Z, 1e-6);
   }
 }
 
@@ -73,14 +74,12 @@ KF_TEST(sph_to_cart) {
 
 KF_TEST(cart_to_sph_forward) { checkCartToSph(0.1, 1.5, 2); }
 
-// Known bug: theta = atan(pT/pz) is negative for backward tracks
-// (TODO.md phase 3).
+// theta used to be atan(pT/pz), negative for backward tracks.
 KF_TEST(cart_to_sph_backward) { checkCartToSph(1.65, 3.0, 3); }
 
 // Error propagation spherical -> Cartesian for *uncorrelated* input errors
-// against a numerical Jacobian. Known bug: the formulas add cross terms
-// 2 (df/da)(df/db) sigma_a sigma_b as if the inputs were fully correlated
-// (TODO.md phase 3).
+// against a numerical Jacobian. The formulas used to add cross terms
+// 2 (df/da)(df/db) sigma_a sigma_b as if the inputs were fully correlated.
 KF_TEST(errors_sph_to_cart) {
   TRandom3 rnd(4);
   int nBad = 0;
