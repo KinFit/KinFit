@@ -32,12 +32,14 @@
 
 // framework includes
 #include "TClonesArray.h"
+#include "TFile.h"
 #include "TLorentzVector.h"
 #include "TString.h"
 #include "TTree.h"
 
 // system includes
 #include <iostream>
+#include <memory>
 #include <vector>
 
 using std::cout;
@@ -53,13 +55,13 @@ private:
   int fVerbose; // Verbosity
 
   // Read in data
-  TTree *fTree; // Input data tree
-  TClonesArray *fCands_in = new TClonesArray(
-      "KinFitParticle"); // Input TClones array of KinFitParticles
+  std::unique_ptr<TFile> fInFile;         // Input file (owns fTree)
+  TTree *fTree = nullptr;                 // Input data tree
+  std::unique_ptr<TClonesArray> fCands_in; // Input KinFitParticles
 
   // Output data
-  TFile *foutFile;  // Output file
-  TTree *fTree_out; // Output data tree
+  std::unique_ptr<TFile> foutFile; // Output file (owns fTree_out)
+  TTree *fTree_out = nullptr;      // Output data tree, nullptr once written
 
   /** @brief Return the output tree with fit results.
    * @return Pointer to the output TTree.
@@ -83,8 +85,11 @@ public:
    */
   KFitAnalyzer(TString inFileName, TString outFileName, int nEvents = -1);
 
-  /** @brief Default destructor. */
-  ~KFitAnalyzer() {};
+  /** @brief Closes the input and (if still open) the output file. */
+  ~KFitAnalyzer();
+
+  KFitAnalyzer(const KFitAnalyzer &) = delete;
+  KFitAnalyzer &operator=(const KFitAnalyzer &) = delete;
 
   void setVerbosity(int val) { fVerbose = val; }
 

@@ -25,17 +25,44 @@
  */
 
 KFitAnalyzer::KFitAnalyzer(TString inFileName, TString outFileName, int nEvents)
-    : fEvents(nEvents), fVerbose(0) {
+    : fEvents(nEvents), fVerbose(0),
+      fCands_in(new TClonesArray("KinFitParticle")) {
   if (fVerbose > 0) {
     std::cout << "--------------- KFitAnalyzer() -----------------"
               << std::endl;
   }
 
-  TFile *inFile = new TFile(inFileName, "READ");
-  fTree = (TTree *)inFile->Get("data");
+  fInFile.reset(TFile::Open(inFileName, "READ"));
+  if (!fInFile || fInFile->IsZombie()) {
+    std::cerr << "KFitAnalyzer: cannot open input file " << inFileName
+              << std::endl;
+    fInFile.reset();
+  } else {
+    fInFile->GetObject("data", fTree);
+    if (!fTree)
+      std::cerr << "KFitAnalyzer: no TTree 'data' in " << inFileName
+                << std::endl;
+  }
 
-  foutFile = new TFile(outFileName, "RECREATE");
-  fTree_out = new TTree("data_fitted", "output_tree");
+  foutFile.reset(TFile::Open(outFileName, "RECREATE"));
+  if (!foutFile || foutFile->IsZombie()) {
+    std::cerr << "KFitAnalyzer: cannot open output file " << outFileName
+              << std::endl;
+    foutFile.reset();
+  } else {
+    // Created in the output file's directory, which owns and deletes it.
+    fTree_out = new TTree("data_fitted", "output_tree");
+  }
+}
+
+KFitAnalyzer::~KFitAnalyzer() {
+  // Detach the input tree from fCands_in before either is destroyed.
+  if (fTree)
+    fTree->ResetBranchAddresses();
+  if (foutFile && foutFile->IsOpen())
+    foutFile->Close(); // deletes fTree_out
+  if (fInFile)
+    fInFile->Close(); // deletes fTree
 }
 
 // Select and sort particles according to their PID.
@@ -76,14 +103,26 @@ void KFitAnalyzer::doFitterTask(TString task, std::vector<int> pids,
     std::cout << "" << std::endl;
   }
 
+  if (!fTree || !fTree_out) {
+    std::cerr << "KFitAnalyzer::doFitterTask: no input tree or output already "
+                 "written (call doFitterTask once per KFitAnalyzer)"
+              << std::endl;
+    return;
+  }
+
   // Read input tree
   int Event;
-  fTree->SetBranchAddress("KinFitParticle", &fCands_in);
+  TClonesArray *candsIn = fCands_in.get();
+  fTree->SetBranchAddress("KinFitParticle", &candsIn);
 
   // Create output tree
   fTree_out->SetName("data_fitted");
   TString out_branchname = "cands_fitted";
-  TClonesArray *fitted_cands = new TClonesArray("KinFitParticle");
+  // Owned here; the output tree only stores its address and is written and
+  // deleted (finish()) before this goes out of scope.
+  std::unique_ptr<TClonesArray> fittedCandsOwner(
+      new TClonesArray("KinFitParticle"));
+  TClonesArray *fitted_cands = fittedCandsOwner.get();
   TClonesArray &fit_arrayRef = *fitted_cands;
   double Chi2, Prob;
 
@@ -167,12 +206,13 @@ void KFitAnalyzer::doFitterTask(TString task, std::vector<int> pids,
     std::cout << "Event loop finished!" << std::endl;
   }
   finish();
+  fTree->ResetBranchAddresses();
 }
 
 // Write output and close all resources.
 void KFitAnalyzer::finish() {
   foutFile->cd();
   fTree_out->Write();
-  foutFile->Save();
-  foutFile->Close();
+  foutFile->Close(); // deletes fTree_out
+  fTree_out = nullptr;
 }
