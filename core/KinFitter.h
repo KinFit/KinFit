@@ -76,7 +76,7 @@ private:
   TMatrixD fYFit;          //! Fitted measured variables
   TMatrixD fVFit;          //! Fitted covariance of the measured variables
   TMatrixD fVxy;           //! Fitted covariance unmeasured x measured
-  TMatrixD fPull;          // Pull value for all measured variables
+  std::vector<double> fPull; // Pull value for all measured variables
   double fChi2 = 1e6;      // Chi2 of fit
   double fProb = 1e6;      // Probability of fit
   bool fConverged = false; // True if fit has converged
@@ -240,7 +240,9 @@ public:
    * @param val Index of the pull entry.
    * @return Pull value (diagonal element of the pull matrix).
    */
-  double getPull(int val = 0) { return fPull(val, val); }
+  double getPull(int val = 0) const {
+    return (val >= 0 && val < (int)fPull.size()) ? fPull[val] : -10000.;
+  }
   int getIteration() const { return fIteration; }
 
   /** @brief Returns true if fit converged within max number of iterations
@@ -281,5 +283,5 @@ private:
   void updateDaughters();
   void updateMother();
 
-  ClassDef(KinFitter, 1)
+  ClassDef(KinFitter, 2)
 };
