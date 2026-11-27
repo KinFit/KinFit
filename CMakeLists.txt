@@ -5,6 +5,15 @@ project(
   VERSION 0.0.1
   LANGUAGES CXX)
 
+# Without a build type CMake compiles with no optimisation at all (-O0),
+# which makes the matrix-heavy fit several times slower.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE
+      RelWithDebInfo
+      CACHE STRING "Build type (Debug, Release, RelWithDebInfo, MinSizeRel)"
+            FORCE)
+endif()
+
 include(GNUInstallDirs)
 set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
